@@ -934,7 +934,8 @@ function setSS(s){
 async function pushSheets(){
   setSS('saving');
   try{
-    const rows=DB.map(c=>[JSON.stringify(c)]);
+    const config={id:'__config__',statuses:STATUSES};
+    const rows=[...DB.map(c=>[JSON.stringify(c)]),[JSON.stringify(config)]];
     const r=await fetch(GS,{method:'POST',body:JSON.stringify({action:'save_all',rows})});
     const d=await r.json();
     if(d.ok){setSS('saved');setTimeout(()=>setSS('idle'),3000);}else throw 0;
@@ -949,9 +950,14 @@ async function pullSheets(){
       const loaded=d.data.flat().filter(Boolean)
         .map(s=>{try{return JSON.parse(s);}catch{return null;}}).filter(Boolean);
       if(loaded.length){
+        // Применяем конфиг колонок если есть
+        const cfg=loaded.find(c=>c.id==='__config__');
+        if(cfg&&Array.isArray(cfg.statuses)&&cfg.statuses.length){
+          STATUSES=cfg.statuses;saveStatuses();
+        }
         // Дедупликация по id — берём последнюю версию каждого объекта
         const seen=new Map();
-        loaded.forEach(c=>{if(c&&c.id)seen.set(c.id,c);});
+        loaded.filter(c=>c.id!=='__config__').forEach(c=>{if(c&&c.id)seen.set(c.id,c);});
         DB=Array.from(seen.values());
         // Сохраняем ТОЛЬКО в localStorage, без повторной отправки в Sheets
         try{localStorage.setItem('px_v2',JSON.stringify(DB));}catch(e){console.warn('save error:',e);}
