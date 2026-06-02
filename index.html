@@ -1589,7 +1589,8 @@ function cardFiz(cl){
       <tbody id="rowbody"></tbody>
     </table>
     <button class="addrow" onclick="addRow()">+ Позиция</button>
-    <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>`)+
+    <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>
+    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${cl.discount||''}" min="0" placeholder="0" oninput="renderDoc()"></div>`)+
   sec('Комментарий','cmt',`
     <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${cl.comment||''}</textarea></div>`);
 }
@@ -1677,7 +1678,8 @@ function cardYur(cl){
       <tbody id="rowbody"></tbody>
     </table>
     <button class="addrow" onclick="addRow()">+ Позиция</button>
-    <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>`)+
+    <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>
+    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${cl.discount||''}" min="0" placeholder="0" oninput="renderDoc()"></div>`)+
   sec('Комментарий','cmt',`
     <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${cl.comment||''}</textarea></div>`);
 }
@@ -1724,6 +1726,7 @@ function syncCard(){
   cl.paid=gv('f_paid');cl.costPrice=gv('f_cost');cl.margin=gv('f_margin');
   cl.objAddr=gv('f_objaddr');cl.comment=gv('f_cmt');
   cl.rows=EROWS.map(r=>({...r}));
+  cl.discount=gv('f_discount');
   if(cl.type==='fiz'){
     cl.fio=gv('f_fio');cl.passportSer=gv('f_psser');cl.passportNum=gv('f_psnum');
     cl.passportBy=gv('f_psby');cl.passportDate=gv('f_psdate');cl.passportCode=gv('f_pscode');
@@ -2018,7 +2021,7 @@ function rublesFull(n){
 }
 
 // Адаптер: в новой CRM строки хранятся в EROWS, итого через ctotal
-function calcTotal(){ return ctotal(EROWS); }
+function calcTotal(){ const disc=+(ge('f_discount')?.value||0); return Math.max(0,ctotal(EROWS)-disc); }
 function passDateFmt(cl){ const p=pd(cl.type==='fiz'?cl.passportDate:''); return p?`${p.d} ${p.m} ${p.y} г.`:bl(100); }
 function fmtDate(s){ const p=pd(s); return p?`«${p.d}» ${p.m} ${p.y} г.`:`«${bl(18)}» ${bl(80)} ${bl(30)} г.`; }
 function fmtDateShort(s){ return fds(s); }
@@ -2043,6 +2046,12 @@ function itemsTable(cl, withPeriod=false){
       <td class="num">${fmt(sum)}</td></tr>`;
   });
   const cs=withPeriod?6:5;
+  const disc=+(ge('f_discount')?.value||0);
+  if(disc>0){
+    const subtotal=ctotal(EROWS);
+    html+=`<tr><td colspan="${cs}" style="text-align:right">Подытог:</td><td class="num">${fmt(subtotal)}</td></tr>
+    <tr><td colspan="${cs}" style="text-align:right;color:#2a9d5c">Скидка:</td><td class="num" style="color:#2a9d5c">−${fmt(disc)}</td></tr>`;
+  }
   html+=`<tr class="trow"><td colspan="${cs}" style="text-align:right">Итого:</td><td class="num">${fmt(total)}</td></tr>
   <tr><td colspan="${cs}" style="text-align:right;font-size:11px;color:#777">В т.ч. НДС:</td><td class="num" style="font-size:11px;color:#777">Без НДС</td></tr>
   </tbody></table>`;
