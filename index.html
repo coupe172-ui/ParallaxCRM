@@ -496,7 +496,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   #kbSearchWrap{display:none!important;}
   .hdr-right{gap:4px;margin-left:auto;}
   .hdr-right .syncbadge{display:none;}
-  .hbtn:not(.pr){display:none;}
+  .hbtn:not(.pr):not(#themeBtn):not(#anaBtn):not(#trashBtn){display:none;}
   .hbtn.pr{padding:5px 10px;font-size:12px;}
   /* Bottom nav */
   .mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;
@@ -545,6 +545,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   /* Карточка объекта — полная ширина */
   .ov .oc{max-height:none;}
   .oc-resizer{display:none;}
+  .kc-drag-handle,.kch-drag,.kch-edit{opacity:.55!important;}
 }
 @media(min-width:769px){.mobile-nav{display:none;}}
 
@@ -678,7 +679,8 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
     <button class="hbtn" onclick="pullSheets()">&#9729; Обновить</button>
     <button class="hbtn" onclick="doExport()">&#128190; Экспорт</button>
     <button class="hbtn" onclick="importJSON()">&#128229; Импорт</button>
-    <button class="hbtn" onclick="showAnalytics()">📈 Аналитика</button>
+    <button class="hbtn" id="anaBtn" onclick="showAnalytics()">📈 Аналитика</button>
+    <button class="hbtn" id="trashBtn" onclick="showTrash()" title="Корзина">🗑</button>
     <button class="hbtn" id="themeBtn" onclick="toggleTheme()" title="Переключить тему">🌙</button>
     <button class="hbtn pr" onclick="newObj()">+ Новый объект</button>
   </div>
@@ -687,7 +689,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   <div id="sbOverlay" onclick="sbHide()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:240;-webkit-tap-highlight-color:transparent;"></div>
   <div class="sb off" id="sb">
     <div class="sb-top">
-      <div class="sb-search"><input id="srch" placeholder="Поиск..." oninput="renderList()" onkeyup="renderList()" onchange="renderList()"></div>
+      <div class="sb-search"><input id="srch" placeholder="Поиск..." oninput="renderList()"></div>
       <div class="sb-filters" id="sbf"></div>
       <button class="new-btn" onclick="newObj()">+ Новый объект</button>
     </div>
@@ -837,6 +839,7 @@ function checkAuth(){
 }
 
 function init(){
+  purgeTrash();
   renderList();
   showDash();
   if(navigator.onLine){pullSheets().then(()=>pushSheets());}
@@ -849,17 +852,19 @@ function init(){
     ge('syncbadge').textContent='📴 Офлайн';ge('syncbadge').style.color='var(--wn)';});
   window.addEventListener('online',()=>{
     ge('syncbadge').textContent='🔄 Подключено';ge('syncbadge').style.color='var(--ok)';
-    setTimeout(()=>{pullSheets();pushSheets();},1000);});
+    setTimeout(()=>{pullSheets().then(()=>pushSheets());},1000);});
 }
 
 let DB=(function(){
   try{
     const s=localStorage.getItem('px_v2');
-    return s?JSON.parse(s):[];
-  }catch(e){
-    console.warn('localStorage unavailable:',e);
-    return [];
-  }
+    if(s){const a=JSON.parse(s);if(Array.isArray(a))return a;}
+  }catch(e){console.warn('px_v2 parse error:',e);}
+  try{
+    const b=localStorage.getItem('px_v2_backup');
+    if(b){const a=JSON.parse(b);if(Array.isArray(a)){console.warn('Восстановлено из px_v2_backup');return a;}}
+  }catch(e){}
+  return [];
 })();
 let KB_SEARCH_Q='';
 let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null,AUTOSAVE_T=null;
@@ -867,9 +872,10 @@ let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=fals
 // ═══════════════════════════════════════════════
 // FACTORY
 // ═══════════════════════════════════════════════
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function mkObj(){
   return{
-    id:Date.now().toString(),type:'fiz',status:'lead',
+    id:uid(),type:'fiz',status:'lead',
     projectName:'',tags:[],sortOrder:Date.now(),
     docNum:'',docDate:new Date().toISOString().split('T')[0],
     fio:'',passportSer:'',passportNum:'',passportBy:'',passportDate:'',passportCode:'',
@@ -883,7 +889,7 @@ function mkObj(){
     dateMeasure:'',dateProd:'',dateInstall:'',dateDead:'',
     tasks:[],files:[],comment:'',
     tl:[{ts:Date.now(),act:'Объект создан',ic:'🆕',col:'#5b9bd5'}],
-    createdAt:Date.now(),
+    createdAt:Date.now(),updatedAt:Date.now(),
   };
 }
 
@@ -893,11 +899,12 @@ function mkObj(){
 const gv=id=>document.getElementById(id)?.value||'';
 const gcb=id=>document.getElementById(id)?.checked||false;
 const ge=id=>document.getElementById(id);
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escA(s){return esc(s).replace(/"/g,'&quot;');}
 function fmt(n){return(+n||0).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtS(n){if(!n)return'0';const v=+n;if(v>=1e6)return(v/1e6).toFixed(1)+'М';if(v>=1e3)return(v/1e3).toFixed(0)+'К';return v.toLocaleString('ru-RU');}
 function bl(w=60){return`<span class="blf" style="min-width:${w}px">&nbsp;&nbsp;&nbsp;&nbsp;</span>`;}
 function pd(s){if(!s)return null;const d=new Date(s);return{d:d.getDate(),m:MONTHS[d.getMonth()],y:d.getFullYear(),raw:d};}
-function fd(s){const p=pd(s);return p?`«${p.d}» ${p.m} ${p.y} г.`:`«${bl(16)}» ${bl(80)} ${bl(28)} г.`;}
 function fds(s){if(!s)return bl(68);const p=pd(s);const m=(MONTHS.indexOf(p.m)+1).toString().padStart(2,'0');return`${p.d<10?'0'+p.d:p.d}.${m}.${p.y}`;}
 function fdt(ts){const d=new Date(ts);return`${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
 function isLate(s){if(!s)return false;return s<new Date().toISOString().split('T')[0];}
@@ -914,29 +921,61 @@ function clientLabel(c){
   return proj||client||'Без названия';
 }
 function ctotal(rows){return(rows||[]).reduce((s,r)=>s+(+r.price||0)*(+r.qty||0),0);}
-function gst(c){return SM[c.status]||SM['lead'];}
-function pdp(cl){const p=pd(cl.docDate);return p?{day:`«${p.d}»`,month:p.m,year:p.y}:{day:`«${bl(14)}»`,month:bl(76),year:bl(24)};}
-function pdfmt(cl){const p=pd(cl.type==='fiz'?cl.passportDate:'');return p?`${p.d} ${p.m} ${p.y} г.`:bl(96);}
-
-function nw(n){
-  if(!n||isNaN(n))return'';n=Math.floor(+n);
-  const on=['','один','два','три','четыре','пять','шесть','семь','восемь','девять'];
-  const tn=['десять','одиннадцать','двенадцать','тринадцать','четырнадцать','пятнадцать','шестнадцать','семнадцать','восемнадцать','девятнадцать'];
-  const t2=['','десять','двадцать','тридцать','сорок','пятьдесят','шестьдесят','семьдесят','восемьдесят','девяносто'];
-  const h=['','сто','двести','триста','четыреста','пятьсот','шестьсот','семьсот','восемьсот','девятьсот'];
-  function g3(x,fm){let s='';const hh=Math.floor(x/100),t=x%100,d=Math.floor(t/10),u=t%10;
-    if(hh)s+=h[hh]+' ';
-    if(t>=10&&t<20){s+=tn[t-10]+' ';}else{if(d)s+=t2[d]+' ';if(u)s+=(fm?(u===1?'одна':u===2?'две':on[u]):on[u])+' ';}return s;}
-  function pl(x,a,b,c){const r=x%100,u=x%10;if(r>=11&&r<=14)return c;if(u===1)return a;if(u>=2&&u<=4)return b;return c;}
-  let res='';
-  const mil=Math.floor(n/1e6),tho=Math.floor((n%1e6)/1e3),rst=n%1e3;
-  if(mil)res+=g3(mil,false)+pl(mil,'миллион','миллиона','миллионов')+' ';
-  if(tho)res+=g3(tho,true)+pl(tho%100>=11&&tho%100<=14?0:tho%10,'тысяча','тысячи','тысяч')+' ';
-  if(rst)res+=g3(rst,false);
-  return res.trim()||'ноль';
+function liveDB(){return DB.filter(c=>!c.deletedAt);}
+const TRASH_DAYS=30;
+function trashCount(){return DB.filter(c=>c.deletedAt).length;}
+function purgeTrash(){
+  const cutoff=Date.now()-TRASH_DAYS*864e5;
+  const before=DB.length;
+  DB=DB.filter(c=>!(c.deletedAt&&c.deletedAt<cutoff));
+  if(DB.length!==before)save();
 }
+function updTrashBadge(){const b=ge('trashBtn');if(b){const n=trashCount();b.textContent=n?`🗑 ${n}`:'🗑';}}
+function restoreObj(id){
+  const cl=DB.find(c=>c.id===id);if(!cl)return;
+  delete cl.deletedAt;cl.updatedAt=Date.now();save();renderList();showTrash();
+  notify('ok','Восстановлено','Объект возвращён из корзины');
+}
+function purgeObj(id){
+  if(!confirm('Удалить объект НАВСЕГДА? Действие необратимо.'))return;
+  DB=DB.filter(c=>c.id!==id);save();renderList();showTrash();
+  notify('warn','Удалено навсегда','Объект удалён безвозвратно');
+}
+function emptyTrash(){
+  const n=trashCount();if(!n)return;
+  if(!confirm(`Очистить корзину? ${n} объект(ов) будут удалены НАВСЕГДА.`))return;
+  DB=DB.filter(c=>!c.deletedAt);save();renderList();showTrash();
+  notify('warn','Корзина очищена','Удалено навсегда: '+n);
+}
+function showTrash(){
+  VIEW='trash';sbHide();
+  const mc=ge('main');
+  const items=DB.filter(c=>c.deletedAt).sort((a,b)=>b.deletedAt-a.deletedAt);
+  mc.innerHTML=`<div class="dash fade-in" style="overflow-y:auto;flex:1;padding:18px 22px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <div class="dash-title" style="margin-bottom:0">🗑 КОРЗИНА</div>
+      <button class="vsw" onclick="showDash()">← Дашборд</button>
+      ${items.length?`<button class="vsw" style="margin-left:auto;color:var(--dn);border-color:var(--dn)" onclick="emptyTrash()">Очистить корзину</button>`:''}
+    </div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Удалённые объекты хранятся ${TRASH_DAYS} дней, затем удаляются автоматически.</div>
+    ${items.length===0?`<div style="color:var(--mu);text-align:center;padding:40px;font-size:14px">Корзина пуста</div>`:
+      items.map(c=>{
+        const left=Math.max(0,Math.ceil((c.deletedAt+TRASH_DAYS*864e5-Date.now())/864e5));
+        const tot=ctotal(c.rows);
+        return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--br);border-radius:8px;margin-bottom:8px;background:var(--sf)">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cname(c))}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">${gst(c).label}${tot?' · '+fmtS(tot)+' ₽':''} · удалён ${fdt(c.deletedAt).split(' ')[0]} · осталось ${left} дн.</div>
+          </div>
+          <button class="kact" onclick="restoreObj('${c.id}')" title="Восстановить">↩ Восстановить</button>
+          <button class="tdel" onclick="purgeObj('${c.id}')" title="Удалить навсегда">×</button>
+        </div>`;
+      }).join('')}
+  </div>`;
+}
+function gst(c){return SM[c.status]||SM['lead'];}
+
 function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
-function rfull(n){const k=Math.round((n%1)*100),r=Math.floor(n);return cap(nw(r))+' рублей '+k.toString().padStart(2,'0')+' копеек';}
 
 // ═══════════════════════════════════════════════
 // SYNC
@@ -971,10 +1010,15 @@ async function pullSheets(){
         if(cfg&&Array.isArray(cfg.statuses)&&cfg.statuses.length){
           STATUSES=cfg.statuses;saveStatuses();cfgNote=' + колонки';
         }else{cfgNote=' (колонки: нет в базе)';}
-        // Дедупликация по id — берём последнюю версию каждого объекта
-        const seen=new Map();
-        loaded.filter(c=>c.id!=='__config__').forEach(c=>{if(c&&c.id)seen.set(c.id,c);});
-        DB=Array.from(seen.values());
+        // Слияние по updatedAt: локальные объекты сохраняются, по id берём более свежую версию
+        const merged=new Map(DB.map(c=>[c.id,c]));
+        loaded.filter(c=>c.id!=='__config__').forEach(rc=>{
+          if(!rc||!rc.id)return;
+          const lc=merged.get(rc.id);
+          if(!lc||(+rc.updatedAt||0)>=(+lc.updatedAt||0)) merged.set(rc.id,rc);
+        });
+        merged.delete('__config__');
+        DB=Array.from(merged.values());
         // Сохраняем ТОЛЬКО в localStorage, без повторной отправки в Sheets
         try{localStorage.setItem('px_v2',JSON.stringify(DB));}catch(e){console.warn('save error:',e);}
         setSS('saved');setTimeout(()=>setSS('idle'),2000);
@@ -1001,12 +1045,17 @@ function save(){
     if(!c.type)c.type='fiz';
   });
   // Backup to secondary key (insurance)
-  const prev=localStorage.getItem('px_v2');
-  if(prev) localStorage.setItem('px_v2_backup',prev);
-  localStorage.setItem('px_v2',JSON.stringify(DB));
+  try{
+    const prev=localStorage.getItem('px_v2');
+    if(prev) localStorage.setItem('px_v2_backup',prev);
+    localStorage.setItem('px_v2',JSON.stringify(DB));
+  }catch(e){
+    console.error('localStorage save failed:',e);
+    notify('err','Хранилище переполнено','Не удалось сохранить локально. Удалите крупные файлы из объектов, чтобы освободить место.');
+  }
   clearTimeout(SYNCT);SYNCT=setTimeout(pushSheets,1500);
 }
-function log(cl,act,ic='📝',col='#888'){if(!cl.tl)cl.tl=[];cl.tl.unshift({ts:Date.now(),act,ic,col});}
+function log(cl,act,ic='📝',col='#888'){if(!cl.tl)cl.tl=[];cl.tl.unshift({ts:Date.now(),act,ic,col});cl.updatedAt=Date.now();}
 
 // ═══════════════════════════════════════════════
 // NOTIFICATIONS
@@ -1075,7 +1124,7 @@ function sbHide(){
 function renderList(){
   const q=(ge('srch')?.value||'').toLowerCase();
   const el=ge('sblist');if(!el)return;
-  let items=DB.filter(c=>{
+  let items=liveDB().filter(c=>{
     const nm=cname(c);
     const ph=(c.phone||c.orgPhone||'').replace(/\D/g,'');
     const ad=(c.objAddr||c.addr||c.orgAddr||'').toLowerCase();
@@ -1087,15 +1136,15 @@ function renderList(){
   // filters bar
   const sf=ge('sbf');
   if(sf){
-    const cnt={};DB.forEach(c=>{cnt[c.status]=(cnt[c.status]||0)+1;});
+    const cnt={};liveDB().forEach(c=>{cnt[c.status]=(cnt[c.status]||0)+1;});
     const active=['paid','sched','prod','awaiting','claim'];
-    sf.innerHTML=`<span class="sff${!FSTAT?' on':''}" onclick="setF(null)">Все (${DB.length})</span>`+
+    sf.innerHTML=`<span class="sff${!FSTAT?' on':''}" onclick="setF(null)">Все (${liveDB().length})</span>`+
       active.map(sid=>{const st=SM[sid];const n=cnt[sid]||0;if(!n)return'';
         return`<span class="sff${FSTAT===sid?' on':''}" onclick="setF('${sid}')" style="color:${st.color}">${st.label} (${n})</span>`;
       }).join('');
   }
   if(!items.length){el.innerHTML=`<div class="sb-empty">${q?'Ничего не найдено по запросу «'+q+'»':'Объектов не найдено'}</div>`;return;}
-  const searchHint=q?`<div style="font-size:10px;color:var(--ac);padding:4px 11px 2px;font-weight:600">Найдено: ${items.length} из ${DB.length}</div>`:'';
+  const searchHint=q?`<div style="font-size:10px;color:var(--ac);padding:4px 11px 2px;font-weight:600">Найдено: ${items.length} из ${liveDB().length}</div>`:'';
   el.innerHTML=searchHint+items.map(c=>{
     const st=gst(c);const tot=ctotal(c.rows);
     const late=isLate(c.dateInstall)&&!['closed','done','cancel'].includes(c.status);
@@ -1103,10 +1152,10 @@ function renderList(){
     const client=c.type==='fiz'?(c.fio||''):(c.orgName||'');
     return`<div class="oi${c.id===CID?' on':''}" onclick="openObj('${c.id}')">
       <div class="oi-top">
-        <span class="oi-name">${proj||client||'Без названия'}</span>
+        <span class="oi-name">${esc(proj||client||'Без названия')}</span>
         ${tot?`<span class="oi-sum">${fmtS(tot)} ₽</span>`:''}
       </div>
-      ${proj&&client?`<div style="font-size:10px;color:var(--mu);margin-bottom:3px;padding-left:1px">${client}</div>`:''}
+      ${proj&&client?`<div style="font-size:10px;color:var(--mu);margin-bottom:3px;padding-left:1px">${esc(client)}</div>`:''}
       <div class="oi-meta">
         <span class="oi-st" style="color:${st.color};background:${st.bg}">
           <span class="oi-dot" style="background:${st.color}"></span>${st.label}
@@ -1117,6 +1166,7 @@ function renderList(){
       ${late?'<span class="oi-late">⚠ Просрочен</span>':''}
     </div>`;
   }).join('');
+  updTrashBadge();
 }
 function setF(s){FSTAT=s;renderList();}
 
@@ -1127,23 +1177,23 @@ function showDash(){
   VIEW='dash';setNav('dash');sbHide();
   const mc=ge('main');
   const today=new Date().toISOString().split('T')[0];
-  const active=DB.filter(c=>c.status!=='closed');
+  const active=liveDB().filter(c=>c.status!=='closed');
   const COMPLETED_ST=['done','closed'];
-  const totRev=DB.filter(c=>COMPLETED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
-  const pipeline=DB.filter(c=>!COMPLETED_ST.includes(c.status)&&c.status!=='cancel').reduce((s,c)=>s+ctotal(c.rows),0);
-  const totDebt=DB.reduce((s,c)=>s+Math.max(0,ctotal(c.rows)-(+c.paid||0)),0);
-  const todayI=DB.filter(c=>c.dateInstall===today);
-  const todayM=DB.filter(c=>c.dateMeasure===today);
-  const overdue=DB.filter(c=>isLate(c.dateInstall)&&!['closed','done'].includes(c.status));
-  const claims=DB.filter(c=>c.status==='claim');
-  const fdata=STATUSES.map(s=>({...s,cnt:DB.filter(c=>c.status===s.id).length})).filter(s=>s.cnt>0);
+  const totRev=liveDB().filter(c=>COMPLETED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+  const pipeline=liveDB().filter(c=>!COMPLETED_ST.includes(c.status)&&c.status!=='cancel').reduce((s,c)=>s+ctotal(c.rows),0);
+  const totDebt=liveDB().reduce((s,c)=>s+Math.max(0,ctotal(c.rows)-(+c.paid||0)),0);
+  const todayI=liveDB().filter(c=>c.dateInstall===today);
+  const todayM=liveDB().filter(c=>c.dateMeasure===today);
+  const overdue=liveDB().filter(c=>isLate(c.dateInstall)&&!['closed','done'].includes(c.status));
+  const claims=liveDB().filter(c=>c.status==='claim');
+  const fdata=STATUSES.map(s=>({...s,cnt:liveDB().filter(c=>c.status===s.id).length})).filter(s=>s.cnt>0);
   const maxC=Math.max(...fdata.map(s=>s.cnt),1);
-  const evts=[];DB.forEach(c=>(c.tl||[]).forEach(ev=>evts.push({...ev,cn:cname(c),cid:c.id})));
+  const evts=[];liveDB().forEach(c=>(c.tl||[]).forEach(ev=>evts.push({...ev,cn:cname(c),cid:c.id})));
   evts.sort((a,b)=>b.ts-a.ts);
   mc.innerHTML=`<div class="dash fade-in">
     <div class="dash-title">ОПЕРАТИВНЫЙ ДАШБОРД</div>
     <div class="stats-row">
-      <div class="stat-card sc-ac"><div class="stat-val">${active.length}</div><div class="stat-label">Активных объектов</div><div class="stat-sub" style="color:var(--mu)">всего ${DB.length} в базе</div></div>
+      <div class="stat-card sc-ac"><div class="stat-val">${active.length}</div><div class="stat-label">Активных объектов</div><div class="stat-sub" style="color:var(--mu)">всего ${liveDB().length} в базе</div></div>
       <div class="stat-card sc-ok"><div class="stat-val">${fmtS(totRev)}</div><div class="stat-label">Выручка (закрытые), ₽</div><div class="stat-sub" style="color:var(--mu)">pipeline: ${fmtS(pipeline)} ₽</div></div>
       <div class="stat-card ${totDebt>0?'sc-dn':'sc-ok'}"><div class="stat-val">${fmtS(totDebt)}</div><div class="stat-label">Долг клиентов, ₽</div></div>
       <div class="stat-card ${overdue.length>0?'sc-wn':''}"><div class="stat-val">${overdue.length}</div><div class="stat-label">Просрочено</div>${claims.length?`<div class="stat-sub" style="color:var(--dn)">${claims.length} рекламаций</div>`:''}</div>
@@ -1184,9 +1234,7 @@ function showKanban(){
       <input id="kbSearchInput" placeholder="⌕ Поиск по объектам..."
         value="${(KB_SEARCH_Q||'').replace(/"/g,'&quot;')}"
         style="flex:1;max-width:240px;min-width:120px;margin-left:10px;background:var(--s4);border:1px solid ${KB_SEARCH_Q?'var(--ac)':'var(--br2)'};border-radius:6px;padding:5px 10px;color:var(--tx);font-family:'Golos Text',sans-serif;font-size:12px;outline:none;"
-        oninput="KB_SEARCH_Q=this.value;this.style.borderColor=this.value?'var(--ac)':'var(--br2)';renderKB()"
-        onkeyup="KB_SEARCH_Q=this.value;renderKB()"
-        onchange="KB_SEARCH_Q=this.value;renderKB()">
+        oninput="KB_SEARCH_Q=this.value;this.style.borderColor=this.value?'var(--ac)':'var(--br2)';renderKB()">
       <button class="vsw" onclick="kbAddColumn()">+ Колонка</button>
       <button class="vsw" onclick="exportColumns()" title="Скопировать колонки для другого устройства">↑ Экспорт</button>
       <button class="vsw" onclick="importColumns()" title="Вставить колонки с другого устройства">↓ Импорт</button>
@@ -1204,8 +1252,9 @@ function renderKB(){
   const rawQ=ge('kbSearchInput')?.value||KB_SEARCH_Q||'';
   KB_SEARCH_Q=rawQ;
   const kbQ=rawQ.toLowerCase().trim();
+  const kbQNum=kbQ.replace(/\D/g,'');
   b.innerHTML=STATUSES.map((st,colIdx)=>{
-    let cards=DB.filter(c=>c.status===st.id);
+    let cards=liveDB().filter(c=>c.status===st.id);
     if(kbQ){
       cards=cards.filter(c=>{
         const name=(c.projectName||cname(c)||'').toLowerCase();
@@ -1213,7 +1262,7 @@ function renderKB(){
         const addr=(c.objAddr||c.addr||c.orgAddr||'').toLowerCase();
         const num=(c.docNum||'').toLowerCase();
         const total=ctotal(c.rows).toString();
-        return name.includes(kbQ)||phone.includes(kbQ.replace(/\D/g,''))||addr.includes(kbQ)||num.includes(kbQ)||total.includes(kbQ);
+        return name.includes(kbQ)||(!!kbQNum&&phone.includes(kbQNum))||addr.includes(kbQ)||num.includes(kbQ)||total.includes(kbQ);
       });
     }
     const csum=cards.reduce((s,c)=>s+ctotal(c.rows),0);
@@ -1250,10 +1299,10 @@ function kcardHTML(c,st){
   const tasks=c.tasks||[];
   const openTasks=tasks.filter(t=>!t.done);
   const lateTasks=openTasks.filter(t=>t.deadline&&isLate(t.deadline));
-  const projLine=c.projectName&&c.projectName.trim()?`<div class="proj-name">${c.projectName}</div>`:'';
+  const projLine=c.projectName&&c.projectName.trim()?`<div class="proj-name" onclick="openObj('${c.id}')" style="cursor:pointer">${esc(c.projectName)}</div>`:'';
   const clientLine=(c.projectName&&c.projectName.trim())?
-    `<div class="kc-name" onclick="openObj('${c.id}')" style="font-weight:400;color:var(--tx2)">${c.type==='fiz'?(c.fio||''):(c.orgName||'')}</div>`:
-    `<div class="kc-name" onclick="openObj('${c.id}')">${cname(c)}</div>`;
+    `<div class="kc-name" onclick="openObj('${c.id}')" style="font-weight:400;color:var(--tx2)">${esc(c.type==='fiz'?(c.fio||''):(c.orgName||''))}</div>`:
+    `<div class="kc-name" onclick="openObj('${c.id}')">${esc(cname(c))}</div>`;
   const tagsLine=(c.tags&&c.tags.length)?
     `<div class="kc-tags" style="margin-top:4px">${c.tags.map(tid=>{const t=TAGS.find(x=>x.id===tid);return t?`<span class="ktag" style="color:${t.color};background:${t.color}22">${t.label}</span>`:''}).join('')}</div>`:'';
   const taskBadge=openTasks.length?
@@ -1270,7 +1319,7 @@ function kcardHTML(c,st){
     <div style="padding-left:7px">
       ${projLine}
       ${clientLine}
-      ${c.objAddr?`<div class="kc-addr">${c.objAddr}</div>`:''}
+      ${c.objAddr?`<div class="kc-addr">${esc(c.objAddr)}</div>`:''}
     </div>
     <div class="kc-tags">
       ${tot>0?`<span class="ktag kt-sum">${fmtS(tot)} ₽</span>`:''}
@@ -1370,6 +1419,7 @@ function kbQuickAdd(statusId){
   sbShow();setNav('cl');VIEW='clients';
   const cl2=DB.find(c=>c.id===obj.id);
   if(cl2){EROWS=cl2.rows.map(r=>({...r}));renderObjView(cl2);}
+  if(window.innerWidth<=768)sbHide();
   notify('ok','Новый объект','Создан в статусе «'+SM[statusId].label+'»');
 }
 
@@ -1381,7 +1431,7 @@ function showTable(){
   const mc=ge('main');
   mc.innerHTML=`<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
     <div class="kb-bar">
-      <span class="kb-bar-title">Все объекты (${DB.length})</span>
+      <span class="kb-bar-title">Все объекты (${liveDB().length})</span>
       <div class="view-sw">
         <button class="vsw" onclick="showKanban()">🗂 Канбан</button>
         <button class="vsw on">☰ Таблица</button>
@@ -1390,8 +1440,8 @@ function showTable(){
     <div class="tbl-wrap">
       <table class="dtbl">
         <thead><tr>
-          <th>#</th><th>Клиент</th><th>Статус</th><th>Объект</th>
-          <th>Сумма</th><th>Оплачено</th><th>Долг</th><th>Монтаж</th><th>Телефон</th>
+          <th>#</th><th onclick="sortTable('name')" style="cursor:pointer" title="Сортировать">Клиент ⇅</th><th onclick="sortTable('status')" style="cursor:pointer" title="Сортировать">Статус ⇅</th><th>Объект</th>
+          <th onclick="sortTable('total')" style="cursor:pointer" title="Сортировать">Сумма ⇅</th><th>Оплачено</th><th>Долг</th><th>Монтаж</th><th>Телефон</th>
         </tr></thead>
         <tbody>
           ${getSortedDB().map((c,i)=>{
@@ -1399,9 +1449,9 @@ function showTable(){
             const late=isLate(c.dateInstall);
             return`<tr class="${c.id===CID?'sel':''}" onclick="openObjTbl('${c.id}')" style="cursor:pointer">
               <td style="color:var(--mu);font-size:10px">${i+1}</td>
-              <td><b>${cname(c)}</b></td>
+              <td><b>${esc(cname(c))}</b></td>
               <td><span class="oi-st" style="color:${st.color};background:${st.bg};font-size:9px;padding:2px 6px;border-radius:3px">${st.label}</span></td>
-              <td style="font-size:11px;color:var(--tx2)">${c.objAddr||'—'}</td>
+              <td style="font-size:11px;color:var(--tx2)">${c.objAddr?esc(c.objAddr):'—'}</td>
               <td style="color:var(--ac);font-weight:600">${tot?fmt(tot)+' ₽':'—'}</td>
               <td style="color:var(--ok)">${paid?fmt(paid)+' ₽':'—'}</td>
               <td style="color:${debt>0?'var(--dn)':'var(--mu)'}">${debt>0?fmt(debt)+' ₽':'—'}</td>
@@ -1441,6 +1491,7 @@ function newObj(){
   const obj=mkObj();DB.unshift(obj);save();CID=obj.id;
   sbShow();setNav('cl');VIEW='clients';renderList();
   EROWS=obj.rows.map(r=>({...r}));renderObjView(obj);
+  if(window.innerWidth<=768)sbHide();
   notify('ok','Новый объект','Карточка создана');
 }
 function openObj(id){
@@ -1527,7 +1578,7 @@ function renderCardBody(cl){
   b.innerHTML=cl.type==='fiz'?cardFiz(cl):cardYur(cl);
   renderRows();
   b.querySelectorAll('input,select,textarea').forEach(el=>{
-    el.addEventListener('input',()=>{syncCard();renderDoc();});
+    el.addEventListener('input',()=>{syncCard();renderDocD();});
     el.addEventListener('change',()=>{syncCard();renderDoc();});
   });
 }
@@ -1537,7 +1588,7 @@ function cardFiz(cl){
   const adv=tot*advPct/100,paid=+cl.paid||0,debt=Math.max(0,tot-paid);
   const payPct=tot>0?Math.min(100,Math.round(paid/tot*100)):0;
   return sec('Проект','proj',`
-    <div class="field"><label>Название проекта</label><input id="f_projname" value="${cl.projectName||''}" placeholder="Например: Квартира Смирновых, ЖК Олимп кв.47..."></div>
+    <div class="field"><label>Название проекта</label><input id="f_projname" value="${escA(cl.projectName)}" placeholder="Например: Квартира Смирновых, ЖК Олимп кв.47..."></div>
     <div class="field"><label>Теги</label>
       <div class="tag-row" id="tagsRow">
         ${TAGS.map(t=>`<span class="tag-pill ${(cl.tags||[]).includes(t.id)?'on':'off'}" style="color:${t.color};background:${(cl.tags||[]).includes(t.id)?t.color+'22':'transparent'};border-color:${t.color}" onclick="togTag('${t.id}')">${t.label}</span>`).join('')}
@@ -1545,27 +1596,27 @@ function cardFiz(cl){
     </div>`)+
   sec('Реквизиты договора','req',`
     <div class="fr">
-      <div class="field"><label>№ договора</label><input id="f_docNum" value="${cl.docNum||''}"></div>
-      <div class="field"><label>Дата</label><input type="date" id="f_docDate" value="${cl.docDate||''}"></div>
+      <div class="field"><label>№ договора</label><input id="f_docNum" value="${escA(cl.docNum)}"></div>
+      <div class="field"><label>Дата</label><input type="date" id="f_docDate" value="${escA(cl.docDate)}"></div>
     </div>`)+
   sec('Заказчик','cli',`
-    <div class="field"><label>ФИО полностью</label><input id="f_fio" value="${cl.fio||''}"></div>
+    <div class="field"><label>ФИО полностью</label><input id="f_fio" value="${escA(cl.fio)}"></div>
     <div class="fr">
-      <div class="field"><label>Серия паспорта</label><input id="f_psser" value="${cl.passportSer||''}"></div>
-      <div class="field"><label>Номер паспорта</label><input id="f_psnum" value="${cl.passportNum||''}"></div>
+      <div class="field"><label>Серия паспорта</label><input id="f_psser" value="${escA(cl.passportSer)}"></div>
+      <div class="field"><label>Номер паспорта</label><input id="f_psnum" value="${escA(cl.passportNum)}"></div>
     </div>
-    <div class="field"><label>Кем выдан</label><input id="f_psby" value="${cl.passportBy||''}"></div>
+    <div class="field"><label>Кем выдан</label><input id="f_psby" value="${escA(cl.passportBy)}"></div>
     <div class="fr">
-      <div class="field"><label>Дата выдачи</label><input type="date" id="f_psdate" value="${cl.passportDate||''}"></div>
-      <div class="field"><label>Код подразделения</label><input id="f_pscode" value="${cl.passportCode||''}"></div>
+      <div class="field"><label>Дата выдачи</label><input type="date" id="f_psdate" value="${escA(cl.passportDate)}"></div>
+      <div class="field"><label>Код подразделения</label><input id="f_pscode" value="${escA(cl.passportCode)}"></div>
     </div>
-    <div class="field"><label>Адрес регистрации</label><input id="f_addr" value="${cl.addr||''}"></div>
+    <div class="field"><label>Адрес регистрации</label><input id="f_addr" value="${escA(cl.addr)}"></div>
     <div class="fr">
-      <div class="field"><label>Телефон</label><input id="f_phone" value="${cl.phone||''}"></div>
-      <div class="field"><label>Telegram</label><input id="f_tg" value="${cl.tg||''}"></div>
+      <div class="field"><label>Телефон</label><input id="f_phone" value="${escA(cl.phone)}"></div>
+      <div class="field"><label>Telegram</label><input id="f_tg" value="${escA(cl.tg)}"></div>
     </div>
-    <div class="field"><label>E-mail</label><input id="f_email" value="${cl.email||''}"></div>
-    <div class="field"><label>Адрес объекта</label><input id="f_objaddr" value="${cl.objAddr||''}"></div>`)+
+    <div class="field"><label>E-mail</label><input id="f_email" value="${escA(cl.email)}"></div>
+    <div class="field"><label>Адрес объекта</label><input id="f_objaddr" value="${escA(cl.objAddr)}"></div>`)+
   sec('Работы и даты','work',`
     <div class="chkgrp">
       <label class="chk"><input type="checkbox" id="f_w1"${cl.w1?' checked':''}> Монтаж натяжного потолка</label>
@@ -1573,16 +1624,16 @@ function cardFiz(cl){
     </div>
     <div class="datgrid" style="margin-top:10px">
       <div class="dcrd${isLate(cl.dateMeasure)?' late':isToday(cl.dateMeasure)?' tod':''}">
-        <div class="dl">📐 Замер</div><input type="date" id="f_dmeas" value="${cl.dateMeasure||''}">
+        <div class="dl">📐 Замер</div><input type="date" id="f_dmeas" value="${escA(cl.dateMeasure)}">
       </div>
       <div class="dcrd${isLate(cl.dateProd)?' late':''}">
-        <div class="dl">🏭 Производство</div><input type="date" id="f_dprod" value="${cl.dateProd||''}">
+        <div class="dl">🏭 Производство</div><input type="date" id="f_dprod" value="${escA(cl.dateProd)}">
       </div>
       <div class="dcrd${isLate(cl.dateInstall)?' late':isToday(cl.dateInstall)?' tod':''}">
-        <div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${cl.dateInstall||''}">
+        <div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${escA(cl.dateInstall)}">
       </div>
       <div class="dcrd${isLate(cl.dateDead)?' late':''}">
-        <div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${cl.dateDead||''}">
+        <div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}">
       </div>
     </div>
     <div class="fr" style="margin-top:9px">
@@ -1602,10 +1653,10 @@ function cardFiz(cl){
       <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${cl.advPct||'50'}" min="1" max="99" oninput="syncRest()"></div>
       <div class="field"><label>Остаток (%)</label><input type="number" id="f_rest" value="${restPct}" readonly style="opacity:.4"></div>
     </div>
-    <div class="field"><label>Фактически оплачено (₽)</label><input type="number" id="f_paid" value="${cl.paid||''}"></div>
+    <div class="field"><label>Фактически оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
     <div class="fr">
-      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${cl.costPrice||''}"></div>
-      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${cl.margin||''}"></div>
+      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
     </div>
     <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
   sec('Позиции','rows',`
@@ -1615,16 +1666,16 @@ function cardFiz(cl){
     </table>
     <button class="addrow" onclick="addRow()">+ Позиция</button>
     <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>
-    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${cl.discount||''}" min="0" placeholder="0" oninput="renderDoc()"></div>`)+
+    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${escA(cl.discount)}" min="0" placeholder="0" oninput="renderDocD()"></div>`)+
   sec('Комментарий','cmt',`
-    <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${cl.comment||''}</textarea></div>`);
+    <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${esc(cl.comment)}</textarea></div>`);
 }
 
 function cardYur(cl){
   const tot=ctotal(cl.rows),advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
   const paid=+cl.paid||0,debt=Math.max(0,tot-paid),payPct=tot>0?Math.min(100,Math.round(paid/tot*100)):0;
   return sec('Проект','proj',`
-    <div class="field"><label>Название проекта</label><input id="f_projname" value="${cl.projectName||''}" placeholder="Например: Офис ООО Ромашка, склад ул.Ленина..."></div>
+    <div class="field"><label>Название проекта</label><input id="f_projname" value="${escA(cl.projectName)}" placeholder="Например: Офис ООО Ромашка, склад ул.Ленина..."></div>
     <div class="field"><label>Теги</label>
       <div class="tag-row" id="tagsRow">
         ${TAGS.map(t=>`<span class="tag-pill ${(cl.tags||[]).includes(t.id)?'on':'off'}" style="color:${t.color};background:${(cl.tags||[]).includes(t.id)?t.color+'22':'transparent'};border-color:${t.color}" onclick="togTag('${t.id}')">${t.label}</span>`).join('')}
@@ -1632,49 +1683,49 @@ function cardYur(cl){
     </div>`)+
   sec('Реквизиты договора','req',`
     <div class="fr">
-      <div class="field"><label>№ договора</label><input id="f_docNum" value="${cl.docNum||''}"></div>
-      <div class="field"><label>Дата</label><input type="date" id="f_docDate" value="${cl.docDate||''}"></div>
+      <div class="field"><label>№ договора</label><input id="f_docNum" value="${escA(cl.docNum)}"></div>
+      <div class="field"><label>Дата</label><input type="date" id="f_docDate" value="${escA(cl.docDate)}"></div>
     </div>`)+
   sec('Заказчик (юрлицо / ИП)','cli',`
     <div class="fr">
       <div class="field"><label>Орг. форма</label>
         <select id="f_orgform">${['АО','ООО','ПАО','ЗАО','ИП','ГУП','МУП','НКО'].map(v=>`<option${cl.orgForm===v?' selected':''}>${v}</option>`).join('')}</select>
       </div>
-      <div class="field"><label>Название</label><input id="f_orgname" value="${cl.orgName||''}"></div>
+      <div class="field"><label>Название</label><input id="f_orgname" value="${escA(cl.orgName)}"></div>
     </div>
     <div class="fr">
-      <div class="field"><label>Должность</label><input id="f_dirpost" value="${cl.dirPost||'Генерального директора'}"></div>
-      <div class="field"><label>ФИО руководителя</label><input id="f_dirname" value="${cl.dirName||''}"></div>
+      <div class="field"><label>Должность</label><input id="f_dirpost" value="${escA(cl.dirPost||'Генерального директора')}"></div>
+      <div class="field"><label>ФИО руководителя</label><input id="f_dirname" value="${escA(cl.dirName)}"></div>
     </div>
-    <div class="field"><label>Действует на основании</label><input id="f_dirdoc" value="${cl.dirDoc||'Устава'}"></div>
+    <div class="field"><label>Действует на основании</label><input id="f_dirdoc" value="${escA(cl.dirDoc||'Устава')}"></div>
     <div class="fr3">
-      <div class="field"><label>ИНН</label><input id="f_orginn" value="${cl.orgInn||''}"></div>
-      <div class="field"><label>КПП</label><input id="f_orgkpp" value="${cl.orgKpp||''}"></div>
-      <div class="field"><label>ОГРН</label><input id="f_orgogrn" value="${cl.orgOgrn||''}"></div>
+      <div class="field"><label>ИНН</label><input id="f_orginn" value="${escA(cl.orgInn)}"></div>
+      <div class="field"><label>КПП</label><input id="f_orgkpp" value="${escA(cl.orgKpp)}"></div>
+      <div class="field"><label>ОГРН</label><input id="f_orgogrn" value="${escA(cl.orgOgrn)}"></div>
     </div>
-    <div class="field"><label>Юридический адрес</label><input id="f_orgaddr" value="${cl.orgAddr||''}"></div>
-    <div class="field"><label>Банк</label><input id="f_orgbank" value="${cl.orgBank||''}"></div>
+    <div class="field"><label>Юридический адрес</label><input id="f_orgaddr" value="${escA(cl.orgAddr)}"></div>
+    <div class="field"><label>Банк</label><input id="f_orgbank" value="${escA(cl.orgBank)}"></div>
     <div class="fr">
-      <div class="field"><label>БИК</label><input id="f_orgbik" value="${cl.orgBik||''}"></div>
-      <div class="field"><label>р/с</label><input id="f_orgrs" value="${cl.orgRs||''}"></div>
+      <div class="field"><label>БИК</label><input id="f_orgbik" value="${escA(cl.orgBik)}"></div>
+      <div class="field"><label>р/с</label><input id="f_orgrs" value="${escA(cl.orgRs)}"></div>
     </div>
-    <div class="field"><label>к/с</label><input id="f_orgks" value="${cl.orgKs||''}"></div>
+    <div class="field"><label>к/с</label><input id="f_orgks" value="${escA(cl.orgKs)}"></div>
     <div class="fr">
-      <div class="field"><label>Телефон</label><input id="f_orgphone" value="${cl.orgPhone||''}"></div>
-      <div class="field"><label>Telegram</label><input id="f_orgtg" value="${cl.orgTg||''}"></div>
+      <div class="field"><label>Телефон</label><input id="f_orgphone" value="${escA(cl.orgPhone)}"></div>
+      <div class="field"><label>Telegram</label><input id="f_orgtg" value="${escA(cl.orgTg)}"></div>
     </div>
-    <div class="field"><label>E-mail</label><input id="f_orgemail" value="${cl.orgEmail||''}"></div>
-    <div class="field"><label>Адрес объекта</label><input id="f_objaddr" value="${cl.objAddr||''}"></div>`)+
+    <div class="field"><label>E-mail</label><input id="f_orgemail" value="${escA(cl.orgEmail)}"></div>
+    <div class="field"><label>Адрес объекта</label><input id="f_objaddr" value="${escA(cl.objAddr)}"></div>`)+
   sec('Работы и даты','work',`
     <div class="chkgrp">
       <label class="chk"><input type="checkbox" id="f_w1"${cl.w1?' checked':''}> Монтаж натяжного потолка</label>
       <label class="chk"><input type="checkbox" id="f_w2"${cl.w2?' checked':''}> Монтаж электрического карниза</label>
     </div>
     <div class="datgrid" style="margin-top:10px">
-      <div class="dcrd${isLate(cl.dateMeasure)?' late':''}"><div class="dl">📐 Замер</div><input type="date" id="f_dmeas" value="${cl.dateMeasure||''}"></div>
-      <div class="dcrd${isLate(cl.dateProd)?' late':''}"><div class="dl">🏭 Производство</div><input type="date" id="f_dprod" value="${cl.dateProd||''}"></div>
-      <div class="dcrd${isLate(cl.dateInstall)?' late':isToday(cl.dateInstall)?' tod':''}"><div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${cl.dateInstall||''}"></div>
-      <div class="dcrd${isLate(cl.dateDead)?' late':''}"><div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${cl.dateDead||''}"></div>
+      <div class="dcrd${isLate(cl.dateMeasure)?' late':''}"><div class="dl">📐 Замер</div><input type="date" id="f_dmeas" value="${escA(cl.dateMeasure)}"></div>
+      <div class="dcrd${isLate(cl.dateProd)?' late':''}"><div class="dl">🏭 Производство</div><input type="date" id="f_dprod" value="${escA(cl.dateProd)}"></div>
+      <div class="dcrd${isLate(cl.dateInstall)?' late':isToday(cl.dateInstall)?' tod':''}"><div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${escA(cl.dateInstall)}"></div>
+      <div class="dcrd${isLate(cl.dateDead)?' late':''}"><div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}"></div>
     </div>
     <div class="fr" style="margin-top:9px">
       <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
@@ -1691,10 +1742,10 @@ function cardYur(cl){
       <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${cl.advPct||'50'}" min="1" max="99" oninput="syncRest()"></div>
       <div class="field"><label>Остаток (%)</label><input type="number" id="f_rest" value="${restPct}" readonly style="opacity:.4"></div>
     </div>
-    <div class="field"><label>Оплачено (₽)</label><input type="number" id="f_paid" value="${cl.paid||''}"></div>
+    <div class="field"><label>Оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
     <div class="fr">
-      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${cl.costPrice||''}"></div>
-      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${cl.margin||''}"></div>
+      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
     </div>
     <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
   sec('Позиции','rows',`
@@ -1704,9 +1755,9 @@ function cardYur(cl){
     </table>
     <button class="addrow" onclick="addRow()">+ Позиция</button>
     <button class="addrow" onclick="showTemplateModal()" style="margin-top:4px;border-color:var(--ac);color:var(--ac)">📋 Шаблон сметы</button>
-    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${cl.discount||''}" min="0" placeholder="0" oninput="renderDoc()"></div>`)+
+    <div class="field" style="margin-top:8px"><label>Скидка (₽)</label><input type="number" id="f_discount" value="${escA(cl.discount)}" min="0" placeholder="0" oninput="renderDocD()"></div>`)+
   sec('Комментарий','cmt',`
-    <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${cl.comment||''}</textarea></div>`);
+    <div class="field"><textarea id="f_cmt" rows="3" placeholder="Заметки...">${esc(cl.comment)}</textarea></div>`);
 }
 
 // ═══════════════════════════════════════════════
@@ -1715,9 +1766,9 @@ function cardYur(cl){
 function renderRows(){
   const b=ge('rowbody');if(!b)return;
   b.innerHTML=EROWS.map((r,i)=>`<tr>
-    <td><input value="${r.name||''}" oninput="EROWS[${i}].name=this.value;renderDoc()" placeholder="Название"></td>
-    <td><input type="number" value="${r.price||''}" oninput="EROWS[${i}].price=this.value;renderDoc()" placeholder="0"></td>
-    <td><input type="number" value="${r.qty||1}" min="0.01" step="0.01" oninput="EROWS[${i}].qty=this.value;renderDoc()"></td>
+    <td><input value="${escA(r.name)}" oninput="EROWS[${i}].name=this.value;renderDocD()" placeholder="Название"></td>
+    <td><input type="number" value="${escA(r.price)}" oninput="EROWS[${i}].price=this.value;renderDocD()" placeholder="0"></td>
+    <td><input type="number" value="${r.qty||1}" min="0.01" step="0.01" oninput="EROWS[${i}].qty=this.value;renderDocD()"></td>
     <td><select onchange="EROWS[${i}].unit=this.value;renderDoc()">${UNITS.map(u=>`<option${u===r.unit?' selected':''}>${u}</option>`).join('')}</select></td>
     <td><button class="delbtn" onclick="rmRow(${i})">×</button></td>
   </tr>`).join('');
@@ -1734,6 +1785,7 @@ function togTag(tid){
   if(!cl.tags)cl.tags=[];
   const idx=cl.tags.indexOf(tid);
   if(idx>=0)cl.tags.splice(idx,1);else cl.tags.push(tid);
+  cl.updatedAt=Date.now();save();
   // re-render just tags row
   const row=ge('tagsRow');
   if(row) row.innerHTML=TAGS.map(t=>`<span class="tag-pill ${cl.tags.includes(t.id)?'on':'off'}" style="color:${t.color};background:${cl.tags.includes(t.id)?t.color+'22':'transparent'};border-color:${t.color}" onclick="togTag('${t.id}')">${t.label}</span>`).join('');
@@ -1764,6 +1816,7 @@ function syncCard(){
     cl.orgBik=gv('f_orgbik');cl.orgRs=gv('f_orgrs');cl.orgKs=gv('f_orgks');
     cl.orgPhone=gv('f_orgphone');cl.orgTg=gv('f_orgtg');cl.orgEmail=gv('f_orgemail');
   }
+  cl.updatedAt=Date.now();
 }
 function onStChange(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
@@ -1795,10 +1848,11 @@ function setType(t){
   syncCard();cl.type=t;renderObjView(cl);
 }
 function delObj(){
-  if(!confirm('Удалить объект?'))return;
-  DB=DB.filter(c=>c.id!==CID);save();CID=null;renderList();
+  if(!confirm('Переместить объект в корзину?'))return;
+  const cl=DB.find(c=>c.id===CID);if(!cl)return;
+  cl.deletedAt=Date.now();cl.updatedAt=Date.now();save();CID=null;renderList();
   ge('main').innerHTML='<div class="welcome"><div class="welcome-logo">PARALLAX</div><div>Выберите объект или создайте новый</div></div>';
-  notify('warn','Удалено','Объект удалён из базы');
+  notify('warn','В корзине','Объект перемещён в корзину (хранится 30 дней)');
 }
 
 // ═══════════════════════════════════════════════
@@ -1815,7 +1869,7 @@ function renderTL(cl){
         ${i<evts.length-1?'<div class="tl-line"></div>':''}
       </div>
       <div class="tl-right">
-        <div class="tl-act">${ev.ic||'📝'} ${ev.act}</div>
+        <div class="tl-act">${ev.ic||'📝'} ${esc(ev.act)}</div>
         <div class="tl-meta">${fdt(ev.ts)} · Администратор</div>
         ${ev.note?`<div class="tl-note">${ev.note}</div>`:''}
       </div>
@@ -1834,7 +1888,7 @@ function renderTasks(cl){
     tasks.map((t,i)=>`<div class="task-item">
       <input type="checkbox" class="tchk" ${t.done?'checked':''} onchange="togTask(${i})">
       <div class="tbody">
-        <div class="ttxt${t.done?' done':''}" ondblclick="editTaskInline(${i},this)">${t.text}</div>
+        <div class="ttxt${t.done?' done':''}" ondblclick="editTaskInline(${i},this)">${esc(t.text)}</div>
         <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
           ${t.deadline?`<div class="tdl${isLate(t.deadline)&&!t.done?' late':''}">📅 ${fds(t.deadline)}</div>`:''}
           ${t.time?`<div class="task-time">🕐 ${t.time}</div>`:''}
@@ -1863,13 +1917,14 @@ function editTask(i){
   if(newDate!==null) t.deadline=newDate.trim();
   const newTime=prompt('Время (ЧЧ:ММ, или пусто):',t.time||'');
   if(newTime!==null) t.time=newTime.trim();
-  save();renderTasks(cl);
+  cl.updatedAt=Date.now();save();renderTasks(cl);
 }
 function editTaskInline(i,el){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;
   el.contentEditable='true';el.focus();
   el.onblur=()=>{
     cl.tasks[i].text=el.innerText.trim()||cl.tasks[i].text;
+    cl.updatedAt=Date.now();
     el.contentEditable='false';
     save();
   };
@@ -1886,13 +1941,13 @@ function addTask(){
 }
 function togTask(i){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;
-  cl.tasks[i].done=!cl.tasks[i].done;
+  cl.tasks[i].done=!cl.tasks[i].done;cl.updatedAt=Date.now();
   if(cl.tasks[i].done)log(cl,`Выполнена: "${cl.tasks[i].text}"`, '✅','#5db87a');
   save();renderTasks(cl);
 }
 function rmTask(i){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;
-  cl.tasks.splice(i,1);save();renderTasks(cl);
+  cl.tasks.splice(i,1);cl.updatedAt=Date.now();save();renderTasks(cl);
 }
 
 // ═══════════════════════════════════════════════
@@ -1916,7 +1971,7 @@ function fCardHTML(f,i){
   const isImg=f.type&&f.type.startsWith('image/');
   return`<div class="fcrd2">
     ${isImg?`<img src="${f.data}" alt="${f.name}">`:`<div class="ficon">${f.type?.includes('pdf')?'📄':'📎'}</div>`}
-    <div class="fn">${f.name}</div><div class="fs">${(f.size/1024).toFixed(0)} KB</div>
+    <div class="fn">${esc(f.name)}</div><div class="fs">${(f.size/1024).toFixed(0)} KB</div>
     <button class="fdl" onclick="rmFile(${i})">×</button>
   </div>`;
 }
@@ -1936,7 +1991,7 @@ function procFiles(fl){
 }
 function rmFile(i){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.files)return;
-  cl.files.splice(i,1);save();renderFiles(cl);
+  cl.files.splice(i,1);cl.updatedAt=Date.now();save();renderFiles(cl);
 }
 
 // ═══════════════════════════════════════════════
@@ -1967,6 +2022,8 @@ function swDTab(t,el){
   document.querySelectorAll('.or-tabs .otab').forEach(b=>b.classList.remove('on'));
   if(el)el.classList.add('on');renderDoc();
 }
+let RDOC_T=null;
+function renderDocD(){clearTimeout(RDOC_T);RDOC_T=setTimeout(renderDoc,200);}
 function renderDoc(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
   const tot=calcTotal();
@@ -2061,6 +2118,9 @@ function fmtDate(s){ const p=pd(s); return p?`«${p.d}» ${p.m} ${p.y} г.`:`«$
 function fmtDateShort(s){ return fds(s); }
 function docDateParts(cl){ const p=pd(cl.docDate); return p?{day:`«${p.d}»`,month:p.m,year:p.y}:{day:`«${bl(16)}»`,month:bl(80),year:bl(28)}; }
 
+function orgTitle(cl){ return cl.orgForm==='ИП'?`ИП ${cl.orgName||bl(140)}`:`${cl.orgForm||''} «${cl.orgName||bl(140)}»`; }
+function orgSigner(cl){ return cl.orgForm==='ИП'?(cl.orgName||bl(140)):(cl.dirName||bl(140)); }
+
 function itemsTable(cl, withPeriod=false){
   const total=calcTotal();
   let html=`<table class="inv-table"><thead><tr>
@@ -2071,12 +2131,15 @@ function itemsTable(cl, withPeriod=false){
     <th style="width:7%">Ед.</th>
     <th style="width:12%;text-align:right">Сумма, руб.</th>
   </tr></thead><tbody>`;
-  EROWS.forEach((r,i)=>{
+  let idx=0;
+  EROWS.forEach((r)=>{
+    if(!r.name&&!r.price)return;
+    idx++;
     const sum=(+r.price||0)*(+r.qty||0);
     const per=withPeriod?`<td>${fmtDateShort(cl.workStart||cl.dateInstall)} – ${fmtDateShort(cl.workEnd||cl.dateDead)}</td>`:'';
-    html+=`<tr><td>${i+1}</td><td>${r.name||'—'}</td>${per}
+    html+=`<tr><td>${idx}</td><td>${r.name||'—'}</td>${per}
       <td class="num">${r.price?fmt(r.price):'—'}</td>
-      <td class="num">${r.qty}</td><td>${r.unit}</td>
+      <td class="num">${r.qty||'—'}</td><td>${r.unit||'—'}</td>
       <td class="num">${fmt(sum)}</td></tr>`;
   });
   const cs=withPeriod?6:5;
@@ -2136,7 +2199,6 @@ function partiesFiz(cl){
       <div class="p-name">${C.name}</div>
       <div class="party-row"><span class="lbl">действующий</span><span>на основании Выписки из ЕГРИП</span></div>
       <div class="party-row"><span class="lbl">ИНН:</span><span>${C.inn}</span></div>
-      <div class="party-row"><span class="lbl">КПП:</span><span>${C.kpp}</span></div>
       <div class="party-row"><span class="lbl">ОГРНИП:</span><span>${C.ogrn}</span></div>
       <div class="party-label">именуемый в дальнейшем «Подрядчик»</div>
     </div>
@@ -2153,24 +2215,24 @@ function partiesFiz(cl){
 }
 
 function partiesYur(cl){
-  const orgFull=`${cl.orgForm||''} «${cl.orgName||bl(150)}»`;
+  const isIP=cl.orgForm==='ИП';
+  const orgFull=orgTitle(cl);
   return `
   <div class="parties-grid">
     <div class="party-col">
       <div class="p-name">${C.name}</div>
       <div class="party-row"><span class="lbl">действующий</span><span>на основании Выписки из ЕГРИП</span></div>
       <div class="party-row"><span class="lbl">ИНН:</span><span>${C.inn}</span></div>
-      <div class="party-row"><span class="lbl">КПП:</span><span>${C.kpp}</span></div>
       <div class="party-row"><span class="lbl">ОГРНИП:</span><span>${C.ogrn}</span></div>
       <div class="party-label">именуемый в дальнейшем «Подрядчик»</div>
     </div>
     <div class="party-col">
       <div class="p-name">${orgFull}</div>
-      <div class="party-row"><span class="lbl">в лице</span><span>${cl.dirPost||bl(100)} ${cl.dirName||bl(140)}</span></div>
-      <div class="party-row"><span class="lbl">действующего</span><span>на основании ${cl.dirDoc||bl(70)}</span></div>
+      ${isIP?'':`<div class="party-row"><span class="lbl">в лице</span><span>${cl.dirPost||bl(100)} ${cl.dirName||bl(140)}</span></div>
+      <div class="party-row"><span class="lbl">действующего</span><span>на основании ${cl.dirDoc||bl(70)}</span></div>`}
       <div class="party-row"><span class="lbl">ИНН:</span><span>${cl.orgInn||bl(80)}</span></div>
-      <div class="party-row"><span class="lbl">КПП:</span><span>${cl.orgKpp||bl(80)}</span></div>
-      <div class="party-row"><span class="lbl">ОГРН:</span><span>${cl.orgOgrn||bl(100)}</span></div>
+      ${isIP?'':`<div class="party-row"><span class="lbl">КПП:</span><span>${cl.orgKpp||bl(80)}</span></div>`}
+      <div class="party-row"><span class="lbl">${isIP?'ОГРНИП:':'ОГРН:'}</span><span>${cl.orgOgrn||bl(100)}</span></div>
       <div class="party-label">именуемый в дальнейшем «Заказчик»</div>
     </div>
   </div>`;
@@ -2188,7 +2250,6 @@ function sigFiz(cl){
         <tr><td colspan="2"><b>Индивидуальный предприниматель</b><br>Захаров Дмитрий Алексеевич</td></tr>
         <tr><td class="lb">ИНН:</td><td>${C.inn}</td></tr>
         <tr><td class="lb">ОГРНИП:</td><td>${C.ogrn}</td></tr>
-        <tr><td class="lb">КПП:</td><td>${C.kpp}</td></tr>
         <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${C.addrSig}</td></tr>
         <tr><td class="lb">Банк:</td><td>${C.bank}</td></tr>
         <tr><td class="lb">БИК:</td><td>${C.bik}</td></tr>
@@ -2224,7 +2285,8 @@ function sigFiz(cl){
 
 function sigYur(cl){
   const dp=docDateParts(cl);
-  const orgFull=`${cl.orgForm||''} «${cl.orgName||bl(120)}»`;
+  const isIP=cl.orgForm==='ИП';
+  const orgFull=orgTitle(cl);
   return `<div class="sig-wrap"><div class="sh2">Реквизиты и подписи Сторон</div>
   <div class="sig-grid">
     <div class="sig-col">
@@ -2233,7 +2295,6 @@ function sigYur(cl){
         <tr><td colspan="2"><b>Индивидуальный предприниматель</b><br>Захаров Дмитрий Алексеевич</td></tr>
         <tr><td class="lb">ИНН:</td><td>${C.inn}</td></tr>
         <tr><td class="lb">ОГРНИП:</td><td>${C.ogrn}</td></tr>
-        <tr><td class="lb">КПП:</td><td>${C.kpp}</td></tr>
         <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${C.addrSig}</td></tr>
         <tr><td class="lb">Банк:</td><td>${C.bank}</td></tr>
         <tr><td class="lb">БИК:</td><td>${C.bik}</td></tr>
@@ -2252,8 +2313,8 @@ function sigYur(cl){
       <table>
         <tr><td colspan="2"><b>${orgFull}</b></td></tr>
         <tr><td class="lb" style="padding-top:5px">ИНН:</td><td style="padding-top:5px">${cl.orgInn||bl(80)}</td></tr>
-        <tr><td class="lb">КПП:</td><td>${cl.orgKpp||bl(80)}</td></tr>
-        <tr><td class="lb">ОГРН:</td><td>${cl.orgOgrn||bl(100)}</td></tr>
+        ${isIP?'':`<tr><td class="lb">КПП:</td><td>${cl.orgKpp||bl(80)}</td></tr>`}
+        <tr><td class="lb">${isIP?'ОГРНИП:':'ОГРН:'}</td><td>${cl.orgOgrn||bl(100)}</td></tr>
         <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${cl.orgAddr||bl(180)}</td></tr>
         <tr><td class="lb">Банк:</td><td>${cl.orgBank||bl(140)}</td></tr>
         <tr><td class="lb">БИК:</td><td>${cl.orgBik||bl(70)}</td></tr>
@@ -2264,7 +2325,7 @@ function sigYur(cl){
         <tr><td class="lb">e-mail:</td><td>${cl.orgEmail||bl(100)}</td></tr>
       </table>
       <span class="sline"></span>
-      <div class="slabel">${cl.dirName||bl(140)} &nbsp;&nbsp;&nbsp; (подпись)</div>
+      <div class="slabel">${orgSigner(cl)} &nbsp;&nbsp;&nbsp; (подпись)</div>
       <div class="dateline">${dp.day} &nbsp;${dp.month}&nbsp; ${dp.year} г.</div>
       <div class="stamp">М.П.</div>
     </div>
@@ -2302,8 +2363,9 @@ function sigAktFiz(cl){
 
 function sigAktYur(cl){
   const dp=docDateParts(cl);
-  const orgFull=`${cl.orgForm||''} «${cl.orgName||bl(140)}»`;
-  const signer=cl.dirName||bl(160);
+  const isIP=cl.orgForm==='ИП';
+  const orgFull=orgTitle(cl);
+  const signer=orgSigner(cl);
   const post=cl.dirPost||'Генеральный директор';
   return `<div class="sig-wrap">
   <div class="sh2">Подписи Сторон</div>
@@ -2319,7 +2381,7 @@ function sigAktYur(cl){
     <div class="sig-col">
       <div class="role">Заказчик:</div>
       <div style="font-size:11px;margin-bottom:4px"><b>${orgFull}</b></div>
-      <div style="font-size:11px;color:#555;margin-bottom:6px">${post}</div>
+      ${isIP?'':`<div style="font-size:11px;color:#555;margin-bottom:6px">${post}</div>`}
       <span class="sline"></span>
       <div class="slabel">${signer} &nbsp;&nbsp;&nbsp; (подпись)</div>
       <div class="dateline">${dp.day} &nbsp;${dp.month}&nbsp; ${dp.year} г.</div>
@@ -2358,11 +2420,11 @@ function renderDog(cl,total){
   <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:11.5px">
     <tr>
       <td style="width:50%;border:1px solid #bbb;padding:7px 9px;vertical-align:top">
-        <b>1.4.1.</b> Подрядчик приступает к выполнению монтажных работ в течение <b>${startDays} [${numWords(+startDays)||startDays}] рабочих дней</b> после получения от Заказчика устного или письменного извещения о готовности объекта недвижимости к выполнению монтажных работ, но не ранее даты оплаты Заказчиком аванса. Днём начала выполнения работ считается календарный день, в который Подрядчик фактически приступил к выполнению работ, при условии, что ранее Заказчиком оплачен аванс. День фактического начала выполнения работ подлежит отражению в Акте выполненных работ в качестве начального срока выполнения монтажных работ.
+        <b>1.4.1.</b> Подрядчик приступает к выполнению монтажных работ в течение <b>${startDays} [${Number.isFinite(+startDays)?numWords(+startDays):startDays}] рабочих дней</b> после получения от Заказчика устного или письменного извещения о готовности объекта недвижимости к выполнению монтажных работ, но не ранее даты оплаты Заказчиком аванса. Днём начала выполнения работ считается календарный день, в который Подрядчик фактически приступил к выполнению работ, при условии, что ранее Заказчиком оплачен аванс. День фактического начала выполнения работ подлежит отражению в Акте выполненных работ в качестве начального срока выполнения монтажных работ.
         ${cl.workStart?`<br><b>Плановая дата начала: ${fmtDateShort(cl.workStart)}</b>`:''}
       </td>
       <td style="width:50%;border:1px solid #bbb;padding:7px 9px;vertical-align:top">
-        <b>1.4.2.</b> Подрядчик обязуется закончить работу в срок не позднее <b>${execDays} [${numWords(+execDays)||execDays}] рабочих дней</b> со дня начала её выполнения, определяемого в порядке, установленном п. 1.4.1 Договора, и сдать результаты работы по Акту выполненных работ. Днём окончания выполнения работ считается календарный день, в который Подрядчик фактически окончил выполнение работы. День окончания выполнения работ переносится соразмерно времени, в течение которого Заказчиком не был оплачен аванс. День фактического окончания выполнения работ подлежит отражению в Акте выполненных работ в качестве конечного срока выполнения работ.
+        <b>1.4.2.</b> Подрядчик обязуется закончить работу в срок не позднее <b>${execDays} [${Number.isFinite(+execDays)?numWords(+execDays):execDays}] рабочих дней</b> со дня начала её выполнения, определяемого в порядке, установленном п. 1.4.1 Договора, и сдать результаты работы по Акту выполненных работ. Днём окончания выполнения работ считается календарный день, в который Подрядчик фактически окончил выполнение работы. День окончания выполнения работ переносится соразмерно времени, в течение которого Заказчиком не был оплачен аванс. День фактического окончания выполнения работ подлежит отражению в Акте выполненных работ в качестве конечного срока выполнения работ.
         ${cl.workEnd?`<br><b>Плановая дата окончания: ${fmtDateShort(cl.workEnd)}</b>`:''}
       </td>
     </tr>
@@ -2388,7 +2450,7 @@ function renderDog(cl,total){
     <tr><th>2.3. Подрядчик обязуется:</th><th>2.4. Заказчик обязуется:</th></tr>
     <tr>
       <td>
-        <div style="margin-bottom:5px"><b>1)</b> Приступить к выполнению монтажных работ в течение <b>${startDays} [${numWords(+startDays)||startDays}] рабочих дней</b> после получения от Заказчика устного или письменного извещения о готовности объекта недвижимости к выполнению монтажных работ, но не ранее даты оплаты Заказчиком аванса. Днём начала выполнения работ считается календарный день, в который Подрядчик фактически приступил к выполнению работ, при условии, что ранее Заказчиком оплачен аванс. День фактического начала выполнения работ подлежит отражению в Акте выполненных работ в качестве начального срока выполнения монтажных работ.</div>
+        <div style="margin-bottom:5px"><b>1)</b> Приступить к выполнению монтажных работ в течение <b>${startDays} [${Number.isFinite(+startDays)?numWords(+startDays):startDays}] рабочих дней</b> после получения от Заказчика устного или письменного извещения о готовности объекта недвижимости к выполнению монтажных работ, но не ранее даты оплаты Заказчиком аванса. Днём начала выполнения работ считается календарный день, в который Подрядчик фактически приступил к выполнению работ, при условии, что ранее Заказчиком оплачен аванс. День фактического начала выполнения работ подлежит отражению в Акте выполненных работ в качестве начального срока выполнения монтажных работ.</div>
         <div style="margin-bottom:5px"><b>2)</b> Уведомлять Заказчика о ходе работ в срок не позднее <b>5 [пяти] календарных дней</b> с даты соответствующего запроса.</div>
         <div><b>3)</b> Предупредить Заказчика об обнаружении и (или) существовании независящих от воли Подрядчика обстоятельств, грозящих качеству или годности результатов работы, либо создающих невозможность их завершения в срок, в срок не позднее <b>5 [пяти] календарных дней</b> с даты обнаружения указанных обстоятельств.</div>
       </td>
@@ -2442,19 +2504,19 @@ function renderDog(cl,total){
       <div class="di">действия (бездействие) Заказчика или третьих лиц либо обстоятельства непреодолимой силы, а также иные обстоятельства, за которые Подрядчик не отвечает.</div>
     </div>
   </div>
-  <div class="cl"><span class="n">5.5.</span> Заказчик, обнаруживший, что работа выполнена Подрядчиком с отступлениями от Договора, ухудшившими результат работы, или с иными недостатками, которые делают его не пригодным для обычного использования, вправе потребовать от Подрядчика безвозмездного устранения недостатков работы в разумный срок.</div>
-  <div class="cl ind"><span class="n">5.5.1.</span> Подрядчик вправе вместо устранения недостатков, за которые он отвечает, безвозмездно выполнить работу заново без возмещения Заказчику причинённых невозможностью использования результата выполненной работы убытков.</div>
-  <div class="cl ind"><span class="n">5.5.2.</span> По требованиям в отношении недостатков работы Заказчик не вправе требовать соразмерного уменьшения или возврата покупной цены либо возмещения своих расходов на устранение недостатков работы либо на выполнение работы заново.</div>
-  <div class="cl"><span class="n">5.6.</span> В случае существенного нарушения требований к качеству работы Заказчик вправе отказаться от исполнения Договора и потребовать возврата уплаченной за некачественную работу денежной суммы.</div>
-  <div class="cl ind"><span class="n">5.6.1.</span> Стороны установили, что существенным нарушением требований к качеству работы является её выполнение с таким существенным недостатком, который имеет хотя бы один из следующих признаков:
+  <div class="cl"><span class="n">5.6.</span> Заказчик, обнаруживший, что работа выполнена Подрядчиком с отступлениями от Договора, ухудшившими результат работы, или с иными недостатками, которые делают его не пригодным для обычного использования, вправе потребовать от Подрядчика безвозмездного устранения недостатков работы в разумный срок.</div>
+  <div class="cl ind"><span class="n">5.6.1.</span> Подрядчик вправе вместо устранения недостатков, за которые он отвечает, безвозмездно выполнить работу заново без возмещения Заказчику причинённых невозможностью использования результата выполненной работы убытков.</div>
+  <div class="cl ind"><span class="n">5.6.2.</span> По требованиям в отношении недостатков работы Заказчик не вправе требовать соразмерного уменьшения или возврата покупной цены либо возмещения своих расходов на устранение недостатков работы либо на выполнение работы заново.</div>
+  <div class="cl"><span class="n">5.7.</span> В случае существенного нарушения требований к качеству работы Заказчик вправе отказаться от исполнения Договора и потребовать возврата уплаченной за некачественную работу денежной суммы.</div>
+  <div class="cl ind"><span class="n">5.7.1.</span> Стороны установили, что существенным нарушением требований к качеству работы является её выполнение с таким существенным недостатком, который имеет хотя бы один из следующих признаков:
     <div class="dlist">
       <div class="di">является неустранимым;</div>
       <div class="di">выявляется неоднократно либо проявляется вновь после устранения;</div>
       <div class="di">не может быть устранён без несоразмерных расходов или затрат времени.</div>
     </div>
   </div>
-  <div class="cl"><span class="n">5.7.</span> На результат работы, в отношении которого Подрядчиком безвозмездно устранены недостатки в порядке, установленном п. 5.5 Договора, не устанавливается новый гарантийный срок.</div>
-  <div class="cl"><span class="n">5.8.</span> В течение срока гарантии Заказчику запрещено вскрывать, самостоятельно ремонтировать и осуществлять иные действия в отношении результата выполненной работы. Устранение недостатков работы осуществляется Подрядчиком. В случае устранения недостатков работы силами третьих лиц гарантия Подрядчика прекращается.</div>
+  <div class="cl"><span class="n">5.8.</span> На результат работы, в отношении которого Подрядчиком безвозмездно устранены недостатки в порядке, установленном п. 5.5 Договора, не устанавливается новый гарантийный срок.</div>
+  <div class="cl"><span class="n">5.9.</span> В течение срока гарантии Заказчику запрещено вскрывать, самостоятельно ремонтировать и осуществлять иные действия в отношении результата выполненной работы. Устранение недостатков работы осуществляется Подрядчиком. В случае устранения недостатков работы силами третьих лиц гарантия Подрядчика прекращается.</div>
 
   <div class="sh">Раздел 6.&nbsp; Ответственность сторон</div>
   <div class="cl"><span class="n">6.1.</span> В случае нарушения Подрядчиком обязательств по Договору Заказчик вправе требовать возмещения только реального ущерба. Упущенная выгода возмещению не подлежит. Убытки, причинённые Заказчику неисполнением или ненадлежащим исполнением Подрядчиком его обязательств по Договору, подлежат возмещению в сумме, не превышающей общую цену работ.</div>
@@ -2477,9 +2539,9 @@ function renderDog(cl,total){
   <div class="cl ind"><span class="n">8.4.1.</span> Нарушение договора Подрядчиком предполагается существенным в случае нарушения предусмотренных п.п. 1.4.1 и 1.4.2 Договора сроков более чем на <b>10 [десять] рабочих дней</b>.</div>
   <div class="cl ind"><span class="n">8.4.2.</span> Нарушение Договора Заказчиком предполагается существенным в случае нарушения Заказчиком сроков оплаты работ более чем на <b>5 [пять] банковских дней</b> или <b>более 2 [двух] раз подряд</b> в период действия настоящего Договора.</div>
   <div class="cl"><span class="n">8.5.</span> По требованию одной из сторон Договор может быть изменён или расторгнут по решению суда только в иных случаях, предусмотренных Гражданским кодексом РФ или другими законами. Сторона, которой законом или Договором предоставлено право на одностороннее изменение или право на отказ от Договора (исполнения Договора), должна при осуществлении этого права действовать добросовестно и разумно в пределах, предусмотренных законом или настоящим Договором.</div>
-  <div class="cl"><span class="n">8.7.</span> Договор считается изменённым или расторгнутым по истечении <b>5 [пяти] календарных дней</b> с момента получения одной стороной письменного уведомления об изменении или о расторжении Договора от другой стороны. Уведомление об отказе от исполнения Договора считается доставленным с момента, удостоверяемого оператором вида связи, при помощи которой оно было доставлено.</div>
-  <div class="cl"><span class="n">8.8.</span> Если Заказчик в нарушение Договора не оплачивает работу или отказывается принять её результат, Подрядчик вправе потребовать от Заказчика принять результат работы и оплатить его либо отказаться от исполнения Договора и потребовать возмещения причинённых этим убытков.</div>
-  <div class="cl"><span class="n">8.9.</span> Во всех случаях одностороннего отказа Заказчика от исполнения Договора Подрядчик вправе требовать оплаты работы в объёме, выполненном до момента заявления Заказчиком об отказе, включая стоимость невостребованного материала (оборудования, иного имущества).</div>
+  <div class="cl"><span class="n">8.6.</span> Договор считается изменённым или расторгнутым по истечении <b>5 [пяти] календарных дней</b> с момента получения одной стороной письменного уведомления об изменении или о расторжении Договора от другой стороны. Уведомление об отказе от исполнения Договора считается доставленным с момента, удостоверяемого оператором вида связи, при помощи которой оно было доставлено.</div>
+  <div class="cl"><span class="n">8.7.</span> Если Заказчик в нарушение Договора не оплачивает работу или отказывается принять её результат, Подрядчик вправе потребовать от Заказчика принять результат работы и оплатить его либо отказаться от исполнения Договора и потребовать возмещения причинённых этим убытков.</div>
+  <div class="cl"><span class="n">8.8.</span> Во всех случаях одностороннего отказа Заказчика от исполнения Договора Подрядчик вправе требовать оплаты работы в объёме, выполненном до момента заявления Заказчиком об отказе, включая стоимость невостребованного материала (оборудования, иного имущества).</div>
 
   <div class="sh">Раздел 9.&nbsp; Порядок разрешения споров</div>
   <div class="cl"><span class="n">9.1.</span> Споры, которые могут возникнуть между сторонами по настоящему Договору, разрешаются в порядке досудебного разбирательства путём переговоров, обмена письмами и прочего.</div>
@@ -2594,9 +2656,9 @@ function renderSmeta(cl,total){
       </div>
       <div class="sig-col">
         <div class="role">Заказчик:</div>
-        <div style="font-size:11px;margin-bottom:6px"><b>${cl.type==='fiz'?(cl.fio||bl(150)):`${cl.orgForm||''} «${cl.orgName||bl(120)}»`}</b></div>
+        <div style="font-size:11px;margin-bottom:6px"><b>${cl.type==='fiz'?(cl.fio||bl(150)):orgTitle(cl)}</b></div>
         <span class="sline"></span>
-        <div class="slabel">${cl.type==='fiz'?(cl.fio||bl(150)):(cl.dirName||bl(150))} &nbsp;&nbsp;&nbsp; (подпись)</div>
+        <div class="slabel">${cl.type==='fiz'?(cl.fio||bl(150)):orgSigner(cl)} &nbsp;&nbsp;&nbsp; (подпись)</div>
         <div class="dateline">${dp.day} &nbsp;${dp.month}&nbsp; ${dp.year} г.</div>
         ${cl.type==='yur'?'<div class="stamp">М.П.</div>':''}
       </div>
@@ -2612,7 +2674,7 @@ function renderSch(cl,total){
   const advPct=parseInt(cl.advPct)||50, restPct=100-advPct;
   const adv=total*advPct/100, rest=total*restPct/100;
   const billDays=cl.billDays||'3';
-  const clientLabel=cl.type==='fiz'?(cl.fio||bl(160)):`${cl.orgForm||''} «${cl.orgName||bl(120)}»`;
+  const clientLabel=cl.type==='fiz'?(cl.fio||bl(160)):`${orgTitle(cl)}, ИНН ${cl.orgInn||bl(60)}, ${cl.orgAddr||bl(140)}`;
 
   ge('sheet').innerHTML=`
   <div class="bank-block">
@@ -2944,7 +3006,7 @@ function duplicateObj(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
   if(!confirm(`Дублировать объект "${cname(cl)}"?`))return;
   const copy=JSON.parse(JSON.stringify(cl));
-  copy.id=Date.now().toString();
+  copy.id=uid();copy.updatedAt=Date.now();
   copy.projectName=(cl.projectName?cl.projectName+' (копия)':cname(cl)+' (копия)');
   copy.status='lead';
   copy.paid=0;copy.tl=[{ts:Date.now(),act:'Объект дублирован из «'+cname(cl)+'»',ic:'⧉',col:'#9b72cf'}];
@@ -2997,8 +3059,8 @@ function sortTable(field){
   showTable();
 }
 function getSortedDB(){
-  if(!tableSortField)return DB;
-  return [...DB].sort((a,b)=>{
+  if(!tableSortField)return liveDB();
+  return [...liveDB()].sort((a,b)=>{
     let va,vb;
     if(tableSortField==='name'){va=cname(a);vb=cname(b);return va.localeCompare(vb)*tableSortDir;}
     if(tableSortField==='status'){va=a.status||'';vb=b.status||'';return va.localeCompare(vb)*tableSortDir;}
@@ -3019,8 +3081,6 @@ function openTasksTab(){
   });
   renderTasks(cl);
 }
-// Patch swOTab to show badge
-const _swOTab=swOTab;
 
 // ═══════════════════════════════════════════════
 // MONTHLY REPORT + FUNNEL ANALYTICS
@@ -3040,7 +3100,7 @@ function showAnalytics(){
     });
   }
   const monthData=months.map(m=>{
-    const closed=DB.filter(c=>{
+    const closed=liveDB().filter(c=>{
       if(!c.createdAt)return false;
       const d=new Date(c.createdAt);
       return d.getFullYear()===m.year&&d.getMonth()===m.month;
@@ -3051,24 +3111,24 @@ function showAnalytics(){
   const maxCount=Math.max(...monthData.map(m=>m.count),1);
 
   // Funnel conversion
-  const total=DB.length||1;
+  const total=liveDB().length||1;
   const funnelSteps=[
     {label:'Лиды',id:'lead'},{label:'Аванс',id:'paid'},
     {label:'Монтаж',id:'done'},{label:'Закрыт',id:'closed'},
   ];
   const funnelData=funnelSteps.map(s=>({
-    ...s,count:DB.filter(c=>c.status===s.id||
+    ...s,count:liveDB().filter(c=>c.status===s.id||
       (s.id==='paid'&&['paid','prod','sched','done','closed'].includes(c.status))||
       (s.id==='done'&&['done','closed'].includes(c.status))
     ).length
   }));
 
   // Stats
-  const totalRevenue=DB.reduce((s,c)=>s+ctotal(c.rows),0);
-  const totalDebt=DB.reduce((s,c)=>s+Math.max(0,ctotal(c.rows)-(+c.paid||0)),0);
-  const avgCheck=DB.length?Math.round(totalRevenue/DB.length):0;
-  const closedCount=DB.filter(c=>c.status==='closed').length;
-  const claimCount=DB.filter(c=>c.status==='claim').length;
+  const totalRevenue=liveDB().reduce((s,c)=>s+ctotal(c.rows),0);
+  const totalDebt=liveDB().reduce((s,c)=>s+Math.max(0,ctotal(c.rows)-(+c.paid||0)),0);
+  const avgCheck=liveDB().length?Math.round(totalRevenue/liveDB().length):0;
+  const closedCount=liveDB().filter(c=>c.status==='closed').length;
+  const claimCount=liveDB().filter(c=>c.status==='claim').length;
 
   mc.innerHTML=`<div class="dash fade-in" style="overflow-y:auto;flex:1;padding:20px 24px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
@@ -3125,7 +3185,7 @@ function showAnalytics(){
     <div class="dash-block">
       <div class="db-title">📊 Распределение по статусам</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${STATUSES.map(s=>{const cnt=DB.filter(c=>c.status===s.id).length;if(!cnt)return'';
+        ${STATUSES.map(s=>{const cnt=liveDB().filter(c=>c.status===s.id).length;if(!cnt)return'';
           const pct=Math.round(cnt/total*100);
           return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--br)">
             <span style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
@@ -3203,6 +3263,7 @@ function applyTemplate(tplId){
   if(EROWS.some(r=>r.name)&&!confirm(`Заменить текущие позиции шаблоном "${tpl.name}"?`))return;
   EROWS=tpl.rows.map(r=>({...r}));
   cl.rows=EROWS.map(r=>({...r}));
+  cl.updatedAt=Date.now();save();
   renderRows();renderDoc();
   notify('ok','Шаблон применён',tpl.name);
   // close modal if open
@@ -3240,7 +3301,7 @@ function renderAllTasksView(mc){
   const today=new Date().toISOString().split('T')[0];
   // Собираем все задачи со всех объектов
   let allTasks=[];
-  DB.forEach(cl=>{
+  liveDB().forEach(cl=>{
     (cl.tasks||[]).forEach((t,i)=>{
       allTasks.push({...t,_cid:cl.id,_cname:cname(cl),_idx:i,_status:cl.status});
     });
@@ -3271,9 +3332,9 @@ function renderAllTasksView(mc){
       <input type="checkbox" class="tchk" ${t.done?'checked':''}
         onchange="quickToggleTask('${t._cid}',${t._idx})">
       <div class="at-body">
-        <div class="ttxt${t.done?' done':''}">${t.text}</div>
+        <div class="ttxt${t.done?' done':''}">${esc(t.text)}</div>
         <div style="display:flex;gap:10px;margin-top:2px;flex-wrap:wrap">
-          <span class="at-obj" onclick="openObj('${t._cid}')">${t._cname}</span>
+          <span class="at-obj" onclick="openObj('${t._cid}')">${esc(t._cname)}</span>
           ${t.deadline?`<span class="tdl${!t.done&&isLate(t.deadline)?' late':''}">${fds(t.deadline)}${t.time?' '+t.time:''}</span>`:''}
         </div>
       </div>
@@ -3319,7 +3380,7 @@ function renderAllTasksView(mc){
 
 function quickToggleTask(cid,idx){
   const cl=DB.find(c=>c.id===cid);if(!cl||!cl.tasks)return;
-  cl.tasks[idx].done=!cl.tasks[idx].done;
+  cl.tasks[idx].done=!cl.tasks[idx].done;cl.updatedAt=Date.now();
   if(cl.tasks[idx].done) log(cl,`Задача выполнена: "${cl.tasks[idx].text}"`, '✅','#5db87a');
   save();
   renderAllTasksView(ge('main'));
@@ -3333,7 +3394,7 @@ function showAddTaskModal(){
     <div class="field"><label>Объект</label>
       <select id="atObj">
         <option value="">— Выберите объект —</option>
-        ${DB.map(c=>`<option value="${c.id}">${cname(c)}</option>`).join('')}
+        ${liveDB().map(c=>`<option value="${c.id}">${cname(c)}</option>`).join('')}
       </select>
     </div>
     <div class="fr">
@@ -3395,7 +3456,7 @@ function renderCalendarView(){
     if(!events[dateStr])events[dateStr]=[];
     events[dateStr].push({icon,label,cid,color});
   }
-  DB.forEach(cl=>{
+  liveDB().forEach(cl=>{
     const n=cname(cl);
     addEv(cl.dateMeasure,'📐',n,cl.id,'var(--in)');
     addEv(cl.dateInstall,'🔧',n,cl.id,'var(--ok)');
@@ -3478,7 +3539,7 @@ function calDayClick(dateStr){
 
   // Собираем события дня
   const dayEvents=[];
-  DB.forEach(cl=>{
+  liveDB().forEach(cl=>{
     const n=cname(cl);
     if(cl.dateMeasure===dateStr) dayEvents.push({icon:'📐',label:'Замер: '+n,cid:cl.id,color:'var(--in)'});
     if(cl.dateInstall===dateStr) dayEvents.push({icon:'🔧',label:'Монтаж: '+n,cid:cl.id,color:'var(--ok)'});
@@ -3522,11 +3583,11 @@ function doExport(){
 }
 function checkAlerts(){
   const today=new Date().toISOString().split('T')[0];
-  const ti=DB.filter(c=>c.dateInstall===today&&!['closed','done','cancel'].includes(c.status));
-  const tm=DB.filter(c=>c.dateMeasure===today&&!['closed','done','cancel'].includes(c.status));
-  const ov=DB.filter(c=>isLate(c.dateInstall)&&!['closed','done','cancel'].includes(c.status));
-  const cl=DB.filter(c=>c.status==='claim');
-  const overdueTasks=DB.filter(c=>(c.tasks||[]).some(t=>!t.done&&t.deadline&&isLate(t.deadline)));
+  const ti=liveDB().filter(c=>c.dateInstall===today&&!['closed','done','cancel'].includes(c.status));
+  const tm=liveDB().filter(c=>c.dateMeasure===today&&!['closed','done','cancel'].includes(c.status));
+  const ov=liveDB().filter(c=>isLate(c.dateInstall)&&!['closed','done','cancel'].includes(c.status));
+  const cl=liveDB().filter(c=>c.status==='claim');
+  const overdueTasks=liveDB().filter(c=>(c.tasks||[]).some(t=>!t.done&&t.deadline&&isLate(t.deadline)));
   if(ti.length)notify('warn','🔧 Монтажи сегодня',ti.map(c=>cname(c)).join(', '));
   if(tm.length)notify('info','📐 Замеры сегодня',tm.map(c=>cname(c)).join(', '));
   if(ov.length)notify('err','⚠ Просрочен монтаж',`${ov.length} объект(ов)`);
@@ -3593,6 +3654,7 @@ if('serviceWorker' in navigator && location.protocol !== 'file:' && location.pro
     });
     self.addEventListener('fetch',e=>{
       if(e.request.method!=='GET')return;
+      if(e.request.url.includes('script.google.com'))return;
       e.respondWith(
         fetch(e.request).then(resp=>{
           if(resp.ok){
