@@ -764,6 +764,21 @@ function saveStatuses(){
   localStorage.setItem('px_statuses_backup',data);
   STATUSES.forEach(s=>{SM[s.id]=s;});
 }
+function exportColumns(){
+  const code=btoa(unescape(encodeURIComponent(JSON.stringify(STATUSES))));
+  navigator.clipboard?.writeText(code).then(()=>notify('ok','Колонки скопированы','Вставьте код на другом устройстве через «Импорт колонок»'))
+    .catch(()=>{prompt('Скопируйте код вручную:',code);});
+}
+function importColumns(){
+  const code=prompt('Вставьте код колонок:');
+  if(!code)return;
+  try{
+    const st=JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if(!Array.isArray(st)||!st.length)throw 0;
+    STATUSES=st;saveStatuses();renderKB();
+    notify('ok','Колонки обновлены','Импортировано '+st.length+' колонок');
+  }catch{notify('err','Ошибка','Неверный код колонок');}
+}
 let STATUSES=loadStatuses();
 const TAGS=[
   {id:'ceiling', label:'Потолки',   color:'#5b9bd5'},
@@ -824,7 +839,7 @@ function checkAuth(){
 function init(){
   renderList();
   showDash();
-  if(navigator.onLine){pullSheets();}
+  if(navigator.onLine){pullSheets().then(()=>pushSheets());}
   else{notify('warn','Офлайн','Работаете без интернета');}
   setTimeout(checkAlerts,2500);
   // Autosave
@@ -847,7 +862,7 @@ let DB=(function(){
   }
 })();
 let KB_SEARCH_Q='';
-let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null;
+let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null,AUTOSAVE_T=null;
 
 // ═══════════════════════════════════════════════
 // FACTORY
@@ -952,9 +967,10 @@ async function pullSheets(){
       if(loaded.length){
         // Применяем конфиг колонок если есть
         const cfg=loaded.find(c=>c.id==='__config__');
+        let cfgNote='';
         if(cfg&&Array.isArray(cfg.statuses)&&cfg.statuses.length){
-          STATUSES=cfg.statuses;saveStatuses();
-        }
+          STATUSES=cfg.statuses;saveStatuses();cfgNote=' + колонки';
+        }else{cfgNote=' (колонки: нет в базе)';}
         // Дедупликация по id — берём последнюю версию каждого объекта
         const seen=new Map();
         loaded.filter(c=>c.id!=='__config__').forEach(c=>{if(c&&c.id)seen.set(c.id,c);});
@@ -965,7 +981,7 @@ async function pullSheets(){
         renderList();
         if(VIEW==='kanban')renderKB();
         else if(VIEW==='dash')showDash();
-        notify('ok','Синхронизация','Загружено '+DB.length+' объектов');
+        notify('ok','Синхронизация','Загружено '+DB.length+' объектов'+cfgNote);
         return;
       }
     }setSS('idle');
@@ -1172,6 +1188,8 @@ function showKanban(){
         onkeyup="KB_SEARCH_Q=this.value;renderKB()"
         onchange="KB_SEARCH_Q=this.value;renderKB()">
       <button class="vsw" onclick="kbAddColumn()">+ Колонка</button>
+      <button class="vsw" onclick="exportColumns()" title="Скопировать колонки для другого устройства">↑ Экспорт</button>
+      <button class="vsw" onclick="importColumns()" title="Вставить колонки с другого устройства">↓ Импорт</button>
       <div class="view-sw">
         <button class="vsw on">🗂 Канбан</button>
         <button class="vsw" onclick="showTable()">☰ Таблица</button>
@@ -1477,6 +1495,7 @@ function renderObjView(cl){
   renderCardBody(cl);
   swOTab(OBJTAB,document.querySelector('.otab.on'));
   setTimeout(initResizer,0);
+  setTimeout(()=>{const oc=ge('oc');if(oc)oc.addEventListener('input',autoSave,{passive:true});},0);
 }
 
 function swOTab(t,el){
@@ -1754,7 +1773,16 @@ function onStChange(){
   log(cl,`Статус: "${old}" → "${st.label}"`, '🔄',st.color);
   save();renderList();
 }
+function autoSave(){
+  clearTimeout(AUTOSAVE_T);
+  AUTOSAVE_T=setTimeout(()=>{
+    if(!CID)return;
+    syncCard();
+    save();
+  },2000);
+}
 function saveObj(){
+  clearTimeout(AUTOSAVE_T);
   syncCard();
   const cl=DB.find(c=>c.id===CID);
   if(cl)log(cl,'Карточка сохранена','💾','#888');
