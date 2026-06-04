@@ -838,6 +838,11 @@ function loadBrigades(){
 }
 let BRIGADES=loadBrigades();
 function saveBrigades(){try{localStorage.setItem('px_brigades',JSON.stringify(BRIGADES));}catch(e){}}
+// Нормализованный список бригад объекта (с миграцией со старого cl.brigade)
+function clBrigs(cl){
+  const a=Array.isArray(cl.brigades)?cl.brigades:(cl.brigade?[cl.brigade]:[]);
+  return a.filter(b=>BRIGADES.includes(b));
+}
 const GS='https://script.google.com/macros/s/AKfycbzX0V1NGgEv0Ekm7EaGOfYdVxNCaIGAsZFDp1unyvBVV0l5BokF8qwMCG7x-qvyv_KqRg/exec';
 
 // ═══════════════════════════════════════════════
@@ -936,7 +941,7 @@ function mkObj(){
     rows:[{name:'',price:'',qty:'1',unit:'шт.'}],
     paid:0,costPrice:0,margin:0,
     dateMeasure:'',dateProd:'',dateInstall:'',dateDead:'',
-    brigade:'',
+    brigades:[],
     tasks:[],files:[],comment:'',
     tl:[{ts:Date.now(),act:'Объект создан',ic:'🆕',col:'#5b9bd5'}],
     createdAt:Date.now(),updatedAt:Date.now(),
@@ -1687,11 +1692,10 @@ function cardFiz(cl){
         <div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}">
       </div>
     </div>
-    <div class="field" style="margin-top:10px"><label>👷 Бригада</label>
-      <select id="f_brigade">
-        <option value=""${!cl.brigade?' selected':''}>— Без бригады —</option>
-        ${BRIGADES.map(b=>`<option${cl.brigade===b?' selected':''}>${esc(b)}</option>`).join('')}
-      </select>
+    <div class="field" style="margin-top:10px"><label>👷 Бригады (можно несколько)</label>
+      <div class="chkgrp" id="brigRow" style="flex-direction:row;flex-wrap:wrap;gap:6px 14px">
+        ${BRIGADES.map(b=>`<label class="chk"><input type="checkbox" class="f_brig_cb" value="${escA(b)}"${clBrigs(cl).includes(b)?' checked':''}> ${esc(b)}</label>`).join('')}
+      </div>
     </div>
     <div class="fr" style="margin-top:9px">
       <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
@@ -1784,11 +1788,10 @@ function cardYur(cl){
       <div class="dcrd${isLate(cl.dateInstall)?' late':isToday(cl.dateInstall)?' tod':''}"><div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${escA(cl.dateInstall)}"></div>
       <div class="dcrd${isLate(cl.dateDead)?' late':''}"><div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}"></div>
     </div>
-    <div class="field" style="margin-top:10px"><label>👷 Бригада</label>
-      <select id="f_brigade">
-        <option value=""${!cl.brigade?' selected':''}>— Без бригады —</option>
-        ${BRIGADES.map(b=>`<option${cl.brigade===b?' selected':''}>${esc(b)}</option>`).join('')}
-      </select>
+    <div class="field" style="margin-top:10px"><label>👷 Бригады (можно несколько)</label>
+      <div class="chkgrp" id="brigRow" style="flex-direction:row;flex-wrap:wrap;gap:6px 14px">
+        ${BRIGADES.map(b=>`<label class="chk"><input type="checkbox" class="f_brig_cb" value="${escA(b)}"${clBrigs(cl).includes(b)?' checked':''}> ${esc(b)}</label>`).join('')}
+      </div>
     </div>
     <div class="fr" style="margin-top:9px">
       <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
@@ -1862,7 +1865,8 @@ function syncCard(){
   cl.dateMeasure=gv('f_dmeas');cl.dateProd=gv('f_dprod');
   cl.dateInstall=gv('f_dinst');cl.dateDead=gv('f_ddead');
   cl.startDays=gv('f_sddays');cl.execDays=gv('f_exdays');
-  cl.brigade=gv('f_brigade');
+  cl.brigades=[...document.querySelectorAll('.f_brig_cb:checked')].map(c=>c.value);
+  delete cl.brigade;
   cl.advPct=gv('f_adv');cl.billDays=gv('f_bdays');
   cl.paid=gv('f_paid');cl.costPrice=gv('f_cost');cl.margin=gv('f_margin');
   cl.objAddr=gv('f_objaddr');cl.comment=gv('f_cmt');
@@ -3502,7 +3506,6 @@ function plAddDays(iso,n){const d=plParse(iso);d.setDate(d.getDate()+n);return p
 function plDiff(a,b){return Math.round((plParse(b)-plParse(a))/864e5);}
 function plDefaultStart(){const d=new Date();const dow=(d.getDay()+6)%7;d.setDate(d.getDate()-dow);return plISO(d);}
 function plBrigKey(i){return(i>=0&&i<BRIGADES.length)?BRIGADES[i]:'';}
-function plNorm(b){return BRIGADES.includes(b)?b:'';}
 function plLabel(iso){const d=plParse(iso);return d.getDate()+' '+PL_MG[d.getMonth()];}
 
 function showPlanner(){
@@ -3533,8 +3536,9 @@ function renderPlanner(){
     let end=(cl.dateDead&&cl.dateDead>=start)?cl.dateDead:start;
     const sTrue=plDiff(PLAN_START,start), eTrue=plDiff(PLAN_START,end);
     if(eTrue<0||sTrue>PLAN_DAYS-1)return; // вне окна
-    const key=plNorm(cl.brigade);
-    byRow[key].push({cl,start,end,sTrue,eTrue});
+    const keys=clBrigs(cl);
+    if(keys.length){keys.forEach(k=>byRow[k].push({cl,start,end,sTrue,eTrue}));}
+    else byRow[''].push({cl,start,end,sTrue,eTrue}); // без бригады
   });
 
   // раскладка по подстрокам (greedy) + конфликты
@@ -3580,7 +3584,7 @@ function renderPlanner(){
       return`<div class="pl-block${it.conf?' conf':''}" draggable="true" title="${tip}"
         style="left:${lft}px;top:${top}px;width:${Math.max(COL-4,w)}px;height:${BH}px;background:${st.color}"
         onclick="event.stopPropagation();openObj('${cl.id}')"
-        ondragstart="plBlockDragStart(event,'${cl.id}',${COL})" ondragend="plBlockDragEnd(event)">${lbl}</div>`;
+        ondragstart="plBlockDragStart(event,'${cl.id}',${COL},${r.idx})" ondragend="plBlockDragEnd(event)">${lbl}</div>`;
     }).join('');
     return`<div class="pl-row">
       <div class="pl-rowlabel${r.none?' none':''}"${r.none?'':` ondblclick="plRenameBrigade(${r.idx})" title="Двойной клик — переименовать"`}>${esc(r.label)}</div>
@@ -3619,15 +3623,18 @@ function plRenameBrigade(idx){
   const name=nn.trim();
   if(!name||name===old)return;
   if(BRIGADES.includes(name)){notify('warn','Уже существует','Бригада с таким названием есть');return;}
-  DB.forEach(c=>{if(c.brigade===old)c.brigade=name;});
+  DB.forEach(c=>{
+    if(Array.isArray(c.brigades))c.brigades=c.brigades.map(b=>b===old?name:b);
+    if(c.brigade===old)c.brigade=name;
+  });
   BRIGADES[idx]=name;saveBrigades();save();renderPlanner();renderList();
   notify('ok','Переименовано',old+' → '+name);
 }
 
-function plBlockDragStart(e,id,COL){
+function plBlockDragStart(e,id,COL,srcIdx){
   const rect=e.currentTarget.getBoundingClientRect();
   const grab=Math.max(0,Math.floor((e.clientX-rect.left)/COL));
-  PLAN_DRAG={id,grab};
+  PLAN_DRAG={id,grab,srcIdx};
   e.dataTransfer.effectAllowed='move';
   try{e.dataTransfer.setData('text/plain',id);}catch(_){}
   e.currentTarget.classList.add('dragging');
@@ -3641,23 +3648,31 @@ function plDrop(e,lane,COL){
   const rect=lane.getBoundingClientRect();
   let idx=Math.floor((e.clientX-rect.left)/COL)-PLAN_DRAG.grab;
   idx=Math.max(0,Math.min(PLAN_DAYS-1,idx));
-  const newBrig=plBrigKey(+lane.dataset.brigidx);
+  const tgtBrig=plBrigKey(+lane.dataset.brigidx);
+  const srcBrig=plBrigKey(PLAN_DRAG.srcIdx);
   const oldStart=cl.dateInstall;
   const oldStartIdx=plDiff(PLAN_START,oldStart);
   const dur=(cl.dateDead&&cl.dateDead>=oldStart)?plDiff(oldStart,cl.dateDead):0;
+  PLAN_DRAG=null;
   let changed=false;
   if(idx!==oldStartIdx){
     cl.dateInstall=plAddDays(PLAN_START,idx);
     if(cl.dateDead)cl.dateDead=plAddDays(cl.dateInstall,dur);
     changed=true;
   }
-  if(newBrig!==plNorm(cl.brigade)){cl.brigade=newBrig;changed=true;}
-  PLAN_DRAG=null;
+  // перенос конкретной бригады: убираем источник, добавляем цель (остальные сохраняются)
+  if(tgtBrig!==srcBrig){
+    let brigs=clBrigs(cl).filter(b=>b!==srcBrig);
+    if(tgtBrig&&!brigs.includes(tgtBrig))brigs.push(tgtBrig);
+    cl.brigades=brigs;delete cl.brigade;
+    changed=true;
+  }
   if(changed){
     cl.updatedAt=Date.now();
-    log(cl,`Планировщик: ${newBrig||'Без бригады'}, монтаж ${fds(cl.dateInstall)}`,'📋','#5b9bd5');
+    const blist=clBrigs(cl).join(', ')||'Без бригады';
+    log(cl,`Планировщик: ${blist}, монтаж ${fds(cl.dateInstall)}`,'📋','#5b9bd5');
     save();renderPlanner();renderList();
-    notify('ok','План обновлён',cname(cl)+' → '+(newBrig||'Без бригады'));
+    notify('ok','План обновлён',cname(cl)+' → '+blist);
   }else{renderPlanner();}
 }
 
@@ -3686,9 +3701,10 @@ function plQuickSave(){
   let cl;
   if(sel){cl=DB.find(c=>c.id===sel);if(!cl)return;}
   else{cl=mkObj();cl.projectName=(ge('plqName')?.value||'').trim();DB.unshift(cl);}
-  cl.brigade=brig;cl.dateInstall=iso;if(!cl.dateDead)cl.dateDead=iso;
+  if(brig){const set=new Set(clBrigs(cl));set.add(brig);cl.brigades=[...set];delete cl.brigade;}
+  cl.dateInstall=iso;if(!cl.dateDead)cl.dateDead=iso;
   cl.updatedAt=Date.now();
-  log(cl,`Запланирован: ${brig||'Без бригады'}, ${fds(iso)}`,'📋','#5b9bd5');
+  log(cl,`Запланирован: ${clBrigs(cl).join(', ')||'Без бригады'}, ${fds(iso)}`,'📋','#5b9bd5');
   save();renderList();
   ge('modalOverlay').classList.add('hidden');PLAN_QA=null;
   renderPlanner();
