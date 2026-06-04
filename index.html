@@ -698,7 +698,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 04.06-1</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 04.06-2</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -3676,15 +3676,39 @@ function plDrop(e,lane,COL){
   }else{renderPlanner();}
 }
 
+function plqObjOpts(q){
+  q=(q||'').toLowerCase().trim();
+  const qn=q.replace(/\D/g,'');
+  let items=liveDB();
+  if(q){
+    items=items.filter(c=>{
+      const nm=[c.projectName,c.fio,c.orgName].filter(Boolean).join(' ').toLowerCase();
+      const ph=(c.phone||c.orgPhone||'').replace(/\D/g,'');
+      const ad=(c.objAddr||c.addr||c.orgAddr||'').toLowerCase();
+      return nm.includes(q)||(!!qn&&ph.includes(qn))||ad.includes(q);
+    });
+  }
+  return`<option value="">➕ Создать новый объект</option>`+
+    items.map(c=>`<option value="${c.id}">${esc(cname(c))}${c.dateInstall?' · '+fds(c.dateInstall):''}</option>`).join('');
+}
+function plqFilter(){
+  const sel=ge('plqObj');if(!sel)return;
+  sel.innerHTML=plqObjOpts(ge('plqSearch')?.value||'');
+  const nw=ge('plqNameWrap');if(nw)nw.style.display=sel.value?'none':'';
+}
 function plCellClick(rowIdx,iso){
   PLAN_QA={brig:plBrigKey(rowIdx),iso};
   const overlay=ge('modalOverlay'),mc=ge('modalContent');if(!overlay||!mc)return;
   mc.innerHTML=`<h3>📋 Добавить в план</h3>
-    <div style="font-size:12px;color:var(--mu);margin-bottom:12px">${esc(PLAN_QA.brig||'Без бригады')} · ${fds(iso)}</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:12px">${esc(PLAN_QA.brig||'Без бригады')}</div>
+    <div class="fr">
+      <div class="field"><label>🔧 Монтаж с</label><input type="date" id="plqStart" value="${iso}"></div>
+      <div class="field"><label>🏁 Сдача (до)</label><input type="date" id="plqEnd" value="${iso}"></div>
+    </div>
+    <div class="field"><label>Поиск объекта</label><input id="plqSearch" placeholder="Имя, телефон, адрес..." autocomplete="off" oninput="plqFilter()"></div>
     <div class="field"><label>Объект</label>
-      <select id="plqObj" onchange="ge('plqNameWrap').style.display=this.value?'none':''">
-        <option value="">— Создать новый —</option>
-        ${liveDB().map(c=>`<option value="${c.id}">${esc(cname(c))}${c.dateInstall?' · '+fds(c.dateInstall):''}</option>`).join('')}
+      <select id="plqObj" size="6" style="height:auto" onchange="ge('plqNameWrap').style.display=this.value?'none':''">
+        ${plqObjOpts('')}
       </select>
     </div>
     <div class="field" id="plqNameWrap"><label>Название нового объекта</label><input id="plqName" placeholder="Имя клиента / проект"></div>
@@ -3693,22 +3717,26 @@ function plCellClick(rowIdx,iso){
       <button class="modal-btn secondary" onclick="ge('modalOverlay').classList.add('hidden')">Отмена</button>
     </div>`;
   overlay.classList.remove('hidden');
+  setTimeout(()=>ge('plqSearch')?.focus(),50);
 }
 function plQuickSave(){
   if(!PLAN_QA)return;
-  const brig=PLAN_QA.brig, iso=PLAN_QA.iso;
+  const brig=PLAN_QA.brig;
+  let start=ge('plqStart')?.value||PLAN_QA.iso;
+  let end=ge('plqEnd')?.value||start;
+  if(end<start)end=start;
   const sel=ge('plqObj')?.value;
   let cl;
   if(sel){cl=DB.find(c=>c.id===sel);if(!cl)return;}
   else{cl=mkObj();cl.projectName=(ge('plqName')?.value||'').trim();DB.unshift(cl);}
   if(brig){const set=new Set(clBrigs(cl));set.add(brig);cl.brigades=[...set];delete cl.brigade;}
-  cl.dateInstall=iso;if(!cl.dateDead)cl.dateDead=iso;
+  cl.dateInstall=start;cl.dateDead=end;
   cl.updatedAt=Date.now();
-  log(cl,`Запланирован: ${clBrigs(cl).join(', ')||'Без бригады'}, ${fds(iso)}`,'📋','#5b9bd5');
+  log(cl,`Запланирован: ${clBrigs(cl).join(', ')||'Без бригады'}, монтаж ${fds(start)}–${fds(end)}`,'📋','#5b9bd5');
   save();renderList();
   ge('modalOverlay').classList.add('hidden');PLAN_QA=null;
   renderPlanner();
-  notify('ok','Добавлено в план',cname(cl));
+  notify('ok','Добавлено в план',cname(cl)+' · сдача '+fds(end));
 }
 
 // ═══════════════════════════════════════════════
@@ -3919,7 +3947,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 04.06-1','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 04.06-2','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
