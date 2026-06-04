@@ -645,6 +645,46 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   /* Page settings */
   @page{ margin:10mm 12mm; size:A4; }
 }
+/* ═══════════ ПЛАНИРОВЩИК БРИГАД ═══════════ */
+.pl-wrap{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+.pl-bar{display:flex;align-items:center;gap:8px;padding:12px 18px;flex-wrap:wrap;border-bottom:1px solid var(--br);}
+.pl-period{font-weight:600;font-size:14px;color:var(--tx);min-width:170px;text-align:center;}
+.pl-nav-btn{background:var(--s3);border:1px solid var(--br2);border-radius:6px;color:var(--tx2);width:30px;height:28px;cursor:pointer;font-size:14px;line-height:1;transition:all .15s;}
+.pl-nav-btn:hover{background:var(--s4);border-color:var(--ac);}
+.pl-seg{display:flex;border:1px solid var(--br2);border-radius:6px;overflow:hidden;}
+.pl-seg button{background:none;border:none;color:var(--mu);padding:5px 11px;font-size:11px;cursor:pointer;font-family:"Golos Text",sans-serif;}
+.pl-seg button.on{background:var(--ac);color:var(--ac-on);font-weight:600;}
+.pl-conf{margin-left:auto;font-size:12px;font-weight:600;color:var(--dn);background:var(--dnb);padding:5px 11px;border-radius:6px;}
+.pl-conf.ok{color:var(--ok);background:var(--okb);}
+.pl-grid{flex:1;overflow:auto;position:relative;}
+.pl-row{display:flex;border-bottom:1px solid var(--br);}
+.pl-corner,.pl-rowlabel{flex:0 0 var(--pl-lbl,130px);width:var(--pl-lbl,130px);position:sticky;left:0;z-index:5;background:var(--sf);border-right:1px solid var(--br2);box-sizing:border-box;}
+.pl-head{display:flex;position:sticky;top:0;z-index:6;}
+.pl-corner{z-index:7;display:flex;align-items:center;padding:0 10px;font-size:11px;color:var(--mu);font-weight:600;background:var(--s2);border-bottom:1px solid var(--br2);}
+.pl-days{display:flex;background:var(--s2);border-bottom:1px solid var(--br2);}
+.pl-dcell{flex:0 0 var(--pl-col,46px);width:var(--pl-col,46px);box-sizing:border-box;text-align:center;padding:4px 0;border-right:1px solid var(--br);font-size:10px;color:var(--mu);line-height:1.3;}
+.pl-dcell.we{background:var(--s3);}
+.pl-dcell.tod{background:var(--ac3);color:var(--ac-on);}
+.pl-dcell .pl-dnum{font-size:13px;font-weight:700;color:var(--tx2);}
+.pl-dcell.tod .pl-dnum{color:var(--ac-on);}
+.pl-rowlabel{display:flex;align-items:center;padding:0 10px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;}
+.pl-rowlabel.none{color:var(--mu);font-weight:500;font-style:italic;}
+.pl-lane{position:relative;display:flex;flex:1;}
+.pl-cell{flex:0 0 var(--pl-col,46px);width:var(--pl-col,46px);box-sizing:border-box;border-right:1px solid var(--br);cursor:pointer;}
+.pl-cell.we{background:var(--s2);}
+.pl-cell.tod{box-shadow:inset 2px 0 0 var(--ac);}
+.pl-cell:hover{background:var(--s3);}
+.pl-block{position:absolute;box-sizing:border-box;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:600;color:#fff;cursor:grab;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:flex;align-items:center;border:1px solid rgba(0,0,0,.25);box-shadow:0 1px 3px rgba(0,0,0,.3);z-index:3;transition:filter .15s;}
+.pl-block:hover{filter:brightness(1.12);z-index:4;}
+.pl-block.dragging{opacity:.5;}
+.pl-block.conf{box-shadow:0 0 0 2px var(--dn),0 1px 3px rgba(0,0,0,.3);}
+@media(max-width:768px){
+  .pl-bar{padding:8px 10px;gap:6px;}
+  .pl-period{min-width:120px;font-size:12px;}
+  .pl-conf{font-size:11px;padding:4px 8px;}
+  .pl-corner,.pl-rowlabel{flex-basis:84px;width:84px;font-size:11px;}
+  .pl-block{font-size:10px;padding:2px 4px;}
+}
 </style>
 </head>
 <body>
@@ -672,6 +712,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
     <button class="hn" id="nv-tasks" onclick="showAllTasks()">&#9989; Задачи</button>
     <button class="hn" id="nv-cal" onclick="showCalendar()">&#128197; Календарь</button>
+    <button class="hn" id="nv-plan" onclick="showPlanner()">&#128203; Планировщик</button>
     <button class="hn" id="nv-cl" onclick="showClients()">&#128101; Клиенты</button>
   </nav>
   <div class="hdr-right">
@@ -713,6 +754,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   <button class="mn-btn" id="mn-kb" onclick="showKanban()"><span class="mn-ic">🗂</span>Канбан</button>
   <button class="mn-btn" id="mn-tasks" onclick="showAllTasks()"><span class="mn-ic">✅</span>Задачи</button>
   <button class="mn-btn" id="mn-cal" onclick="showCalendar()"><span class="mn-ic">📅</span>Календарь</button>
+  <button class="mn-btn" id="mn-plan" onclick="showPlanner()"><span class="mn-ic">📋</span>План</button>
   <button class="mn-btn" id="mn-cl" onclick="showClients()"><span class="mn-ic">👥</span>Клиенты</button>
   <button class="mn-btn" onclick="pullSheets()" style="color:var(--ac)"><span class="mn-ic">☁</span>Синхр.</button>
 </nav>
@@ -789,6 +831,13 @@ const TAGS=[
   {id:'walls',   label:'Стены',     color:'#5db87a'},
 ];
 const SM={};STATUSES.forEach(s=>SM[s.id]=s);
+// ── Бригады (планировщик) ────────────────────
+function loadBrigades(){
+  try{const s=localStorage.getItem('px_brigades');if(s){const a=JSON.parse(s);if(Array.isArray(a)&&a.length)return a;}}catch(e){}
+  return['Бригада 1','Бригада 2','Бригада 3','Бригада 4'];
+}
+let BRIGADES=loadBrigades();
+function saveBrigades(){try{localStorage.setItem('px_brigades',JSON.stringify(BRIGADES));}catch(e){}}
 const GS='https://script.google.com/macros/s/AKfycbzX0V1NGgEv0Ekm7EaGOfYdVxNCaIGAsZFDp1unyvBVV0l5BokF8qwMCG7x-qvyv_KqRg/exec';
 
 // ═══════════════════════════════════════════════
@@ -887,6 +936,7 @@ function mkObj(){
     rows:[{name:'',price:'',qty:'1',unit:'шт.'}],
     paid:0,costPrice:0,margin:0,
     dateMeasure:'',dateProd:'',dateInstall:'',dateDead:'',
+    brigade:'',
     tasks:[],files:[],comment:'',
     tl:[{ts:Date.now(),act:'Объект создан',ic:'🆕',col:'#5b9bd5'}],
     createdAt:Date.now(),updatedAt:Date.now(),
@@ -1180,7 +1230,7 @@ function showDash(){
   const today=new Date().toISOString().split('T')[0];
   const active=liveDB().filter(c=>c.status!=='closed');
   const COMPLETED_ST=['done','closed'];
-  const totRev=liveDB().filter(c=>COMPLETED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+  const totRev=liveDB().filter(c=>c.status==='done').reduce((s,c)=>s+ctotal(c.rows),0);
   const pipeline=liveDB().filter(c=>!COMPLETED_ST.includes(c.status)&&c.status!=='cancel').reduce((s,c)=>s+ctotal(c.rows),0);
   const totDebt=liveDB().reduce((s,c)=>s+Math.max(0,ctotal(c.rows)-(+c.paid||0)),0);
   const todayI=liveDB().filter(c=>c.dateInstall===today);
@@ -1195,7 +1245,7 @@ function showDash(){
     <div class="dash-title">ОПЕРАТИВНЫЙ ДАШБОРД</div>
     <div class="stats-row">
       <div class="stat-card sc-ac"><div class="stat-val">${active.length}</div><div class="stat-label">Активных объектов</div><div class="stat-sub" style="color:var(--mu)">всего ${liveDB().length} в базе</div></div>
-      <div class="stat-card sc-ok"><div class="stat-val">${fmtS(totRev)}</div><div class="stat-label">Выручка (закрытые), ₽</div><div class="stat-sub" style="color:var(--mu)">pipeline: ${fmtS(pipeline)} ₽</div></div>
+      <div class="stat-card sc-ok"><div class="stat-val">${fmtS(totRev)}</div><div class="stat-label">Выручка (${(SM['done']?.label||'выполнено').toLowerCase()}), ₽</div><div class="stat-sub" style="color:var(--mu)">pipeline: ${fmtS(pipeline)} ₽</div></div>
       <div class="stat-card ${totDebt>0?'sc-dn':'sc-ok'}"><div class="stat-val">${fmtS(totDebt)}</div><div class="stat-label">Долг клиентов, ₽</div></div>
       <div class="stat-card ${overdue.length>0?'sc-wn':''}"><div class="stat-val">${overdue.length}</div><div class="stat-label">Просрочено</div>${claims.length?`<div class="stat-sub" style="color:var(--dn)">${claims.length} рекламаций</div>`:''}</div>
     </div>
@@ -1637,6 +1687,12 @@ function cardFiz(cl){
         <div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}">
       </div>
     </div>
+    <div class="field" style="margin-top:10px"><label>👷 Бригада</label>
+      <select id="f_brigade">
+        <option value=""${!cl.brigade?' selected':''}>— Без бригады —</option>
+        ${BRIGADES.map(b=>`<option${cl.brigade===b?' selected':''}>${esc(b)}</option>`).join('')}
+      </select>
+    </div>
     <div class="fr" style="margin-top:9px">
       <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
       <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${cl.execDays||'30'}"></div>
@@ -1656,8 +1712,8 @@ function cardFiz(cl){
     </div>
     <div class="field"><label>Фактически оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
     <div class="fr">
-      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
-      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
+      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Себестоимость (₽) 🚧</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Маржа (%) 🚧</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
     </div>
     <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
   sec('Позиции','rows',`
@@ -1728,6 +1784,12 @@ function cardYur(cl){
       <div class="dcrd${isLate(cl.dateInstall)?' late':isToday(cl.dateInstall)?' tod':''}"><div class="dl">🔧 Монтаж</div><input type="date" id="f_dinst" value="${escA(cl.dateInstall)}"></div>
       <div class="dcrd${isLate(cl.dateDead)?' late':''}"><div class="dl">🏁 Сдача</div><input type="date" id="f_ddead" value="${escA(cl.dateDead)}"></div>
     </div>
+    <div class="field" style="margin-top:10px"><label>👷 Бригада</label>
+      <select id="f_brigade">
+        <option value=""${!cl.brigade?' selected':''}>— Без бригады —</option>
+        ${BRIGADES.map(b=>`<option${cl.brigade===b?' selected':''}>${esc(b)}</option>`).join('')}
+      </select>
+    </div>
     <div class="fr" style="margin-top:9px">
       <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
       <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${cl.execDays||'30'}"></div>
@@ -1745,8 +1807,8 @@ function cardYur(cl){
     </div>
     <div class="field"><label>Оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
     <div class="fr">
-      <div class="field"><label>Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
-      <div class="field"><label>Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
+      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Себестоимость (₽) 🚧</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Маржа (%) 🚧</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
     </div>
     <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
   sec('Позиции','rows',`
@@ -1800,6 +1862,7 @@ function syncCard(){
   cl.dateMeasure=gv('f_dmeas');cl.dateProd=gv('f_dprod');
   cl.dateInstall=gv('f_dinst');cl.dateDead=gv('f_ddead');
   cl.startDays=gv('f_sddays');cl.execDays=gv('f_exdays');
+  cl.brigade=gv('f_brigade');
   cl.advPct=gv('f_adv');cl.billDays=gv('f_bdays');
   cl.paid=gv('f_paid');cl.costPrice=gv('f_cost');cl.margin=gv('f_margin');
   cl.objAddr=gv('f_objaddr');cl.comment=gv('f_cmt');
@@ -2007,7 +2070,7 @@ function renderDocsTab(cl){
     </div>
     <div class="doc-acts">
       <button class="bp" onclick="window.print()">🖨 Печать</button>
-      <button class="bs" id="embtn" onclick="togEM()">✏️ Редактировать</button>
+      <button class="bs" id="embtn" onclick="togEM()">✏️ Редактировать 🚧</button>
       <button class="bs" onclick="cpDoc()">📋 Копировать</button>
       <div class="tot-b">Итого: <strong id="totd">${fmt(tot)} ₽</strong></div>
     </div>
@@ -2041,7 +2104,7 @@ function togEM(){
     // оригинальные классы договора
     sh.querySelectorAll('.cl,.sh,.pbox,.highlight,.conditions li,.sig-col td,.party-col,.doc-center-title .t2s,.doc-hdr-right').forEach(el=>el.setAttribute('contenteditable','true'));
     const bar=document.createElement('div');bar.className='edit-mode-bar';bar.id='ebar';
-    bar.innerHTML=`<b>✏️ Режим редактирования</b> — кликните на любой текст в документе чтобы изменить. При печати изменения сохранятся.`;
+    bar.innerHTML=`<b>🚧 Режим редактирования — в разработке.</b> Правки видны только в этом окне и при печати; в карточке объекта они НЕ сохраняются.`;
     sh.prepend(bar);
   }else{
     sh.classList.remove('emed');
@@ -3153,7 +3216,7 @@ function showAnalytics(){
         </div>
       </div>
       <div class="dash-block">
-        <div class="db-title">💰 Выручка по месяцам</div>
+        <div class="db-title">💰 Сумма заказов по месяцам (по дате создания)</div>
         <div style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px">
           ${monthData.map(m=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
             <div style="font-size:9px;color:var(--ok)">${m.revenue?fmtS(m.revenue):''}</div>
@@ -3421,6 +3484,215 @@ function saveNewTask(){
   ge('modalOverlay').classList.add('hidden');
   renderAllTasksView(ge('main'));
   notify('ok','Задача создана',text);
+}
+
+// ═══════════════════════════════════════════════
+// ПЛАНИРОВЩИК БРИГАД (диаграмма Ганта)
+// ═══════════════════════════════════════════════
+let PLAN_START=null;
+let PLAN_DAYS=(window.innerWidth<=768?7:14);
+let PLAN_DRAG=null;
+let PLAN_QA=null;
+const PL_WD=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const PL_MG=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+function plISO(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function plParse(s){return new Date(s+'T00:00:00');}
+function plAddDays(iso,n){const d=plParse(iso);d.setDate(d.getDate()+n);return plISO(d);}
+function plDiff(a,b){return Math.round((plParse(b)-plParse(a))/864e5);}
+function plDefaultStart(){const d=new Date();const dow=(d.getDay()+6)%7;d.setDate(d.getDate()-dow);return plISO(d);}
+function plBrigKey(i){return(i>=0&&i<BRIGADES.length)?BRIGADES[i]:'';}
+function plNorm(b){return BRIGADES.includes(b)?b:'';}
+function plLabel(iso){const d=plParse(iso);return d.getDate()+' '+PL_MG[d.getMonth()];}
+
+function showPlanner(){
+  VIEW='planner';setNav('plan');sbHide();
+  if(!PLAN_START)PLAN_START=plDefaultStart();
+  renderPlanner();
+}
+
+function renderPlanner(){
+  const mc=ge('main');if(!mc)return;
+  const mob=window.innerWidth<=768;
+  const COL=mob?32:46, LBL=mob?84:130, BH=30, GAP=4;
+  if(PLAN_DAYS>14&&mob)PLAN_DAYS=7;
+  const todayISO=plISO(new Date());
+  const days=[];for(let i=0;i<PLAN_DAYS;i++)days.push(plAddDays(PLAN_START,i));
+  const laneW=PLAN_DAYS*COL;
+
+  // строки: бригады + «Без бригады»
+  const rows=BRIGADES.map((b,i)=>({idx:i,key:b,label:b,none:false}));
+  rows.push({idx:BRIGADES.length,key:'',label:'Без бригады',none:true});
+
+  // объекты по бригадам
+  let totalConf=0;
+  const byRow={};rows.forEach(r=>byRow[r.key]=[]);
+  liveDB().forEach(cl=>{
+    if(!cl.dateInstall)return;
+    const start=cl.dateInstall;
+    let end=(cl.dateDead&&cl.dateDead>=start)?cl.dateDead:start;
+    const sTrue=plDiff(PLAN_START,start), eTrue=plDiff(PLAN_START,end);
+    if(eTrue<0||sTrue>PLAN_DAYS-1)return; // вне окна
+    const key=plNorm(cl.brigade);
+    byRow[key].push({cl,start,end,sTrue,eTrue});
+  });
+
+  // раскладка по подстрокам (greedy) + конфликты
+  function layout(items){
+    const sorted=items.slice().sort((a,b)=>a.sTrue-b.sTrue||a.eTrue-b.eTrue);
+    const ends=[];
+    sorted.forEach(it=>{
+      let r=0;while(r<ends.length&&ends[r]>=it.sTrue)r++;
+      it.lane=r;ends[r]=it.eTrue;it.conf=false;
+    });
+    // конфликты: пересекающиеся пары
+    for(let i=0;i<sorted.length;i++)for(let j=0;j<i;j++){
+      if(sorted[j].sTrue<=sorted[i].eTrue&&sorted[i].sTrue<=sorted[j].eTrue){
+        totalConf++;sorted[i].conf=true;sorted[j].conf=true;
+      }
+    }
+    return{items:sorted,lanes:Math.max(1,ends.length)};
+  }
+  const laid={};rows.forEach(r=>laid[r.key]=layout(byRow[r.key]));
+
+  // ── разметка ──
+  const dayHead=days.map(iso=>{
+    const d=plParse(iso),dow=(d.getDay()+6)%7,we=dow>=5,tod=iso===todayISO;
+    return`<div class="pl-dcell${we?' we':''}${tod?' tod':''}"><div class="pl-dnum">${d.getDate()}</div>${PL_WD[dow]}</div>`;
+  }).join('');
+
+  const rowsHTML=rows.map(r=>{
+    const lo=laid[r.key];
+    const rowH=lo.lanes*(BH+GAP)+GAP;
+    const cells=days.map(iso=>{
+      const d=plParse(iso),dow=(d.getDay()+6)%7,we=dow>=5,tod=iso===todayISO;
+      return`<div class="pl-cell${we?' we':''}${tod?' tod':''}" onclick="plCellClick(${r.idx},'${iso}')"></div>`;
+    }).join('');
+    const blocks=lo.items.map(it=>{
+      const cl=it.cl,st=gst(cl);
+      const lft=Math.max(0,it.sTrue)*COL+2;
+      const rIdx=Math.min(PLAN_DAYS-1,it.eTrue);
+      const w=(rIdx-Math.max(0,it.sTrue)+1)*COL-4;
+      const top=it.lane*(BH+GAP)+GAP;
+      const nm=cname(cl);
+      const lbl=w<50?esc(nm.slice(0,3)):esc(nm);
+      const tip=escA(`${nm} · ${fds(it.start)}–${fds(it.end)} · ${st.label} · ${r.label}`);
+      return`<div class="pl-block${it.conf?' conf':''}" draggable="true" title="${tip}"
+        style="left:${lft}px;top:${top}px;width:${Math.max(COL-4,w)}px;height:${BH}px;background:${st.color}"
+        onclick="event.stopPropagation();openObj('${cl.id}')"
+        ondragstart="plBlockDragStart(event,'${cl.id}',${COL})" ondragend="plBlockDragEnd(event)">${lbl}</div>`;
+    }).join('');
+    return`<div class="pl-row">
+      <div class="pl-rowlabel${r.none?' none':''}"${r.none?'':` ondblclick="plRenameBrigade(${r.idx})" title="Двойной клик — переименовать"`}>${esc(r.label)}</div>
+      <div class="pl-lane" data-brigidx="${r.idx}" style="flex:0 0 ${laneW}px;width:${laneW}px;height:${rowH}px"
+        ondragover="plLaneOver(event)" ondrop="plDrop(event,this,${COL})">${cells}${blocks}</div>
+    </div>`;
+  }).join('');
+
+  const period=plLabel(days[0])+' — '+plLabel(days[PLAN_DAYS-1]);
+  const segs=mob?[[7,'Неделя'],[14,'2 недели']]:[[14,'2 недели'],[28,'4 недели'],[30,'Месяц']];
+  mc.innerHTML=`<div class="pl-wrap fade-in" style="--pl-col:${COL}px;--pl-lbl:${LBL}px">
+    <div class="pl-bar">
+      <button class="pl-nav-btn" onclick="plShift(-1)">◀</button>
+      <div class="pl-period">${period}</div>
+      <button class="pl-nav-btn" onclick="plShift(1)">▶</button>
+      <button class="vsw" onclick="plToday()">Сегодня</button>
+      <div class="pl-seg">${segs.map(s=>`<button class="${PLAN_DAYS===s[0]?'on':''}" onclick="plSetDays(${s[0]})">${s[1]}</button>`).join('')}</div>
+      <div class="pl-conf${totalConf?'':' ok'}">${totalConf?('⚠ Конфликтов: '+totalConf):'✓ Без конфликтов'}</div>
+    </div>
+    <div class="pl-grid">
+      <div class="pl-head"><div class="pl-corner">Бригада</div><div class="pl-days" style="width:${laneW}px">${dayHead}</div></div>
+      ${rowsHTML}
+    </div>
+  </div>`;
+}
+
+function plShift(dir){PLAN_START=plAddDays(PLAN_START,dir*PLAN_DAYS);renderPlanner();}
+function plToday(){PLAN_START=plDefaultStart();renderPlanner();}
+function plSetDays(n){PLAN_DAYS=n;renderPlanner();}
+
+function plRenameBrigade(idx){
+  if(idx<0||idx>=BRIGADES.length)return;
+  const old=BRIGADES[idx];
+  const nn=prompt('Название бригады:',old);
+  if(nn==null)return;
+  const name=nn.trim();
+  if(!name||name===old)return;
+  if(BRIGADES.includes(name)){notify('warn','Уже существует','Бригада с таким названием есть');return;}
+  DB.forEach(c=>{if(c.brigade===old)c.brigade=name;});
+  BRIGADES[idx]=name;saveBrigades();save();renderPlanner();renderList();
+  notify('ok','Переименовано',old+' → '+name);
+}
+
+function plBlockDragStart(e,id,COL){
+  const rect=e.currentTarget.getBoundingClientRect();
+  const grab=Math.max(0,Math.floor((e.clientX-rect.left)/COL));
+  PLAN_DRAG={id,grab};
+  e.dataTransfer.effectAllowed='move';
+  try{e.dataTransfer.setData('text/plain',id);}catch(_){}
+  e.currentTarget.classList.add('dragging');
+}
+function plBlockDragEnd(e){e.currentTarget.classList.remove('dragging');PLAN_DRAG=null;}
+function plLaneOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function plDrop(e,lane,COL){
+  e.preventDefault();
+  if(!PLAN_DRAG)return;
+  const cl=DB.find(c=>c.id===PLAN_DRAG.id);if(!cl){PLAN_DRAG=null;return;}
+  const rect=lane.getBoundingClientRect();
+  let idx=Math.floor((e.clientX-rect.left)/COL)-PLAN_DRAG.grab;
+  idx=Math.max(0,Math.min(PLAN_DAYS-1,idx));
+  const newBrig=plBrigKey(+lane.dataset.brigidx);
+  const oldStart=cl.dateInstall;
+  const oldStartIdx=plDiff(PLAN_START,oldStart);
+  const dur=(cl.dateDead&&cl.dateDead>=oldStart)?plDiff(oldStart,cl.dateDead):0;
+  let changed=false;
+  if(idx!==oldStartIdx){
+    cl.dateInstall=plAddDays(PLAN_START,idx);
+    if(cl.dateDead)cl.dateDead=plAddDays(cl.dateInstall,dur);
+    changed=true;
+  }
+  if(newBrig!==plNorm(cl.brigade)){cl.brigade=newBrig;changed=true;}
+  PLAN_DRAG=null;
+  if(changed){
+    cl.updatedAt=Date.now();
+    log(cl,`Планировщик: ${newBrig||'Без бригады'}, монтаж ${fds(cl.dateInstall)}`,'📋','#5b9bd5');
+    save();renderPlanner();renderList();
+    notify('ok','План обновлён',cname(cl)+' → '+(newBrig||'Без бригады'));
+  }else{renderPlanner();}
+}
+
+function plCellClick(rowIdx,iso){
+  PLAN_QA={brig:plBrigKey(rowIdx),iso};
+  const overlay=ge('modalOverlay'),mc=ge('modalContent');if(!overlay||!mc)return;
+  mc.innerHTML=`<h3>📋 Добавить в план</h3>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:12px">${esc(PLAN_QA.brig||'Без бригады')} · ${fds(iso)}</div>
+    <div class="field"><label>Объект</label>
+      <select id="plqObj" onchange="ge('plqNameWrap').style.display=this.value?'none':''">
+        <option value="">— Создать новый —</option>
+        ${liveDB().map(c=>`<option value="${c.id}">${esc(cname(c))}${c.dateInstall?' · '+fds(c.dateInstall):''}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field" id="plqNameWrap"><label>Название нового объекта</label><input id="plqName" placeholder="Имя клиента / проект"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="modal-btn primary" onclick="plQuickSave()">Добавить</button>
+      <button class="modal-btn secondary" onclick="ge('modalOverlay').classList.add('hidden')">Отмена</button>
+    </div>`;
+  overlay.classList.remove('hidden');
+}
+function plQuickSave(){
+  if(!PLAN_QA)return;
+  const brig=PLAN_QA.brig, iso=PLAN_QA.iso;
+  const sel=ge('plqObj')?.value;
+  let cl;
+  if(sel){cl=DB.find(c=>c.id===sel);if(!cl)return;}
+  else{cl=mkObj();cl.projectName=(ge('plqName')?.value||'').trim();DB.unshift(cl);}
+  cl.brigade=brig;cl.dateInstall=iso;if(!cl.dateDead)cl.dateDead=iso;
+  cl.updatedAt=Date.now();
+  log(cl,`Запланирован: ${brig||'Без бригады'}, ${fds(iso)}`,'📋','#5b9bd5');
+  save();renderList();
+  ge('modalOverlay').classList.add('hidden');PLAN_QA=null;
+  renderPlanner();
+  notify('ok','Добавлено в план',cname(cl));
 }
 
 // ═══════════════════════════════════════════════
