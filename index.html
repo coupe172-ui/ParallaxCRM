@@ -707,7 +707,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 05.06-5</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 05.06-6</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -3216,6 +3216,25 @@ function openTasksTab(){
 // ═══════════════════════════════════════════════
 // MONTHLY REPORT + FUNNEL ANALYTICS
 // ═══════════════════════════════════════════════
+// ── KPI: период и хелперы ──
+let ANA_PERIOD='month'; // month | prev | quarter | all
+function anaSetPeriod(p){ANA_PERIOD=p;showAnalytics();}
+function anaRange(){
+  const n=new Date(),y=n.getFullYear(),m=n.getMonth();
+  if(ANA_PERIOD==='all')return{from:0,to:Infinity};
+  if(ANA_PERIOD==='prev')return{from:+new Date(y,m-1,1),to:+new Date(y,m,1)};
+  if(ANA_PERIOD==='quarter')return{from:+new Date(y,m-2,1),to:+new Date(y,m+1,1)};
+  return{from:+new Date(y,m,1),to:+new Date(y,m+1,1)}; // текущий месяц
+}
+function anaIn(ts){const r=anaRange();return ts>=r.from&&ts<r.to;}
+function stIdx(id){return STATUSES.findIndex(s=>s.id===id);}
+// «объект прошёл стадию X» по индексу; cancel/claim — боковые финалы, прогресс по индексу недостоверен → исключаем
+function anaReached(c,stageId){if(c.status==='cancel'||c.status==='claim')return false;const si=stIdx(c.status),ti=stIdx(stageId);return si>=0&&ti>=0&&si>=ti;}
+// ts последнего перехода в один из статусов ids (по тексту записи tl «… → "label"»)
+function anaTransTs(c,ids){let best=0;(c.tl||[]).forEach(ev=>{const m=/→\s*"([^"]+)"\s*$/.exec(ev.act||'');if(!m)return;const st=STATUSES.find(s=>s.label===m[1]);if(st&&ids.indexOf(st.id)>=0&&ev.ts>best)best=ev.ts;});return best;}
+function anaCloseTs(c){return anaTransTs(c,['done','closed','support','cancel','claim'])||c.updatedAt||c.createdAt||0;}
+function anaDoneISO(c){const ts=anaTransTs(c,['done','closed','support']);if(ts){const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}return c.dateInstall||'';}
+function anaNet(c){return Math.max(0,ctotal(c.rows)-(+c.discount||0));}
 function showAnalytics(){
   VIEW='analytics';setNav('dash');sbHide();
   const mc=ge('main');
@@ -3261,6 +3280,24 @@ function showAnalytics(){
   const closedCount=liveDB().filter(c=>c.status==='closed').length;
   const claimCount=liveDB().filter(c=>c.status==='claim').length;
 
+  // ── KPI за выбранный период ──
+  const SUCC=['done','closed','support'], TERMALL=['done','closed','support','cancel','claim'], FINNC=['done','closed','support','cancel'];
+  const anaCreated=liveDB().filter(c=>anaIn(c.createdAt||c.updatedAt||0));        // когорта по дате создания
+  const anaClosed =liveDB().filter(c=>TERMALL.includes(c.status)&&anaIn(anaCloseTs(c))); // финализированные за период (по дате закрытия из tl)
+  const kpiLead = anaClosed.length?Math.round(anaClosed.filter(c=>anaReached(c,'contract')).length/anaClosed.length*100):0;
+  const anaMeas = anaCreated.filter(c=>anaReached(c,'measured'));
+  const kpiMeas = anaMeas.length?Math.round(anaMeas.filter(c=>anaReached(c,'contract')).length/anaMeas.length*100):0;
+  const anaFin  = anaClosed.filter(c=>FINNC.includes(c.status));
+  const kpiMont = anaFin.length?Math.round(anaFin.filter(c=>SUCC.includes(c.status)).length/anaFin.length*100):0;
+  const anaDD   = anaClosed.filter(c=>SUCC.includes(c.status)&&c.dateDead&&anaDoneISO(c));
+  const kpiSrok = anaDD.length?Math.round(anaDD.filter(c=>anaDoneISO(c)<=c.dateDead).length/anaDD.length*100):0;
+  const anaMontR= anaClosed.filter(c=>SUCC.includes(c.status)||c.status==='claim');
+  const kpiClaim= anaMontR.length?Math.round(anaClosed.filter(c=>c.status==='claim').length/anaMontR.length*100):0;
+  const anaChk  = anaClosed.filter(c=>SUCC.includes(c.status));
+  const kpiAvg  = anaChk.length?Math.round(anaChk.reduce((s,c)=>s+anaNet(c),0)/anaChk.length):0;
+  const kpiAR   = liveDB().reduce((s,c)=>s+clDebt(c),0); // деньги к получению = дебиторка (есть в CRM)
+  const anaPerBtns=[['month','Текущий месяц'],['prev','Прошлый'],['quarter','Квартал'],['all','Всё время']];
+
   mc.innerHTML=`<div class="dash fade-in" style="overflow-y:auto;flex:1;padding:20px 24px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
       <div class="dash-title" style="margin-bottom:0">АНАЛИТИКА</div>
@@ -3272,6 +3309,31 @@ function showAnalytics(){
       <div class="stat-card sc-dn"><div class="stat-val">${fmtS(totalDebt)}</div><div class="stat-label">Долг клиентов, ₽</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--pu)">${fmtS(avgCheck)}</div><div class="stat-label">Средний чек, ₽</div></div>
       <div class="stat-card sc-ok"><div class="stat-val">${closedCount}</div><div class="stat-label">Закрыто объектов</div>${claimCount?`<div class="stat-sub" style="color:var(--dn)">${claimCount} рекламаций</div>`:''}</div>
+    </div>
+
+    <div class="dash-block" style="margin-bottom:16px">
+      <div class="db-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        🎯 Ключевые показатели
+        <div class="view-sw" style="margin-left:auto">
+          ${anaPerBtns.map(p=>`<button class="vsw${ANA_PERIOD===p[0]?' on':''}" onclick="anaSetPeriod('${p[0]}')">${p[1]}</button>`).join('')}
+        </div>
+      </div>
+      <div class="stats-row" style="margin-top:10px">
+        <div class="stat-card"><div class="stat-val">${kpiLead}%</div><div class="stat-label">Конверсия лид→договор</div><div class="stat-sub" style="color:var(--mu)">по закрытым за период</div></div>
+        <div class="stat-card"><div class="stat-val">${kpiMeas}%</div><div class="stat-label">Конверсия замер→договор</div><div class="stat-sub" style="color:var(--mu)">по созданным за период</div></div>
+        <div class="stat-card"><div class="stat-val">${kpiMont}%</div><div class="stat-label">Доходят до монтажа</div></div>
+        <div class="stat-card"><div class="stat-val">${kpiSrok}%</div><div class="stat-label">Соблюдение сроков</div></div>
+      </div>
+      <div class="stats-row" style="margin-top:10px">
+        <div class="stat-card ${kpiClaim>0?'sc-wn':''}"><div class="stat-val">${kpiClaim}%</div><div class="stat-label">Доля рекламаций</div></div>
+        <div class="stat-card sc-ac"><div class="stat-val">${fmtS(kpiAvg)}</div><div class="stat-label">Средний чек (нетто), ₽</div></div>
+        <div class="stat-card ${kpiAR>0?'sc-dn':''}"><div class="stat-val">${fmtS(kpiAR)}</div><div class="stat-label">Деньги к получению, ₽</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--mu)">—</div><div class="stat-label">Остаток на счетах</div><div class="stat-sub" style="color:var(--mu)">после синхр. с ДДС</div></div>
+      </div>
+      <div class="stats-row" style="margin-top:10px">
+        <div class="stat-card"><div class="stat-val" style="color:var(--mu)">—</div><div class="stat-label">Чистая прибыль за месяц</div><div class="stat-sub" style="color:var(--mu)">после синхр. с ДДС</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--mu)">—</div><div class="stat-label">Средняя маржа по объекту</div><div class="stat-sub" style="color:var(--mu)">после синхр. с ДДС</div></div>
+      </div>
     </div>
 
     <div class="two-col" style="margin-bottom:16px">
@@ -4094,7 +4156,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 05.06-5','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 05.06-6','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
