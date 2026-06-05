@@ -701,7 +701,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 05.06-3</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 05.06-4</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -836,7 +836,6 @@ function importColumns(){
   }catch{notify('err','Ошибка','Неверный код колонок');}
 }
 let STATUSES=loadStatuses();
-ensureSupportColumn();
 const TAGS=[
   {id:'ceiling', label:'Потолки',   color:'#5b9bd5'},
   {id:'cornice', label:'Карнизы',   color:'#9b72cf'},
@@ -844,6 +843,7 @@ const TAGS=[
   {id:'walls',   label:'Стены',     color:'#5db87a'},
 ];
 const SM={};STATUSES.forEach(s=>SM[s.id]=s);
+ensureSupportColumn(); // после SM — saveStatuses() внутри обращается к SM
 // ── Бригады (планировщик) ────────────────────
 function loadBrigades(){
   try{const s=localStorage.getItem('px_brigades');if(s){const a=JSON.parse(s);if(Array.isArray(a)&&a.length)return a;}}catch(e){}
@@ -4074,7 +4074,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 05.06-3','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 05.06-4','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
