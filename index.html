@@ -246,9 +246,15 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 .tdel{background:none;border:none;color:var(--mu);cursor:pointer;font-size:12px;padding:2px;opacity:0;transition:opacity .2s;}
 .task-item:hover .tdel{opacity:.5;}
 .tdel:hover{opacity:1!important;color:var(--dn);}
-.task-add{display:flex;gap:5px;margin-top:7px;}
-.task-add input{flex:1;background:var(--s4);border:1px solid var(--br);border-radius:5px;padding:5px 9px;color:var(--tx);font-family:"Golos Text",sans-serif;font-size:11px;outline:none;}
-.task-add input:focus{border-color:var(--ac);}
+.task-add{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;}
+.task-add input,.task-add select{flex:1;background:var(--s4);border:1px solid var(--br);border-radius:5px;padding:5px 9px;color:var(--tx);font-family:"Golos Text",sans-serif;font-size:11px;outline:none;}
+.task-add input:focus,.task-add select:focus{border-color:var(--ac);}
+.tdate-inp,.ttime-inp{background:var(--s4);border:1px solid var(--br);border-radius:4px;color:var(--tx2);font-family:"Golos Text",sans-serif;font-size:10px;padding:2px 5px;outline:none;}
+.tdate-inp:focus,.ttime-inp:focus{border-color:var(--ac);}
+.tdate-inp.late{border-color:var(--dn);color:var(--dn);}
+.tprio{font-size:10px;font-weight:700;border-radius:8px;padding:2px 8px;cursor:pointer;border:1px solid var(--br);background:none;color:var(--mu);white-space:nowrap;font-family:"Golos Text",sans-serif;}
+.kc-task-chk{cursor:pointer;user-select:none;}
+.mobonly{display:none!important;}
 .task-add button{background:var(--ac);color:#0f0f0f;border:none;border-radius:5px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:"Golos Text",sans-serif;}
 .fdrop{border:2px dashed var(--br);border-radius:8px;padding:14px;text-align:center;color:var(--mu);font-size:11px;cursor:pointer;transition:all .2s;margin-bottom:9px;}
 .fdrop:hover,.fdrop.dov{border-color:var(--ac);color:var(--ac);}
@@ -488,6 +494,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 .at-cnt{background:var(--s4);border-radius:10px;padding:2px 8px;font-size:11px;color:var(--mu);}
 /* ═══ MOBILE ════════════════════════════════ */
 @media(max-width:768px){
+  .mobonly{display:inline-flex!important;}
   body{font-size:13px;-webkit-text-size-adjust:100%;}
   .hdr{padding:0 12px;padding-top:env(safe-area-inset-top);height:calc(52px + env(safe-area-inset-top));gap:0;box-sizing:border-box;}
   .hdr-sep{display:none;}
@@ -707,7 +714,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 05.06-6</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 19.06-1</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -848,6 +855,9 @@ const TAGS=[
   {id:'light',   label:'Освещение', color:'#e8a020'},
   {id:'walls',   label:'Стены',     color:'#5db87a'},
 ];
+const PRIO={high:{l:'Высокий',c:'#e05c5c'},med:{l:'Средний',c:'#e8a020'},low:{l:'Низкий',c:'#5b9bd5'}};
+function prioNext(p){return p==='high'?'med':p==='med'?'low':p==='low'?'':'high';}
+function prioRank(p){return p==='high'?0:p==='med'?1:p==='low'?2:3;}
 const SM={};STATUSES.forEach(s=>SM[s.id]=s);
 ensureSupportColumn(); // после SM — saveStatuses() внутри обращается к SM
 // ── Бригады (планировщик) ────────────────────
@@ -941,10 +951,13 @@ let DB=(function(){
 })();
 let KB_SEARCH_Q='';
 let KB_SHOW_TASKS=localStorage.getItem('px_kb_tasks')==='1'; // показывать на карточках текст задач, а не просто счётчик
+let KB_TAG_FILTER=localStorage.getItem('px_kb_tag')||''; // фильтр канбана по тегу (Потолки/Карнизы/…)
 let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null,AUTOSAVE_T=null;
 // Склонение числительных: plural(1,'задача','задачи','задач') → «задача»
 function plural(n,one,few,many){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return many;if(n1>1&&n1<5)return few;if(n1===1)return one;return many;}
 function toggleKbTasks(){KB_SHOW_TASKS=!KB_SHOW_TASKS;localStorage.setItem('px_kb_tasks',KB_SHOW_TASKS?'1':'0');showKanban();}
+function kbSetTag(t){KB_TAG_FILTER=(KB_TAG_FILTER===t?'':t);localStorage.setItem('px_kb_tag',KB_TAG_FILTER);showKanban();}
+function kbToggleTask(cid,idx){const cl=DB.find(c=>c.id===cid);if(!cl||!cl.tasks||!cl.tasks[idx])return;cl.tasks[idx].done=!cl.tasks[idx].done;cl.updatedAt=Date.now();if(cl.tasks[idx].done)log(cl,`Задача выполнена: "${cl.tasks[idx].text}"`,'✅','#5db87a');save();renderKB();}
 
 // ═══════════════════════════════════════════════
 // FACTORY
@@ -1351,6 +1364,7 @@ function showKanban(){
       <button class="vsw" onclick="exportColumns()" title="Скопировать колонки для другого устройства">↑ Экспорт</button>
       <button class="vsw" onclick="importColumns()" title="Вставить колонки с другого устройства">↓ Импорт</button>
       <button class="vsw${KB_SHOW_TASKS?' on':''}" onclick="toggleKbTasks()" title="Показывать текст задач на карточках">📋 Задачи</button>
+      ${TAGS.map(t=>`<button class="vsw${KB_TAG_FILTER===t.id?' on':''}" onclick="kbSetTag('${t.id}')" title="Фильтр по тегу"${KB_TAG_FILTER===t.id?` style="color:${t.color};border-color:${t.color}"`:''}>${t.label}</button>`).join('')}
       <div class="view-sw">
         <button class="vsw on">🗂 Канбан</button>
         <button class="vsw" onclick="showTable()">☰ Таблица</button>
@@ -1368,6 +1382,7 @@ function renderKB(){
   const kbQNum=kbQ.replace(/\D/g,'');
   b.innerHTML=STATUSES.map((st,colIdx)=>{
     let cards=liveDB().filter(c=>c.status===st.id);
+    if(KB_TAG_FILTER)cards=cards.filter(c=>(c.tags||[]).includes(KB_TAG_FILTER));
     if(kbQ){
       cards=cards.filter(c=>{
         const name=[c.projectName,c.fio,c.orgName].filter(Boolean).join(' ').toLowerCase();
@@ -1421,9 +1436,10 @@ function kcardHTML(c,st){
   let taskBadge='';
   if(openTasks.length){
     if(KB_SHOW_TASKS){
-      taskBadge=`<div class="kc-tasks-list">${openTasks.map(t=>{
+      taskBadge=`<div class="kc-tasks-list">${tasks.map((t,idx)=>({t,idx})).filter(o=>!o.t.done).map(({t,idx})=>{
         const tl=t.deadline&&isLate(t.deadline);
-        return`<div class="kc-task${tl?' late':''}">▢ ${esc(t.text||'')}${t.deadline?` <span class="kc-task-dl">📅 ${fds(t.deadline)}</span>`:''}</div>`;
+        const pc=(!tl&&t.priority)?PRIO[t.priority].c:'';
+        return`<div class="kc-task${tl?' late':''}"${pc?` style="border-left-color:${pc}"`:''}><span class="kc-task-chk" onclick="event.stopPropagation();kbToggleTask('${c.id}',${idx})" title="Отметить выполненной">▢</span> ${esc(t.text||'')}${t.deadline?` <span class="kc-task-dl">📅 ${fds(t.deadline)}</span>`:''}</div>`;
       }).join('')}</div>`;
     }else{
       taskBadge=`<div class="kc-tasks-badge${lateTasks.length?' late':''}">
@@ -1454,8 +1470,7 @@ function kcardHTML(c,st){
     ${tagsLine}
     ${taskBadge}
     <div class="kc-acts">
-      ${ph?`<button class="kact" onclick="window.open('tel:${ph}')">📞</button>`:''}
-      ${ph?`<button class="kact" onclick="window.open('https://wa.me/${ph.replace(/\D/g,'')}')">WA</button>`:''}
+      ${ph?`<button class="kact mobonly" onclick="window.open('tel:${ph}')">📞</button>`:''}
       ${tg?`<button class="kact" onclick="window.open('https://t.me/${tg.replace('@','')}')">TG</button>`:''}
       <button class="kact" onclick="openObj('${c.id}')">Открыть →</button>
     </div>
@@ -1648,9 +1663,8 @@ function renderObjView(cl){
       <div class="oc-ft">
         <button class="bsave" onclick="saveObj()">💾 Сохранить</button>
         <span class="svd" id="svd">✓ Сохранено</span>
-        <button class="kact" id="btn-wa" onclick="objOpenWA()" title="WhatsApp" style="padding:6px 10px;font-size:14px;border-radius:5px">📱</button>
         <button class="kact" id="btn-tg" onclick="objOpenTG()" title="Telegram" style="padding:6px 10px;font-size:14px;border-radius:5px">✈️</button>
-        <button class="kact" id="btn-call" onclick="objCall()" title="Позвонить" style="padding:6px 10px;font-size:14px;border-radius:5px">📞</button>
+        <button class="kact mobonly" id="btn-call" onclick="objCall()" title="Позвонить" style="padding:6px 10px;font-size:14px;border-radius:5px">📞</button>
         <button class="kact" onclick="duplicateObj()" title="Дублировать объект" style="padding:6px 10px;font-size:13px;border-radius:5px">⧉</button>
         <button class="bdel" onclick="delObj()">🗑</button>
       </div>
@@ -2022,37 +2036,27 @@ function renderTasks(cl){
     tasks.map((t,i)=>`<div class="task-item">
       <input type="checkbox" class="tchk" ${t.done?'checked':''} onchange="togTask(${i})">
       <div class="tbody">
-        <div class="ttxt${t.done?' done':''}" ondblclick="editTaskInline(${i},this)">${esc(t.text)}</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:2px">
-          ${t.deadline?`<div class="tdl${isLate(t.deadline)&&!t.done?' late':''}">📅 ${fds(t.deadline)}</div>`:''}
-          ${t.time?`<div class="task-time">🕐 ${t.time}</div>`:''}
+        <div class="ttxt${t.done?' done':''}" ondblclick="editTaskInline(${i},this)" title="Двойной клик — изменить текст">${esc(t.text)}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
+          <input type="date" class="tdate-inp${isLate(t.deadline)&&!t.done?' late':''}" value="${t.deadline||''}" onchange="setTaskDate(${i},this.value)">
+          <input type="time" class="ttime-inp" value="${t.time||''}" onchange="setTaskTime(${i},this.value)">
+          <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="cycleTaskPrio(${i})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
-      <div style="display:flex;gap:3px;align-items:center">
-        <button class="kact" style="font-size:9px;padding:2px 5px" onclick="editTask(${i})" title="Редактировать">✏</button>
-        <button class="tdel" onclick="rmTask(${i})">×</button>
-      </div>
+      <button class="tdel" onclick="rmTask(${i})">×</button>
     </div>`).join('')}
     <div class="task-add" style="margin-top:10px">
-      <input id="tinp" placeholder="Новая задача..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2">
-      <input type="date" id="tddate" style="width:126px">
-      <input type="time" id="tdtime" style="width:90px">
+      <input id="tinp" placeholder="Новая задача..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2 1 100%">
+      <input type="date" id="tddate" style="flex:0 0 auto">
+      <input type="time" id="tdtime" style="flex:0 0 auto">
+      <select id="tdprio" style="flex:0 0 auto"><option value="">Приоритет</option><option value="high">Высокий</option><option value="med">Средний</option><option value="low">Низкий</option></select>
       <button onclick="addTask()">+</button>
     </div>
   </div>`;
 }
-function editTask(i){
-  const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;
-  const t=cl.tasks[i];
-  const newText=prompt('Изменить задачу:',t.text);
-  if(newText===null)return;
-  if(newText.trim()) t.text=newText.trim();
-  const newDate=prompt('Дата дедлайна (ГГГГ-ММ-ДД):',t.deadline||'');
-  if(newDate!==null) t.deadline=newDate.trim();
-  const newTime=prompt('Время (ЧЧ:ММ, или пусто):',t.time||'');
-  if(newTime!==null) t.time=newTime.trim();
-  cl.updatedAt=Date.now();save();renderTasks(cl);
-}
+function setTaskDate(i,v){const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;cl.tasks[i].deadline=v;cl.updatedAt=Date.now();save();renderTasks(cl);}
+function setTaskTime(i,v){const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;cl.tasks[i].time=v;cl.updatedAt=Date.now();save();renderTasks(cl);}
+function cycleTaskPrio(i){const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;cl.tasks[i].priority=prioNext(cl.tasks[i].priority||'');cl.updatedAt=Date.now();save();renderTasks(cl);}
 function editTaskInline(i,el){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.tasks)return;
   el.contentEditable='true';el.focus();
@@ -2068,8 +2072,9 @@ function addTask(){
   const txt=ge('tinp')?.value?.trim();
   const dl=ge('tddate')?.value;
   const tm=ge('tdtime')?.value;
+  const pr=ge('tdprio')?.value||'';
   if(!txt)return;if(!cl.tasks)cl.tasks=[];
-  cl.tasks.push({text:txt,deadline:dl,time:tm||'',done:false,createdAt:Date.now()});
+  cl.tasks.push({text:txt,deadline:dl,time:tm||'',priority:pr,done:false,createdAt:Date.now()});
   log(cl,`Задача: "${txt}"`, '✅','#5b9bd5');
   save();renderTasks(cl);
 }
@@ -2815,7 +2820,7 @@ function renderSch(cl,total){
     <hr class="bank-hr">
     <div class="brow"><span class="bl">Банк получателя</span><span>${C.bank}</span></div>
     <div class="brow"><span class="bl">БИК</span><span>${C.bik}</span></div>
-    <div class="brow"><span class="bl">Сч. №</span><span>${C.ks}</span></div>
+    <div class="brow"><span class="bl">Кор. сч. №</span><span>${C.ks}</span></div>
   </div>
 
   <div class="doc-title">Счёт-договор № ${num}</div>
@@ -3109,14 +3114,8 @@ function kbCreateColumn(id){
 }
 
 // ═══════════════════════════════════════════════
-// CONTACTS — WA / TG / CALL
+// CONTACTS — TG / CALL
 // ═══════════════════════════════════════════════
-function objOpenWA(){
-  const cl=DB.find(c=>c.id===CID);if(!cl)return;
-  const ph=(cl.phone||cl.orgPhone||'').replace(/\D/g,'');
-  if(!ph){notify('warn','WhatsApp','Телефон не указан');return;}
-  window.open('https://wa.me/'+ph);
-}
 function objOpenTG(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
   const tg=(cl.tg||cl.orgTg||'').replace('@','');
@@ -3375,6 +3374,27 @@ function showAnalytics(){
       </div>
     </div>
 
+    <div class="dash-block" style="margin-bottom:16px">
+      <div class="db-title">🪟 По направлениям (теги)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+        ${TAGS.map(t=>{
+          const arr=liveDB().filter(c=>(c.tags||[]).includes(t.id));
+          const rev=arr.reduce((s,c)=>s+ctotal(c.rows),0);
+          const avg=arr.length?Math.round(rev/arr.length):0;
+          const doneN=arr.filter(c=>['done','closed','support'].includes(c.status)).length;
+          return`<div style="border:1px solid var(--br);border-radius:8px;padding:12px 14px;border-left:3px solid ${t.color}">
+            <div style="font-weight:700;color:${t.color};font-size:13px;margin-bottom:7px">${t.label}</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--tx2)">
+              <span>Объектов: <b style="color:var(--tx)">${arr.length}</b></span>
+              <span>Закрыто: <b style="color:var(--tx)">${doneN}</b></span>
+              <span>Выручка: <b style="color:var(--ac)">${fmtS(rev)} ₽</b></span>
+              <span>Ср. чек: <b style="color:var(--pu)">${fmtS(avg)} ₽</b></span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
     <div class="dash-block">
       <div class="db-title">📊 Распределение по статусам</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -3513,23 +3533,26 @@ function renderAllTasksView(mc){
   );
 
   // Группировка
-  const overdue=filtered.filter(t=>!t.done&&t.deadline&&isLate(t.deadline));
-  const todayT=filtered.filter(t=>!t.done&&t.deadline===today);
-  const upcoming=filtered.filter(t=>!t.done&&t.deadline&&t.deadline>today);
-  const nodate=filtered.filter(t=>!t.done&&!t.deadline);
+  const byPrio=arr=>arr.sort((a,b)=>prioRank(a.priority)-prioRank(b.priority));
+  const overdue=byPrio(filtered.filter(t=>!t.done&&t.deadline&&isLate(t.deadline)));
+  const todayT=byPrio(filtered.filter(t=>!t.done&&t.deadline===today));
+  const upcoming=byPrio(filtered.filter(t=>!t.done&&t.deadline&&t.deadline>today));
+  const nodate=byPrio(filtered.filter(t=>!t.done&&!t.deadline));
   const done=filtered.filter(t=>t.done);
 
   function taskRow(t){
-    const lateCls=!t.done&&t.deadline&&isLate(t.deadline)?' style="border-left:3px solid var(--dn);padding-left:10px"':'';
-    const todayCls=!t.done&&t.deadline===today?' style="border-left:3px solid var(--wn);padding-left:10px"':'';
-    return`<div class="at-row"${lateCls||todayCls}>
+    const late=!t.done&&t.deadline&&isLate(t.deadline);
+    const bord=late?' style="border-left:3px solid var(--dn);padding-left:10px"':(!t.done&&t.deadline===today?' style="border-left:3px solid var(--wn);padding-left:10px"':'');
+    return`<div class="at-row"${bord}>
       <input type="checkbox" class="tchk" ${t.done?'checked':''}
         onchange="quickToggleTask('${t._cid}',${t._idx})">
       <div class="at-body">
-        <div class="ttxt${t.done?' done':''}">${esc(t.text)}</div>
-        <div style="display:flex;gap:10px;margin-top:2px;flex-wrap:wrap">
+        <div class="ttxt${t.done?' done':''}" ondblclick="gEditTaskText('${t._cid}',${t._idx},this)" title="Двойной клик — изменить текст">${esc(t.text)}</div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;align-items:center">
           <span class="at-obj" onclick="openObj('${t._cid}')">${esc(t._cname)}</span>
-          ${t.deadline?`<span class="tdl${!t.done&&isLate(t.deadline)?' late':''}">${fds(t.deadline)}${t.time?' '+t.time:''}</span>`:''}
+          <input type="date" class="tdate-inp${late?' late':''}" value="${t.deadline||''}" onchange="gSetTaskDate('${t._cid}',${t._idx},this.value)">
+          <input type="time" class="ttime-inp" value="${t.time||''}" onchange="gSetTaskTime('${t._cid}',${t._idx},this.value)">
+          <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="gCyclePrio('${t._cid}',${t._idx})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
       <button class="kact" onclick="openObj('${t._cid}')" style="font-size:10px;padding:3px 7px;flex-shrink:0">→</button>
@@ -3579,6 +3602,10 @@ function quickToggleTask(cid,idx){
   save();
   renderAllTasksView(ge('main'));
 }
+function gSetTaskDate(cid,idx,v){const cl=DB.find(c=>c.id===cid);if(!cl||!cl.tasks)return;cl.tasks[idx].deadline=v;cl.updatedAt=Date.now();save();renderAllTasksView(ge('main'));}
+function gSetTaskTime(cid,idx,v){const cl=DB.find(c=>c.id===cid);if(!cl||!cl.tasks)return;cl.tasks[idx].time=v;cl.updatedAt=Date.now();save();renderAllTasksView(ge('main'));}
+function gCyclePrio(cid,idx){const cl=DB.find(c=>c.id===cid);if(!cl||!cl.tasks)return;cl.tasks[idx].priority=prioNext(cl.tasks[idx].priority||'');cl.updatedAt=Date.now();save();renderAllTasksView(ge('main'));}
+function gEditTaskText(cid,idx,el){el.contentEditable='true';el.focus();el.onblur=()=>{const cl=DB.find(c=>c.id===cid);if(cl&&cl.tasks&&cl.tasks[idx]){cl.tasks[idx].text=el.innerText.trim()||cl.tasks[idx].text;cl.updatedAt=Date.now();save();}el.contentEditable='false';renderAllTasksView(ge('main'));};}
 
 function showAddTaskModal(){
   const overlay=ge('modalOverlay'),mc2=ge('modalContent');
@@ -3595,6 +3622,9 @@ function showAddTaskModal(){
       <div class="field"><label>Дата</label><input type="date" id="atDate"></div>
       <div class="field"><label>Время</label><input type="time" id="atTime"></div>
     </div>
+    <div class="field"><label>Приоритет</label>
+      <select id="atPrio"><option value="">Без приоритета</option><option value="high">Высокий</option><option value="med">Средний</option><option value="low">Низкий</option></select>
+    </div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="modal-btn primary" onclick="saveNewTask()">Создать</button>
       <button class="modal-btn secondary" onclick="ge('modalOverlay').classList.add('hidden')">Отмена</button>
@@ -3607,11 +3637,12 @@ function saveNewTask(){
   const cid=ge('atObj')?.value;
   const date=ge('atDate')?.value;
   const time=ge('atTime')?.value;
+  const prio=ge('atPrio')?.value||'';
   if(!text){ge('atText').focus();return;}
   if(!cid){ge('atObj').focus();return;}
   const cl=DB.find(c=>c.id===cid);if(!cl)return;
   if(!cl.tasks)cl.tasks=[];
-  cl.tasks.push({text,deadline:date,time:time||'',done:false,createdAt:Date.now()});
+  cl.tasks.push({text,deadline:date,time:time||'',priority:prio,done:false,createdAt:Date.now()});
   log(cl,`Задача: "${text}"`, '✅','#5b9bd5');
   save();
   ge('modalOverlay').classList.add('hidden');
@@ -4156,7 +4187,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 05.06-6','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 19.06-1','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
