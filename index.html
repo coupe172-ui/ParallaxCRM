@@ -714,7 +714,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 19.06-4</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 19.06-5</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -3218,11 +3218,12 @@ function openTasksTab(){
 // ── KPI: период и хелперы ──
 let ANA_PERIOD='month'; // month | prev | quarter | all
 function anaSetPeriod(p){ANA_PERIOD=p;showAnalytics();}
-function anaRange(){
+function anaRange(p){
+  p=p||ANA_PERIOD;
   const n=new Date(),y=n.getFullYear(),m=n.getMonth();
-  if(ANA_PERIOD==='all')return{from:0,to:Infinity};
-  if(ANA_PERIOD==='prev')return{from:+new Date(y,m-1,1),to:+new Date(y,m,1)};
-  if(ANA_PERIOD==='quarter')return{from:+new Date(y,m-2,1),to:+new Date(y,m+1,1)};
+  if(p==='all')return{from:0,to:Infinity};
+  if(p==='prev')return{from:+new Date(y,m-1,1),to:+new Date(y,m,1)};
+  if(p==='quarter')return{from:+new Date(y,m-2,1),to:+new Date(y,m+1,1)};
   return{from:+new Date(y,m,1),to:+new Date(y,m+1,1)}; // текущий месяц
 }
 function anaIn(ts){const r=anaRange();return ts>=r.from&&ts<r.to;}
@@ -3236,6 +3237,13 @@ function anaDoneISO(c){const ts=anaTransTs(c,['done','closed','support']);if(ts)
 function anaNet(c){return Math.max(0,ctotal(c.rows)-(+c.discount||0));}
 // Дата выручки = «Сдача» (dateDead); если пусто — откат на дату перехода в done/support из истории, далее на «Монтаж»
 function anaRevISO(c){return c.dateDead||anaDoneISO(c)||'';}
+// Блок «Выручка»: свой переключатель периода (по дате «Сдача»)
+let REV_PERIOD='all'; // month | prev | quarter | all
+function revSetPeriod(p){REV_PERIOD=p;showAnalytics();}
+function revTs(c){const d=anaRevISO(c);return d?+new Date(d):0;}
+function revIn(ts){const r=anaRange(REV_PERIOD);return ts>=r.from&&ts<r.to;}
+const REV_FLOW_ST=['paid','prod','sched','done','support']; // в работе + выполнено (с «Аванс получен»)
+const REV_REAL_ST=['done','support'];                       // реализовано (выполненные)
 function showAnalytics(){
   VIEW='analytics';setNav('dash');sbHide();
   const mc=ge('main');
@@ -3290,10 +3298,12 @@ function showAnalytics(){
   // Финансовые показатели по колонкам воронки
   const SIGNED_ST=['paid','prod','sched']; // договор подписан: аванс получен → монтаж назначен
   const sumSigned=liveDB().filter(c=>SIGNED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
-  const sumDone=liveDB().filter(c=>c.status==='done').reduce((s,c)=>s+ctotal(c.rows),0); // выручка: монтаж выполнен
-  const curYear=new Date().getFullYear();
-  const sumYear=liveDB().filter(c=>['done','support'].includes(c.status)&&(anaRevISO(c)||'').slice(0,4)===String(curYear)).reduce((s,c)=>s+ctotal(c.rows),0); // выручка за год: монтаж выполнен + сопровождение, по дате сдачи в этом году
   const doneCount=liveDB().filter(c=>['done','support','closed'].includes(c.status)).length;
+  // ── Выручка за выбранный период (REV_PERIOD), привязка по дате «Сдача» ──
+  const revInScope=liveDB().filter(c=>revIn(revTs(c)));
+  const revFlow=revInScope.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0); // в работе + выполнено (с аванса)
+  const revReal=revInScope.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0); // реализовано (выполненные)
+  const revPerBtns=[['month','Месяц'],['prev','Прошлый'],['quarter','Квартал'],['all','Всё время']];
 
   // ── KPI за выбранный период ──
   const SUCC=['done','closed','support'], TERMALL=['done','closed','support','cancel','claim'], FINNC=['done','closed','support','cancel'];
@@ -3322,13 +3332,36 @@ function showAnalytics(){
     <div class="stats-row" style="margin-bottom:12px">
       <div class="stat-card"><div class="stat-val">${fmtS(totalRevenue)}</div><div class="stat-label">Общая сумма объектов, ₽</div><div class="stat-sub" style="color:var(--mu)">все объекты в таблице</div></div>
       <div class="stat-card sc-ac"><div class="stat-val">${fmtS(sumSigned)}</div><div class="stat-label">Подписанные договоры, ₽</div><div class="stat-sub" style="color:var(--mu)">аванс получен → монтаж назначен</div></div>
-      <div class="stat-card sc-ok"><div class="stat-val">${fmtS(sumDone)}</div><div class="stat-label">Выручка · монтаж выполнен, ₽</div></div>
-      <div class="stat-card" style="border-color:var(--ac)"><div class="stat-val" style="color:var(--ac)">${fmtS(sumYear)}</div><div class="stat-label">Выручка за ${curYear}, ₽</div><div class="stat-sub" style="color:var(--mu)">монтаж выполнен + сопровождение</div></div>
-    </div>
-    <div class="stats-row" style="margin-bottom:16px">
       <div class="stat-card sc-dn"><div class="stat-val">${fmtS(totalDebt)}</div><div class="stat-label">Долг клиентов, ₽</div></div>
       <div class="stat-card"><div class="stat-val" style="color:var(--pu)">${fmtS(avgCheck)}</div><div class="stat-label">Средний чек, ₽</div></div>
       <div class="stat-card sc-ok"><div class="stat-val">${doneCount}</div><div class="stat-label">Выполнено объектов</div>${claimCount?`<div class="stat-sub" style="color:var(--dn)">${claimCount} рекламаций</div>`:''}</div>
+    </div>
+
+    <div class="dash-block" style="margin-bottom:16px">
+      <div class="db-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        💵 Выручка <span style="font-size:11px;color:var(--mu);font-weight:400">(по дате «Сдача»)</span>
+        <div class="view-sw" style="margin-left:auto">
+          ${revPerBtns.map(p=>`<button class="vsw${REV_PERIOD===p[0]?' on':''}" onclick="revSetPeriod('${p[0]}')">${p[1]}</button>`).join('')}
+        </div>
+      </div>
+      <div class="stats-row" style="margin-top:10px">
+        <div class="stat-card sc-ac"><div class="stat-val">${fmtS(revFlow)}</div><div class="stat-label">В работе + выполнено, ₽</div><div class="stat-sub" style="color:var(--mu)">с «Аванс получен» до «Сопровождение»</div></div>
+        <div class="stat-card sc-ok"><div class="stat-val">${fmtS(revReal)}</div><div class="stat-label">Реализовано, ₽</div><div class="stat-sub" style="color:var(--mu)">монтаж выполнен + сопровождение</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        ${TAGS.map(t=>{
+          const tagArr=revInScope.filter(c=>(c.tags||[]).includes(t.id));
+          const f=tagArr.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+          const r=tagArr.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+          return`<div style="border:1px solid var(--br);border-radius:8px;padding:10px 14px;border-left:3px solid ${t.color}">
+            <div style="font-weight:700;color:${t.color};font-size:13px;margin-bottom:6px">${t.label}</div>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx2)">
+              <span>В работе+выполнено: <b style="color:var(--ac)">${fmtS(f)} ₽</b></span>
+              <span>Реализовано: <b style="color:var(--ok)">${fmtS(r)} ₽</b></span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>
 
     <div class="dash-block" style="margin-bottom:16px">
@@ -3401,29 +3434,6 @@ function showAnalytics(){
             <div style="font-size:11px;color:var(--tx2);margin:2px 0">${s.label}</div>
             <div style="font-size:10px;color:var(--mu)">${pct}% от всех</div>
             ${i>0?`<div style="font-size:10px;color:${conv>50?'var(--ok)':'var(--wn)'};margin-top:3px">→ ${conv}% конв.</div>`:''}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <div class="dash-block" style="margin-bottom:16px">
-      <div class="db-title">🪟 По направлениям (теги)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-        ${TAGS.map(t=>{
-          const arr=liveDB().filter(c=>(c.tags||[]).includes(t.id));
-          const sum=arr.reduce((s,c)=>s+ctotal(c.rows),0);
-          const avg=arr.length?Math.round(sum/arr.length):0;
-          const doneN=arr.filter(c=>['done','support','closed'].includes(c.status)).length;
-          const revDone=arr.filter(c=>c.status==='done').reduce((s,c)=>s+ctotal(c.rows),0);
-          return`<div style="border:1px solid var(--br);border-radius:8px;padding:12px 14px;border-left:3px solid ${t.color}">
-            <div style="font-weight:700;color:${t.color};font-size:13px;margin-bottom:7px">${t.label}</div>
-            <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--tx2)">
-              <span>Объектов: <b style="color:var(--tx)">${arr.length}</b></span>
-              <span>Выполнено: <b style="color:var(--tx)">${doneN}</b></span>
-              <span>Сумма: <b style="color:var(--tx)">${fmtS(sum)} ₽</b></span>
-              <span>Выручка: <b style="color:var(--ac)">${fmtS(revDone)} ₽</b></span>
-              <span>Ср. чек: <b style="color:var(--pu)">${fmtS(avg)} ₽</b></span>
-            </div>
           </div>`;
         }).join('')}
       </div>
@@ -4221,7 +4231,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 19.06-4','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 19.06-5','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
