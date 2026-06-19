@@ -714,7 +714,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 19.06-2</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 19.06-4</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -3234,6 +3234,8 @@ function anaTransTs(c,ids){let best=0;(c.tl||[]).forEach(ev=>{const m=/→\s*"([
 function anaCloseTs(c){return anaTransTs(c,['done','closed','support','cancel','claim'])||c.updatedAt||c.createdAt||0;}
 function anaDoneISO(c){const ts=anaTransTs(c,['done','closed','support']);if(ts){const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}return c.dateInstall||'';}
 function anaNet(c){return Math.max(0,ctotal(c.rows)-(+c.discount||0));}
+// Дата выручки = «Сдача» (dateDead); если пусто — откат на дату перехода в done/support из истории, далее на «Монтаж»
+function anaRevISO(c){return c.dateDead||anaDoneISO(c)||'';}
 function showAnalytics(){
   VIEW='analytics';setNav('dash');sbHide();
   const mc=ge('main');
@@ -3258,6 +3260,14 @@ function showAnalytics(){
   });
   const maxRev=Math.max(...monthData.map(m=>m.revenue),1);
   const maxCount=Math.max(...monthData.map(m=>m.count),1);
+  // Выручка по месяцам = выполненные объекты (Монтаж выполнен + Сопровождение), привязка по дате «Сдача» (anaRevISO)
+  const REV_ST=['done','support'];
+  const monthRev=months.map(m=>liveDB().filter(c=>{
+    if(!REV_ST.includes(c.status))return false;
+    const di=anaRevISO(c);if(!di)return false;
+    const d=new Date(di);return d.getFullYear()===m.year&&d.getMonth()===m.month;
+  }).reduce((s,c)=>s+ctotal(c.rows),0));
+  const maxMRev=Math.max(...monthRev,1);
 
   // Funnel conversion
   const total=liveDB().length||1;
@@ -3282,7 +3292,7 @@ function showAnalytics(){
   const sumSigned=liveDB().filter(c=>SIGNED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
   const sumDone=liveDB().filter(c=>c.status==='done').reduce((s,c)=>s+ctotal(c.rows),0); // выручка: монтаж выполнен
   const curYear=new Date().getFullYear();
-  const sumYear=liveDB().filter(c=>c.status==='support'&&(anaDoneISO(c)||'').slice(0,4)===String(curYear)).reduce((s,c)=>s+ctotal(c.rows),0); // выручка за год: сопровождение, завершённые в этом году
+  const sumYear=liveDB().filter(c=>['done','support'].includes(c.status)&&(anaRevISO(c)||'').slice(0,4)===String(curYear)).reduce((s,c)=>s+ctotal(c.rows),0); // выручка за год: монтаж выполнен + сопровождение, по дате сдачи в этом году
   const doneCount=liveDB().filter(c=>['done','support','closed'].includes(c.status)).length;
 
   // ── KPI за выбранный период ──
@@ -3313,7 +3323,7 @@ function showAnalytics(){
       <div class="stat-card"><div class="stat-val">${fmtS(totalRevenue)}</div><div class="stat-label">Общая сумма объектов, ₽</div><div class="stat-sub" style="color:var(--mu)">все объекты в таблице</div></div>
       <div class="stat-card sc-ac"><div class="stat-val">${fmtS(sumSigned)}</div><div class="stat-label">Подписанные договоры, ₽</div><div class="stat-sub" style="color:var(--mu)">аванс получен → монтаж назначен</div></div>
       <div class="stat-card sc-ok"><div class="stat-val">${fmtS(sumDone)}</div><div class="stat-label">Выручка · монтаж выполнен, ₽</div></div>
-      <div class="stat-card" style="border-color:var(--ac)"><div class="stat-val" style="color:var(--ac)">${fmtS(sumYear)}</div><div class="stat-label">Выручка за ${curYear} · сопровождение, ₽</div></div>
+      <div class="stat-card" style="border-color:var(--ac)"><div class="stat-val" style="color:var(--ac)">${fmtS(sumYear)}</div><div class="stat-label">Выручка за ${curYear}, ₽</div><div class="stat-sub" style="color:var(--mu)">монтаж выполнен + сопровождение</div></div>
     </div>
     <div class="stats-row" style="margin-bottom:16px">
       <div class="stat-card sc-dn"><div class="stat-val">${fmtS(totalDebt)}</div><div class="stat-label">Долг клиентов, ₽</div></div>
@@ -3366,6 +3376,17 @@ function showAnalytics(){
             <div style="font-size:9px;color:var(--mu);white-space:nowrap">${m.label}</div>
           </div>`).join('')}
         </div>
+      </div>
+    </div>
+
+    <div class="dash-block" style="margin-bottom:16px">
+      <div class="db-title">💵 Выручка по месяцам (выполнено, по дате сдачи)</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:8px">
+        ${months.map((m,i)=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="font-size:9px;color:var(--ac)">${monthRev[i]?fmtS(monthRev[i]):''}</div>
+          <div style="width:100%;background:var(--ac);border-radius:3px 3px 0 0;min-height:4px;height:${Math.round(monthRev[i]/maxMRev*88)}px;opacity:.85"></div>
+          <div style="font-size:9px;color:var(--mu);white-space:nowrap">${m.label}</div>
+        </div>`).join('')}
       </div>
     </div>
 
@@ -4200,7 +4221,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 19.06-2','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 19.06-4','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
