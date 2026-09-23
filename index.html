@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Parallax CRM">
@@ -53,7 +53,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 .hdr-nav{display:flex;gap:0;padding:0 8px;}
 .hn{background:none;border:none;color:var(--mu);padding:0 14px;font-family:"Golos Text",sans-serif;font-size:12px;cursor:pointer;height:48px;display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.2px;}
 .hn:hover{color:var(--tx2);}
-.hn.active{color:var(--ac);border-bottom-color:var(--ac);}
+.hn.on{color:var(--ac);border-bottom-color:var(--ac);}
 .hn .nbadge{background:var(--dn);color:#fff;border-radius:10px;padding:1px 5px;font-size:11px;font-weight:700;line-height:1.4;}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px;}
 .syncbadge{font-size:11px;padding:0 8px;transition:color .3s;}
@@ -701,6 +701,13 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   .pl-corner,.pl-rowlabel{flex-basis:84px;width:84px;font-size:11px;}
   .pl-block{font-size:10px;padding:2px 4px;}
 }
+
+/* Small usability changes; retain the existing layout and palette. */
+.build-label{display:block;font-family:"Golos Text",sans-serif;font-size:10px;letter-spacing:.2px;line-height:1.2;color:var(--mu);}
+.logo{line-height:1;}
+.login-hint{color:var(--mu);}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:2px;}
+.stat-val,.fv,.oi-sum{font-variant-numeric:tabular-nums;}
 </style>
 </head>
 <body>
@@ -714,7 +721,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 19.06-5</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 23.09-1</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -722,7 +729,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX</div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 23.09-1</span></div>
   <nav class="hdr-nav">
     <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Дашборд</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
@@ -732,7 +739,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
     <button class="hn" id="nv-cl" onclick="showClients()">&#128101; Клиенты</button>
   </nav>
   <div class="hdr-right">
-    <span id="syncbadge" class="syncbadge"></span>
+    <span id="syncbadge" class="syncbadge" role="status" aria-live="polite"></span>
     <button class="hbtn" onclick="syncNow()">&#9729; Синхронизировать</button>
     <button class="hbtn" onclick="doExport()">&#128190; Экспорт</button>
     <button class="hbtn" onclick="importJSON()">&#128229; Импорт</button>
@@ -772,7 +779,7 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   <button class="mn-btn" id="mn-cal" onclick="showCalendar()"><span class="mn-ic">📅</span>Календарь</button>
   <button class="mn-btn" id="mn-plan" onclick="showPlanner()"><span class="mn-ic">📋</span>План</button>
   <button class="mn-btn" id="mn-cl" onclick="showClients()"><span class="mn-ic">👥</span>Клиенты</button>
-  <button class="mn-btn" onclick="syncNow()" style="color:var(--ac)"><span class="mn-ic">☁</span>Синхр.</button>
+  <button class="mn-btn" id="mn-sync" onclick="syncNow()" style="color:var(--ac)"><span class="mn-ic">☁</span><span id="mobileSyncLabel">Синхр.</span></button>
 </nav>
 
 <script>
@@ -819,11 +826,18 @@ function loadStatuses(){
   }catch(e){}
   return DEFAULT_STATUSES.map(s=>({...s}));
 }
-function saveStatuses(){
+let STATUS_TS=+(localStorage.getItem('px_statuses_ts')||0);
+let BRIGADE_TS=+(localStorage.getItem('px_brigades_ts')||0);
+let APP_READY=false;
+function saveStatuses(changed=true){
+  if(changed)STATUS_TS=Math.max(Date.now(),STATUS_TS+1);
+  localStorage.setItem('px_statuses_ts',String(STATUS_TS));
   const data=JSON.stringify(STATUSES);
   localStorage.setItem('px_statuses',data);
   localStorage.setItem('px_statuses_backup',data);
+  Object.keys(SM).forEach(k=>delete SM[k]);
   STATUSES.forEach(s=>{SM[s.id]=s;});
+  if(APP_READY&&changed)save();
 }
 // Миграция: в старых сохранённых/синхронизированных колонках нет «Сопровождение» — вставляем после «Монтаж выполнен»
 function ensureSupportColumn(){
@@ -831,7 +845,7 @@ function ensureSupportColumn(){
   const col={id:'support',label:'Сопровождение',color:'#3a9c8f',bg:'rgba(58,156,143,.16)'};
   const di=STATUSES.findIndex(s=>s.id==='done');
   if(di>=0)STATUSES.splice(di+1,0,col);else STATUSES.push(col);
-  saveStatuses();
+  saveStatuses(false);
 }
 function exportColumns(){
   const code=btoa(unescape(encodeURIComponent(JSON.stringify(STATUSES))));
@@ -866,7 +880,12 @@ function loadBrigades(){
   return['Бригада 1','Бригада 2','Бригада 3','Бригада 4'];
 }
 let BRIGADES=loadBrigades();
-function saveBrigades(){try{localStorage.setItem('px_brigades',JSON.stringify(BRIGADES));}catch(e){}}
+function saveBrigades(changed=true){
+  if(changed)BRIGADE_TS=Math.max(Date.now(),BRIGADE_TS+1);
+  localStorage.setItem('px_brigades_ts',String(BRIGADE_TS));
+  localStorage.setItem('px_brigades',JSON.stringify(BRIGADES));
+  if(APP_READY&&changed)save();
+}
 // Нормализованный список бригад объекта (с миграцией со старого cl.brigade)
 function clBrigs(cl){
   const a=Array.isArray(cl.brigades)?cl.brigades:(cl.brigade?[cl.brigade]:[]);
@@ -922,20 +941,22 @@ function checkAuth(){
 }
 
 function init(){
+  if(APP_READY)return;
+  APP_READY=true;
   purgeTrash();
   renderList();
   showDash();
-  if(navigator.onLine){pullSheets().then(()=>pushSheets());}
+  if(navigator.onLine){pushSheets();}
   else{notify('warn','Офлайн','Работаете без интернета');}
   setTimeout(checkAlerts,2500);
   // Autosave
-  setInterval(()=>{if(DB.length)try{localStorage.setItem('px_v2',JSON.stringify(DB));}catch(e){};},30000);
+  // Inputs are persisted immediately; no delayed form reads on navigation.
   // Online/offline
   window.addEventListener('offline',()=>{
-    ge('syncbadge').textContent='📴 Офлайн';ge('syncbadge').style.color='var(--wn)';});
+    setSS('offline');});
   window.addEventListener('online',()=>{
     ge('syncbadge').textContent='🔄 Подключено';ge('syncbadge').style.color='var(--ok)';
-    setTimeout(()=>{pullSheets().then(()=>pushSheets());},1000);});
+    setTimeout(()=>{pushSheets();},1000);});
 }
 
 let DB=(function(){
@@ -952,7 +973,7 @@ let DB=(function(){
 let KB_SEARCH_Q='';
 let KB_SHOW_TASKS=localStorage.getItem('px_kb_tasks')==='1'; // показывать на карточках текст задач, а не просто счётчик
 let KB_TAG_FILTER=localStorage.getItem('px_kb_tag')||''; // фильтр канбана по тегу (Потолки/Карнизы/…)
-let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null,AUTOSAVE_T=null;
+let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null;
 // Склонение числительных: plural(1,'задача','задачи','задач') → «задача»
 function plural(n,one,few,many){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return many;if(n1>1&&n1<5)return few;if(n1===1)return one;return many;}
 function toggleKbTasks(){KB_SHOW_TASKS=!KB_SHOW_TASKS;localStorage.setItem('px_kb_tasks',KB_SHOW_TASKS?'1':'0');showKanban();}
@@ -1012,36 +1033,44 @@ function clientLabel(c){
   return proj||client||'Без названия';
 }
 function ctotal(rows){return(rows||[]).reduce((s,r)=>s+(+r.price||0)*(+r.qty||0),0);}
-function liveDB(){return DB.filter(c=>!c.deletedAt);}
+function objectTotal(c){return Math.max(0,ctotal(c.rows)-Math.max(0,+c.discount||0));}
+function liveDB(){return DB.filter(c=>!c.deletedAt&&!c.purgedAt);}
 const TRASH_DAYS=30;
-function trashCount(){return DB.filter(c=>c.deletedAt).length;}
+function trashCount(){return DB.filter(c=>c.deletedAt&&!c.purgedAt).length;}
+function deletionRecord(c){
+  const ts=Date.now();
+  return {id:c.id,deletedAt:c.deletedAt||ts,purgedAt:ts,updatedAt:ts};
+}
 function purgeTrash(){
   const cutoff=Date.now()-TRASH_DAYS*864e5;
-  const before=DB.length;
-  DB=DB.filter(c=>!(c.deletedAt&&c.deletedAt<cutoff));
-  if(DB.length!==before)save();
+  let changed=false;
+  DB=DB.map(c=>{
+    if(c.deletedAt&&!c.purgedAt&&c.deletedAt<cutoff){changed=true;return deletionRecord(c);}
+    return c;
+  });
+  if(changed)save();
 }
 function updTrashBadge(){const b=ge('trashBtn');if(b){const n=trashCount();b.textContent=n?`🗑 ${n}`:'🗑';}}
 function restoreObj(id){
-  const cl=DB.find(c=>c.id===id);if(!cl)return;
+  const cl=DB.find(c=>c.id===id);if(!cl||cl.purgedAt)return;
   delete cl.deletedAt;cl.updatedAt=Date.now();save();renderList();showTrash();
   notify('ok','Восстановлено','Объект возвращён из корзины');
 }
 function purgeObj(id){
   if(!confirm('Удалить объект НАВСЕГДА? Действие необратимо.'))return;
-  DB=DB.filter(c=>c.id!==id);save();renderList();showTrash();
+  DB=DB.map(c=>c.id===id?deletionRecord(c):c);save();renderList();showTrash();
   notify('warn','Удалено навсегда','Объект удалён безвозвратно');
 }
 function emptyTrash(){
   const n=trashCount();if(!n)return;
   if(!confirm(`Очистить корзину? ${n} объект(ов) будут удалены НАВСЕГДА.`))return;
-  DB=DB.filter(c=>!c.deletedAt);save();renderList();showTrash();
+  DB=DB.map(c=>c.deletedAt&&!c.purgedAt?deletionRecord(c):c);save();renderList();showTrash();
   notify('warn','Корзина очищена','Удалено навсегда: '+n);
 }
 function showTrash(){
   VIEW='trash';sbHide();
   const mc=ge('main');
-  const items=DB.filter(c=>c.deletedAt).sort((a,b)=>b.deletedAt-a.deletedAt);
+  const items=DB.filter(c=>c.deletedAt&&!c.purgedAt).sort((a,b)=>b.deletedAt-a.deletedAt);
   mc.innerHTML=`<div class="dash fade-in" style="overflow-y:auto;flex:1;padding:18px 22px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
       <div class="dash-title" style="margin-bottom:0">🗑 КОРЗИНА</div>
@@ -1052,7 +1081,7 @@ function showTrash(){
     ${items.length===0?`<div style="color:var(--mu);text-align:center;padding:40px;font-size:14px">Корзина пуста</div>`:
       items.map(c=>{
         const left=Math.max(0,Math.ceil((c.deletedAt+TRASH_DAYS*864e5-Date.now())/864e5));
-        const tot=ctotal(c.rows);
+        const tot=objectTotal(c);
         return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--br);border-radius:8px;margin-bottom:8px;background:var(--sf)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cname(c))}</div>
@@ -1071,7 +1100,7 @@ function clDebt(c){
   const aw=STATUSES.findIndex(s=>s.id==='awaiting');
   const si=STATUSES.findIndex(s=>s.id===c.status);
   if(aw>=0&&si>=0&&si<aw)return 0;
-  return Math.max(0,ctotal(c.rows)-(+c.paid||0));
+  return Math.max(0,objectTotal(c)-(+c.paid||0));
 }
 
 function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
@@ -1081,34 +1110,72 @@ function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
 // ═══════════════════════════════════════════════
 function setSS(s){
   const el=ge('syncbadge');if(!el)return;
-  const m={idle:{t:'',c:'var(--mu)'},saving:{t:'⟳ Сохранение...',c:'var(--ac)'},saved:{t:'✓ Синхронизировано',c:'var(--ok)'},error:{t:'⚠ Ошибка',c:'var(--dn)'},loading:{t:'⟳ Загрузка...',c:'var(--ac)'}};
+  const m={idle:{t:'',c:'var(--mu)'},pending:{t:'✓ На устройстве · ожидает отправки',c:'var(--mu)'},offline:{t:'📴 Офлайн',c:'var(--wn)'},saving:{t:'⟳ Сохранение...',c:'var(--ac)'},saved:{t:'✓ Синхронизировано',c:'var(--ok)'},error:{t:'⚠ Ошибка',c:'var(--dn)'},loading:{t:'⟳ Загрузка...',c:'var(--ac)'}};
   const st=m[s]||m.idle;el.textContent=st.t;el.style.color=st.c;
+  const mobile=ge('mobileSyncLabel'),button=ge('mn-sync');
+  if(mobile)mobile.textContent=({pending:'Локально',offline:'Офлайн',saving:'Отправка',saved:'В облаке',error:'Ошибка',loading:'Загрузка'})[s]||'Синхр.';
+  if(button){button.style.color=st.c;button.title=st.t||'Синхронизировать';}
 }
-// SYNCED — в этой сессии уже был успешный pull (облако слито в local). PULLP — текущий pull «в полёте».
-let SYNCED=false, PULLP=null;
-async function pushSheets(){
-  // save_all перезаписывает облако ЦЕЛИКОМ. Пока не подтянули и не слили чужие изменения — отправлять нельзя (затрём чужое/дефолтами).
-  if(!SYNCED){
-    await pullSheets();
-    if(!SYNCED){setSS('error');return false;} // сервер недоступен — не рискуем перезаписать облако
-  }
-  setSS('saving');
-  try{
-    const config={id:'__config__',statuses:STATUSES,brigades:BRIGADES};
-    const rows=[...DB.map(c=>[JSON.stringify(c)]),[JSON.stringify(config)]];
-    const r=await fetch(GS,{method:'POST',body:JSON.stringify({action:'save_all',rows})});
-    const d=await r.json();
-    if(d.ok){setSS('saved');setTimeout(()=>setSS('idle'),3000);return true;}else throw 0;
-  }catch{setSS('error');return false;}
+let PULLP=null, PUSHP=null, PUSH_AGAIN=false, SAVE_REV=0;
+function mergeRecords(local,incoming){
+  const merged=new Map(local.map(c=>[c.id,c]));
+  incoming.forEach(rc=>{
+    const lc=merged.get(rc.id);
+    if(lc?.purgedAt)return;
+    if(!lc||rc.purgedAt||(+rc.updatedAt||0)>(+lc.updatedAt||0))merged.set(rc.id,rc);
+  });
+  return Array.from(merged.values());
 }
-// Ручная синхронизация: сначала забираем чужие изменения (слияние), затем отправляем свои
+function validateRecords(records){
+  if(!Array.isArray(records))throw new Error('Ожидается массив объектов');
+  const ids=new Set();
+  return records.map(c=>{
+    if(!c||typeof c!=='object'||typeof c.id!=='string'||!c.id||c.id==='__config__'||ids.has(c.id))
+      throw new Error('Некорректный или повторяющийся ID объекта');
+    ids.add(c.id);
+    for(const key of ['updatedAt','createdAt','deletedAt','purgedAt']){
+      if(c[key]!=null&&(!Number.isFinite(+c[key])||+c[key]<0))throw new Error('Некорректная дата объекта');
+    }
+    for(const key of ['rows','tasks','files','tags','tl','brigades']){
+      if(c[key]!=null&&!Array.isArray(c[key]))throw new Error('Некорректное поле '+key);
+    }
+    for(const key of ['rows','tasks','files','tl']){
+      if((c[key]||[]).some(v=>!v||typeof v!=='object'||Array.isArray(v)))throw new Error('Некорректное поле '+key);
+    }
+    if(c.purgedAt)return {id:c.id,deletedAt:c.deletedAt||c.purgedAt,purgedAt:c.purgedAt,updatedAt:c.updatedAt||c.purgedAt};
+    return {...c,rows:c.rows||[],tasks:c.tasks||[],files:c.files||[],tags:c.tags||[],tl:c.tl||[]};
+  });
+}
+function pushSheets(){
+  if(!navigator.onLine){setSS('offline');return Promise.resolve(false);}
+  if(PUSHP){PUSH_AGAIN=true;return PUSHP;}
+  PUSHP=(async()=>{
+    let ok=false;
+    do{
+      PUSH_AGAIN=false;
+      if(!await pullSheets())return false;
+      setSS('saving');
+      try{
+        const config={id:'__config__',statuses:STATUSES,brigades:BRIGADES,statusesUpdatedAt:STATUS_TS,brigadesUpdatedAt:BRIGADE_TS};
+        const revision=SAVE_REV;
+        const rows=[...DB.map(c=>[JSON.stringify(c)]),[JSON.stringify(config)]];
+        const r=await fetch(GS,{method:'POST',body:JSON.stringify({action:'save_all',rows})});
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const d=await r.json();
+        if(d.ok!==true)throw new Error('Сервер не подтвердил запись');
+        ok=true;setSS(revision===SAVE_REV?'saved':'pending');
+      }catch(e){console.warn('Sync:',e);setSS('error');return false;}
+    }while(PUSH_AGAIN);
+    return ok;
+  })().finally(()=>{PUSHP=null;});
+  return PUSHP;
+}
 async function syncNow(){
-  await pullSheets();
+  clearTimeout(SYNCT);
   const ok=await pushSheets();
-  notify(ok?'ok':'err', ok?'Синхронизировано':'Ошибка синхронизации',
-    ok?'Изменения отправлены на сервер':'Не удалось отправить. Проверьте интернет и повторите.');
+  notify(ok?'ok':'err',ok?'Синхронизировано':'Ошибка синхронизации',
+    ok?'Изменения отправлены на сервер':'Сервер не подтвердил синхронизацию. Повторите позже.');
 }
-// Один pull «в полёте» на всех вызывающих — иначе старт + отложенный push могут запустить два слияния сразу
 function pullSheets(){
   if(PULLP)return PULLP;
   PULLP=_pullSheets().finally(()=>{PULLP=null;});
@@ -1118,47 +1185,56 @@ async function _pullSheets(){
   setSS('loading');
   try{
     const r=await fetch(GS+'?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    if(d.ok)SYNCED=true; // сервер на связи и вернул валидный ответ — пуш теперь безопасен (даже если база пуста: первое устройство засеет облако)
-    if(d.ok&&Array.isArray(d.data)&&d.data.length){
-      const loaded=d.data.flat().filter(Boolean)
-        .map(s=>{try{return JSON.parse(s);}catch{return null;}}).filter(Boolean);
-      if(loaded.length){
-        // Применяем конфиг колонок если есть
-        const cfg=loaded.find(c=>c.id==='__config__');
-        let cfgNote='';
-        if(cfg&&Array.isArray(cfg.statuses)&&cfg.statuses.length){
-          STATUSES=cfg.statuses;saveStatuses();cfgNote=' + колонки';
-        }else{cfgNote=' (колонки: нет в базе)';}
-        ensureSupportColumn();
-        // Бригады планировщика тоже из общего конфига — иначе на др. устройстве объекты «слетают» в «Без бригады»
-        if(cfg&&Array.isArray(cfg.brigades)&&cfg.brigades.length){BRIGADES=cfg.brigades;saveBrigades();}
-        // Слияние по updatedAt: локальные объекты сохраняются, по id берём более свежую версию
-        const merged=new Map(DB.map(c=>[c.id,c]));
-        loaded.filter(c=>c.id!=='__config__').forEach(rc=>{
-          if(!rc||!rc.id)return;
-          const lc=merged.get(rc.id);
-          if(!lc||(+rc.updatedAt||0)>=(+lc.updatedAt||0)) merged.set(rc.id,rc);
-        });
-        merged.delete('__config__');
-        DB=Array.from(merged.values());
-        // Сохраняем ТОЛЬКО в localStorage, без повторной отправки в Sheets
-        try{localStorage.setItem('px_v2',JSON.stringify(DB));}catch(e){console.warn('save error:',e);}
-        setSS('saved');setTimeout(()=>setSS('idle'),2000);
-        renderList();
-        if(VIEW==='kanban')renderKB();
-        else if(VIEW==='dash')showDash();
-        else if(VIEW==='planner')renderPlanner();
-        notify('ok','Синхронизация','Загружено '+DB.length+' объектов'+cfgNote);
-        return;
-      }
-    }setSS('idle');
-  }catch{setSS('error');}
+    if(d.ok!==true||!Array.isArray(d.data))throw new Error('Некорректный ответ сервера');
+    // A damaged row must stop the upload, not silently disappear from save_all.
+    const loaded=d.data.flat().filter(s=>s!==''&&s!=null).map(s=>JSON.parse(s));
+    if(loaded.some(c=>!c||typeof c!=='object'))throw new Error('Повреждённая запись');
+    const configs=loaded.filter(c=>c.id==='__config__');
+    if(configs.length>1)throw new Error('Повтор настроек');
+    const cfg=configs[0];
+    const incoming=validateRecords(loaded.filter(c=>c.id!=='__config__'));
+    if(cfg){
+      if(!Array.isArray(cfg.statuses)||!cfg.statuses.length||cfg.statuses.some(s=>!s||typeof s.id!=='string'||typeof s.label!=='string'))throw new Error('Повреждены колонки');
+      if(cfg.brigades!=null&&(!Array.isArray(cfg.brigades)||cfg.brigades.some(b=>typeof b!=='string')))throw new Error('Повреждены бригады');
+    }
+    const previous=DB.find(c=>c.id===CID);
+    DB=mergeRecords(DB,incoming);
+    if(cfg&&(+cfg.statusesUpdatedAt||0)>=STATUS_TS){
+      STATUSES=cfg.statuses;STATUS_TS=+cfg.statusesUpdatedAt||0;saveStatuses(false);ensureSupportColumn();
+    }
+    if(cfg?.brigades&&(+cfg.brigadesUpdatedAt||0)>=BRIGADE_TS){
+      BRIGADES=cfg.brigades;BRIGADE_TS=+cfg.brigadesUpdatedAt||0;saveBrigades(false);
+    }
+    if(!persistDB())throw new Error('Не удалось сохранить результат загрузки');
+    renderList();
+    const current=DB.find(c=>c.id===CID);
+    if(ge('oc')&&current!==previous){
+      if(!current||current.deletedAt||current.purgedAt){CID=null;showDash();}
+      else{EROWS=current.rows.map(r=>({...r}));renderObjView(current);notify('info','Карточка обновлена','Загружена более свежая версия с другого устройства');}
+    }else if(VIEW==='kanban')renderKB();
+    else if(VIEW==='dash')showDash();
+    else if(VIEW==='planner')renderPlanner();
+    else if(VIEW==='analytics')showAnalytics();
+    setSS('idle');return true;
+  }catch(e){console.warn('Sync:',e);setSS('error');return false;}
+}
+function persistDB(){
+  try{
+    const data=JSON.stringify(DB),prev=localStorage.getItem('px_v2');
+    if(prev&&prev!==data){try{localStorage.setItem('px_v2_backup',prev);}catch(e){console.warn('Backup:',e);}}
+    localStorage.setItem('px_v2',data);return true;
+  }catch(e){
+    notify('err','Не удалось сохранить на устройстве','Экспортируйте данные перед закрытием страницы. Проверьте свободное место.');
+    return false;
+  }
 }
 function save(){
   // Integrity check before save
   if(!Array.isArray(DB)){console.error('DB is not array!');return;}
   DB.forEach(c=>{
+    if(c.purgedAt)return;
     if(!c.id)c.id=Date.now().toString()+Math.random().toString(36).slice(2);
     if(!c.rows)c.rows=[];
     if(!c.tl)c.tl=[];
@@ -1168,17 +1244,12 @@ function save(){
     if(!c.status)c.status='lead';
     if(!c.type)c.type='fiz';
   });
-  // Backup to secondary key (insurance)
-  try{
-    const prev=localStorage.getItem('px_v2');
-    if(prev) localStorage.setItem('px_v2_backup',prev);
-    localStorage.setItem('px_v2',JSON.stringify(DB));
-  }catch(e){
-    console.error('localStorage save failed:',e);
-    notify('err','Хранилище переполнено','Не удалось сохранить локально. Удалите крупные файлы из объектов, чтобы освободить место.');
-  }
+  const stored=persistDB();
+  SAVE_REV++;setSS(stored?'pending':'error');
   clearTimeout(SYNCT);SYNCT=setTimeout(pushSheets,1500);
+  return stored;
 }
+
 function log(cl,act,ic='📝',col='#888'){if(!cl.tl)cl.tl=[];cl.tl.unshift({ts:Date.now(),act,ic,col});cl.updatedAt=Date.now();}
 
 // ═══════════════════════════════════════════════
@@ -1271,7 +1342,7 @@ function renderList(){
   if(!items.length){el.innerHTML=`<div class="sb-empty">${q?'Ничего не найдено по запросу «'+q+'»':'Объектов не найдено'}</div>`;return;}
   const searchHint=q?`<div style="font-size:10px;color:var(--ac);padding:4px 11px 2px;font-weight:600">Найдено: ${items.length} из ${liveDB().length}</div>`:'';
   el.innerHTML=searchHint+items.map(c=>{
-    const st=gst(c);const tot=ctotal(c.rows);
+    const st=gst(c);const tot=objectTotal(c);
     const late=isLate(c.dateDead)&&!['closed','done','cancel','support'].includes(c.status);
     const proj=c.projectName&&c.projectName.trim();
     const client=c.type==='fiz'?(c.fio||''):(c.orgName||'');
@@ -1304,8 +1375,8 @@ function showDash(){
   const today=new Date().toISOString().split('T')[0];
   const active=liveDB().filter(c=>c.status!=='closed');
   const COMPLETED_ST=['done','closed','support'];
-  const totRev=liveDB().filter(c=>c.status==='done').reduce((s,c)=>s+ctotal(c.rows),0);
-  const pipeline=liveDB().filter(c=>!COMPLETED_ST.includes(c.status)&&c.status!=='cancel').reduce((s,c)=>s+ctotal(c.rows),0);
+  const totRev=liveDB().filter(c=>['done','support','closed'].includes(c.status)).reduce((s,c)=>s+objectTotal(c),0);
+  const pipeline=liveDB().filter(c=>!COMPLETED_ST.includes(c.status)&&c.status!=='cancel').reduce((s,c)=>s+objectTotal(c),0);
   const totDebt=liveDB().reduce((s,c)=>s+clDebt(c),0);
   const todayI=liveDB().filter(c=>c.dateInstall===today);
   const todayM=liveDB().filter(c=>c.dateMeasure===today);
@@ -1389,11 +1460,11 @@ function renderKB(){
         const phone=(c.phone||c.orgPhone||'').replace(/\D/g,'');
         const addr=(c.objAddr||c.addr||c.orgAddr||'').toLowerCase();
         const num=(c.docNum||'').toLowerCase();
-        const total=ctotal(c.rows).toString();
+        const total=objectTotal(c).toString();
         return name.includes(kbQ)||(!!kbQNum&&phone.includes(kbQNum))||addr.includes(kbQ)||num.includes(kbQ)||total.includes(kbQ);
       });
     }
-    const csum=cards.reduce((s,c)=>s+ctotal(c.rows),0);
+    const csum=cards.reduce((s,c)=>s+objectTotal(c),0);
     return`<div class="kb-col" id="kc-${st.id}" data-col-id="${st.id}"
       draggable="true"
       ondragstart="colDragStart(event,'${st.id}')"
@@ -1420,7 +1491,7 @@ function renderKB(){
   }).join('');
 }
 function kcardHTML(c,st){
-  const tot=ctotal(c.rows);const paid=+c.paid||0;const debt=clDebt(c);
+  const tot=objectTotal(c);const paid=+c.paid||0;const debt=clDebt(c);
   const late=isLate(c.dateDead)&&!['closed','done','cancel','support'].includes(c.status);
   const tod=isToday(c.dateInstall);
   const ph=c.phone||c.orgPhone||'';const tg=c.tg||c.orgTg||'';
@@ -1582,7 +1653,7 @@ function showTable(){
         </tr></thead>
         <tbody>
           ${getSortedDB().map((c,i)=>{
-            const st=gst(c);const tot=ctotal(c.rows);const paid=+c.paid||0;const debt=clDebt(c);
+            const st=gst(c);const tot=objectTotal(c);const paid=+c.paid||0;const debt=clDebt(c);
             const late=isLate(c.dateDead)&&!['closed','done','cancel','support'].includes(c.status);
             return`<tr class="${c.id===CID?'sel':''}" onclick="openObjTbl('${c.id}')" style="cursor:pointer">
               <td style="color:var(--mu);font-size:10px">${i+1}</td>
@@ -1646,7 +1717,7 @@ function renderObjView(cl){
   // Apply saved card width
   document.documentElement.style.setProperty('--oc-width',(parseInt(localStorage.getItem('px_oc_width')||'370'))+'px');
   mc.innerHTML=`<div class="ov fade-in">
-    <div class="oc" id="oc">
+    <div class="oc" id="oc" data-object-id="${escA(cl.id)}">
       <div class="oc-resizer" id="ocResizer"></div>
       <div class="oc-hd">
         <div class="oc-ttl">Объект</div>
@@ -1682,7 +1753,9 @@ function renderObjView(cl){
   renderCardBody(cl);
   swOTab(OBJTAB,document.querySelector('.otab.on'));
   setTimeout(initResizer,0);
-  setTimeout(()=>{const oc=ge('oc');if(oc)oc.addEventListener('input',autoSave,{passive:true});},0);
+  const oc=ge('oc');
+  oc.addEventListener('input',autoSave);
+  oc.addEventListener('change',autoSave);
 }
 
 function swOTab(t,el){
@@ -1713,14 +1786,11 @@ function renderCardBody(cl){
   const b=ge('cbody');if(!b)return;
   b.innerHTML=cl.type==='fiz'?cardFiz(cl):cardYur(cl);
   renderRows();
-  b.querySelectorAll('input,select,textarea').forEach(el=>{
-    el.addEventListener('input',()=>{syncCard();renderDocD();});
-    el.addEventListener('change',()=>{syncCard();renderDoc();});
-  });
+
 }
 
 function cardFiz(cl){
-  const tot=ctotal(cl.rows),advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
+  const tot=objectTotal(cl),advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
   const adv=tot*advPct/100,paid=+cl.paid||0,debt=clDebt(cl);
   const payPct=tot>0?Math.min(100,Math.round(paid/tot*100)):0;
   return sec('Проект','proj',`
@@ -1813,7 +1883,7 @@ function cardFiz(cl){
 }
 
 function cardYur(cl){
-  const tot=ctotal(cl.rows),advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
+  const tot=objectTotal(cl),advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
   const paid=+cl.paid||0,debt=clDebt(cl),payPct=tot>0?Math.min(100,Math.round(paid/tot*100)):0;
   return sec('Проект','proj',`
     <div class="field"><label>Название проекта</label><input id="f_projname" value="${escA(cl.projectName)}" placeholder="Например: Офис ООО Ромашка, склад ул.Ленина..."></div>
@@ -1919,8 +1989,8 @@ function renderRows(){
     <td><button class="delbtn" onclick="rmRow(${i})">×</button></td>
   </tr>`).join('');
 }
-function addRow(){EROWS.push({name:'',price:'',qty:'1',unit:'шт.'});renderRows();renderDoc();}
-function rmRow(i){EROWS.splice(i,1);renderRows();renderDoc();}
+function addRow(){EROWS.push({name:'',price:'',qty:'1',unit:'шт.'});renderRows();autoSave();renderDoc();}
+function rmRow(i){EROWS.splice(i,1);renderRows();autoSave();renderDoc();}
 function syncRest(){const a=parseInt(ge('f_adv')?.value)||50;const r=ge('f_rest');if(r)r.value=100-a;}
 
 // ═══════════════════════════════════════════════
@@ -1938,7 +2008,8 @@ function togTag(tid){
 }
 
 function syncCard(){
-  const cl=DB.find(c=>c.id===CID);if(!cl)return;
+  if(!ge('cbody')||ge('oc')?.dataset.objectId!==CID)return false;
+  const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt||cl.purgedAt)return false;
   cl.projectName=gv('f_projname');
   cl.docNum=gv('f_docNum');cl.docDate=gv('f_docDate');
   cl.w1=gcb('f_w1');cl.w2=gcb('f_w2');
@@ -1965,6 +2036,7 @@ function syncCard(){
     cl.orgPhone=gv('f_orgphone');cl.orgTg=gv('f_orgtg');cl.orgEmail=gv('f_orgemail');
   }
   cl.updatedAt=Date.now();
+  return true;
 }
 function onStChange(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
@@ -1975,25 +2047,36 @@ function onStChange(){
   save();renderList();
 }
 function autoSave(){
-  clearTimeout(AUTOSAVE_T);
-  AUTOSAVE_T=setTimeout(()=>{
-    if(!CID)return;
-    syncCard();
-    save();
-  },2000);
+  if(!syncCard())return;
+  save();
+  renderDocD();
+  refreshCardFinance();
+}
+function refreshCardFinance(){
+  const cl=DB.find(c=>c.id===CID);if(!cl||!ge('oc'))return;
+  const tot=objectTotal(cl),paid=+cl.paid||0,debt=clDebt(cl);
+  const advPct=parseInt(cl.advPct)||50;
+  const values=ge('oc').querySelectorAll('.fin-grid .fv');
+  const amounts=cl.type==='fiz'?[tot,paid,tot*advPct/100,debt]:[tot,debt];
+  amounts.forEach((v,i)=>{if(values[i])values[i].textContent=fmt(v)+' ₽';});
+  const debtCard=values[cl.type==='fiz'?3:1]?.parentElement;
+  if(debtCard){debtCard.classList.toggle('fdn',debt>0);debtCard.classList.toggle('fok',debt===0);}
+  const pct=tot>0?Math.min(100,Math.round(paid/tot*100)):0;
+  const progress=ge('oc').querySelector('.payfill');
+  if(progress){progress.style.width=pct+'%';progress.parentElement.nextElementSibling.textContent=pct+'% оплачено';}
 }
 function saveObj(){
-  clearTimeout(AUTOSAVE_T);
-  syncCard();
+  if(!syncCard())return;
   const cl=DB.find(c=>c.id===CID);
   if(cl)log(cl,'Карточка сохранена','💾','#888');
-  save();renderList();
+  if(!save())return;
+  renderList();
   const b=ge('svd');if(b){b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2000);}
-  notify('ok','Сохранено','Данные объекта обновлены');
+  notify('ok','Сохранено на устройстве','Отправка в облако выполняется отдельно');
 }
 function setType(t){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
-  syncCard();cl.type=t;renderObjView(cl);
+  syncCard();cl.type=t;cl.updatedAt=Date.now();save();renderObjView(cl);
 }
 function delObj(){
   if(!confirm('Переместить объект в корзину?'))return;
@@ -2135,7 +2218,7 @@ function rmFile(i){
 // ═══════════════════════════════════════════════
 function renderDocsTab(cl){
   const tc=ge('orbody');if(!tc)return;
-  const tot=ctotal(cl.rows);
+  const tot=objectTotal(cl);
   tc.innerHTML=`<div class="docsflex" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
     <div class="or-tabs" style="padding:0 3px;border-bottom:1px solid var(--br)">
       <button class="otab${DOCTAB==='dog'?' on':''}" onclick="swDTab('dog',this)">📋 Договор</button>
@@ -2161,7 +2244,8 @@ function swDTab(t,el){
 let RDOC_T=null;
 function renderDocD(){clearTimeout(RDOC_T);RDOC_T=setTimeout(renderDoc,200);}
 function renderDoc(){
-  const cl=DB.find(c=>c.id===CID);if(!cl)return;
+  if(!ge('sheet')||!ge('cbody'))return;
+  const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt)return;
   const tot=calcTotal();
   const td=ge('totd');if(td)td.textContent=fmt(tot)+' ₽';
   if(DOCTAB==='dog')renderDog(cl,tot);
@@ -2248,7 +2332,7 @@ function rublesFull(n){
 }
 
 // Адаптер: в новой CRM строки хранятся в EROWS, итого через ctotal
-function calcTotal(){ const disc=+(ge('f_discount')?.value||0); return Math.max(0,ctotal(EROWS)-disc); }
+function calcTotal(){ return objectTotal({rows:EROWS,discount:ge('f_discount')?.value}); }
 function passDateFmt(cl){ const p=pd(cl.type==='fiz'?cl.passportDate:''); return p?`${p.d} ${p.m} ${p.y} г.`:bl(100); }
 function fmtDate(s){ const p=pd(s); return p?`«${p.d}» ${p.m} ${p.y} г.`:`«${bl(18)}» ${bl(80)} ${bl(30)} г.`; }
 function fmtDateShort(s){ return fds(s); }
@@ -3060,7 +3144,7 @@ function kbDeleteCol(colId){
   const hasCards = DB.filter(c=>c.status===colId).length;
   if(hasCards){
     if(!confirm(`В колонке "${st.label}" есть ${hasCards} объект(ов). Они будут переведены в "Новый лид". Удалить колонку?`)) return;
-    DB.forEach(c=>{ if(c.status===colId) c.status='lead'; });
+    DB.forEach(c=>{ if(c.status===colId){c.status='lead';c.updatedAt=Date.now();} });
     save();
   }
   const idx = STATUSES.findIndex(s=>s.id===colId);
@@ -3160,19 +3244,21 @@ function importJSON(){
     const reader=new FileReader();
     reader.onload=ev=>{
       try{
-        const data=JSON.parse(ev.target.result);
-        if(!Array.isArray(data))throw new Error('Не массив');
-        // Deduplicate: merge by id
-        const existing=new Map(DB.map(c=>[c.id,c]));
-        let added=0,updated=0;
-        data.forEach(c=>{
-          if(!c||!c.id)return;
-          if(existing.has(c.id)){updated++;}else{added++;}
-          existing.set(c.id,c);
-        });
-        DB=Array.from(existing.values());
-        save();renderList();
-        notify('ok','Импорт',`Добавлено: ${added}, обновлено: ${updated}`);
+        const data=validateRecords(JSON.parse(ev.target.result));
+        const before=new Map(DB.map(c=>[c.id,c]));
+        const next=mergeRecords(DB,data);
+        const added=next.filter(c=>!before.has(c.id)).length;
+        const updated=next.filter(c=>before.has(c.id)&&before.get(c.id)!==c).length;
+        const skipped=data.length-added-updated;
+        DB=next;
+        const stored=save();renderList();
+        if(ge('oc')){
+          const cl=DB.find(c=>c.id===CID);
+          if(!cl||cl.deletedAt||cl.purgedAt){CID=null;showDash();}
+          else{EROWS=cl.rows.map(r=>({...r}));renderObjView(cl);}
+        }else if(VIEW==='dash')showDash();
+        else if(VIEW==='kanban')renderKB();
+        if(stored)notify('ok','Импорт',`Добавлено: ${added}, обновлено: ${updated}, пропущено: ${skipped}`);
       }catch(err){notify('err','Ошибка импорта',err.message);}
     };
     reader.readAsText(file);
@@ -3194,7 +3280,7 @@ function getSortedDB(){
     let va,vb;
     if(tableSortField==='name'){va=cname(a);vb=cname(b);return va.localeCompare(vb)*tableSortDir;}
     if(tableSortField==='status'){va=a.status||'';vb=b.status||'';return va.localeCompare(vb)*tableSortDir;}
-    if(tableSortField==='total'){va=ctotal(a.rows);vb=ctotal(b.rows);return(va-vb)*tableSortDir;}
+    if(tableSortField==='total'){va=objectTotal(a);vb=objectTotal(b);return(va-vb)*tableSortDir;}
     return 0;
   });
 }
@@ -3234,16 +3320,16 @@ function anaReached(c,stageId){if(c.status==='cancel'||c.status==='claim')return
 function anaTransTs(c,ids){let best=0;(c.tl||[]).forEach(ev=>{const m=/→\s*"([^"]+)"\s*$/.exec(ev.act||'');if(!m)return;const st=STATUSES.find(s=>s.label===m[1]);if(st&&ids.indexOf(st.id)>=0&&ev.ts>best)best=ev.ts;});return best;}
 function anaCloseTs(c){return anaTransTs(c,['done','closed','support','cancel','claim'])||c.updatedAt||c.createdAt||0;}
 function anaDoneISO(c){const ts=anaTransTs(c,['done','closed','support']);if(ts){const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}return c.dateInstall||'';}
-function anaNet(c){return Math.max(0,ctotal(c.rows)-(+c.discount||0));}
-// Дата выручки = «Сдача» (dateDead); если пусто — откат на дату перехода в done/support из истории, далее на «Монтаж»
-function anaRevISO(c){return c.dateDead||anaDoneISO(c)||'';}
+function anaNet(c){return objectTotal(c);}
+// Дата выручки = «Сдача» (dateDead); если пусто — откат на «Монтаж» (dateInstall). НЕ берём дату перехода из истории (это «когда кликнул», а не дата сдачи) — иначе объекты без «Сдачи» падают в текущий месяц.
+function anaRevISO(c){return c.dateDead||c.dateInstall||'';}
 // Блок «Выручка»: свой переключатель периода (по дате «Сдача»)
 let REV_PERIOD='all'; // month | prev | quarter | all
 function revSetPeriod(p){REV_PERIOD=p;showAnalytics();}
 function revTs(c){const d=anaRevISO(c);return d?+new Date(d):0;}
 function revIn(ts){const r=anaRange(REV_PERIOD);return ts>=r.from&&ts<r.to;}
-const REV_FLOW_ST=['paid','prod','sched','done','support']; // в работе + выполнено (с «Аванс получен»)
-const REV_REAL_ST=['done','support'];                       // реализовано (выполненные)
+const REV_FLOW_ST=['paid','prod','sched','done','support','closed']; // в работе + выполнено (с «Аванс получен»)
+const REV_REAL_ST=['done','support','closed'];                       // реализовано (выполненные)
 function showAnalytics(){
   VIEW='analytics';setNav('dash');sbHide();
   const mc=ge('main');
@@ -3264,17 +3350,17 @@ function showAnalytics(){
       const d=new Date(c.createdAt);
       return d.getFullYear()===m.year&&d.getMonth()===m.month;
     });
-    return{...m,count:closed.length,revenue:closed.reduce((s,c)=>s+ctotal(c.rows),0)};
+    return{...m,count:closed.length,revenue:closed.reduce((s,c)=>s+objectTotal(c),0)};
   });
   const maxRev=Math.max(...monthData.map(m=>m.revenue),1);
   const maxCount=Math.max(...monthData.map(m=>m.count),1);
   // Выручка по месяцам = выполненные объекты (Монтаж выполнен + Сопровождение), привязка по дате «Сдача» (anaRevISO)
-  const REV_ST=['done','support'];
+  const REV_ST=['done','support','closed'];
   const monthRev=months.map(m=>liveDB().filter(c=>{
     if(!REV_ST.includes(c.status))return false;
     const di=anaRevISO(c);if(!di)return false;
     const d=new Date(di);return d.getFullYear()===m.year&&d.getMonth()===m.month;
-  }).reduce((s,c)=>s+ctotal(c.rows),0));
+  }).reduce((s,c)=>s+objectTotal(c),0));
   const maxMRev=Math.max(...monthRev,1);
 
   // Funnel conversion
@@ -3291,18 +3377,18 @@ function showAnalytics(){
   }));
 
   // Stats
-  const totalRevenue=liveDB().reduce((s,c)=>s+ctotal(c.rows),0); // общая сумма всех объектов в таблице
+  const totalRevenue=liveDB().reduce((s,c)=>s+objectTotal(c),0); // общая сумма всех объектов в таблице
   const totalDebt=liveDB().reduce((s,c)=>s+clDebt(c),0);
   const avgCheck=liveDB().length?Math.round(totalRevenue/liveDB().length):0;
   const claimCount=liveDB().filter(c=>c.status==='claim').length;
   // Финансовые показатели по колонкам воронки
   const SIGNED_ST=['paid','prod','sched']; // договор подписан: аванс получен → монтаж назначен
-  const sumSigned=liveDB().filter(c=>SIGNED_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+  const sumSigned=liveDB().filter(c=>SIGNED_ST.includes(c.status)).reduce((s,c)=>s+objectTotal(c),0);
   const doneCount=liveDB().filter(c=>['done','support','closed'].includes(c.status)).length;
   // ── Выручка за выбранный период (REV_PERIOD), привязка по дате «Сдача» ──
   const revInScope=liveDB().filter(c=>revIn(revTs(c)));
-  const revFlow=revInScope.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0); // в работе + выполнено (с аванса)
-  const revReal=revInScope.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0); // реализовано (выполненные)
+  const revFlow=revInScope.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+objectTotal(c),0); // в работе + выполнено (с аванса)
+  const revReal=revInScope.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+objectTotal(c),0); // реализовано (выполненные)
   const revPerBtns=[['month','Месяц'],['prev','Прошлый'],['quarter','Квартал'],['all','Всё время']];
 
   // ── KPI за выбранный период ──
@@ -3351,8 +3437,8 @@ function showAnalytics(){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
         ${TAGS.map(t=>{
           const tagArr=revInScope.filter(c=>(c.tags||[]).includes(t.id));
-          const f=tagArr.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
-          const r=tagArr.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+ctotal(c.rows),0);
+          const f=tagArr.filter(c=>REV_FLOW_ST.includes(c.status)).reduce((s,c)=>s+objectTotal(c),0);
+          const r=tagArr.filter(c=>REV_REAL_ST.includes(c.status)).reduce((s,c)=>s+objectTotal(c),0);
           return`<div style="border:1px solid var(--br);border-radius:8px;padding:10px 14px;border-left:3px solid ${t.color}">
             <div style="font-weight:700;color:${t.color};font-size:13px;margin-bottom:6px">${t.label}</div>
             <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx2)">
@@ -4231,7 +4317,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 19.06-5','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 23.09-1','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
 // Запуск через проверку авторизации
 checkAuth();
 
