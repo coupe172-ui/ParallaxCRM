@@ -769,7 +769,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 24.09-2</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 23.09-5</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -777,7 +777,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 24.09-2</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 23.09-5</span></div>
   <nav class="hdr-nav">
     <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Центр</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
@@ -1271,7 +1271,7 @@ function validateRecords(records){
   });
 }
 // Network timeout includes reading and parsing the response body.
-async function sheetsRequest(url,options={},timeout=60000){
+async function sheetsRequest(url,options={},timeout=20000){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeout);
   try{
@@ -1284,9 +1284,6 @@ async function sheetsRequest(url,options={},timeout=60000){
       throw new Error(messages[result.code]||'Сервер не подтвердил операцию. Данные не отправлены или результат неизвестен.');
     }
     return result;
-  }catch(error){
-    if(controller.signal.aborted)throw new Error('Сервер не ответил за минуту. Результат записи пока неизвестен. Подождите и повторите синхронизацию; локальные данные не очищайте.');
-    throw error;
   }finally{clearTimeout(timer);}
 }
 function pushSheets(){
@@ -1324,20 +1321,6 @@ function pullSheets(){
   PULLP=_pullSheets().finally(()=>{PULLP=null;});
   return PULLP;
 }
-function mergeCloudConfigs(configs){
-  if(!configs.length)return null;
-  const result={id:'__config__'};
-  for(const [field,time] of [['statuses','statusesUpdatedAt'],['brigades','brigadesUpdatedAt']]){
-    const candidates=configs.filter(c=>c[field]!=null);
-    if(!candidates.length)continue;
-    if(candidates.some(c=>!Array.isArray(c[field])||!Number.isFinite(+(c[time]||0))||+(c[time]||0)<0))throw new Error('Повреждены настройки '+field);
-    const newest=Math.max(...candidates.map(c=>+(c[time]||0)));
-    const latest=candidates.filter(c=>+(c[time]||0)===newest);
-    if(latest.some(c=>stableRecord(c[field])!==stableRecord(latest[0][field])))throw new Error('В облаке разные настройки с одинаковой датой. Нужна проверка копии таблицы; объекты не изменены.');
-    result[field]=latest[0][field];result[time]=newest;
-  }
-  return result;
-}
 async function _pullSheets(){
   setSS('loading');
   try{
@@ -1347,7 +1330,8 @@ async function _pullSheets(){
     const loaded=d.data.flat().filter(s=>s!==''&&s!=null).map(s=>JSON.parse(s));
     if(loaded.some(c=>!c||typeof c!=='object'))throw new Error('Повреждённая запись');
     const configs=loaded.filter(c=>c.id==='__config__');
-    const cfg=mergeCloudConfigs(configs);
+    if(configs.length>1)throw new Error('Повтор настроек');
+    const cfg=configs[0];
     const incoming=validateRecords(loaded.filter(c=>c.id!=='__config__'));
     if(cfg){
       if(!Array.isArray(cfg.statuses)||!cfg.statuses.length||cfg.statuses.some(s=>!s||typeof s.id!=='string'||typeof s.label!=='string'))throw new Error('Повреждены колонки');
@@ -1594,15 +1578,8 @@ function rdOpenCurrent(){
   if(window.innerWidth<=768)requestAnimationFrame(()=>ge('readinessPanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
 }
 function rdRefresh(cl){
-  const oldPanel=ge('readinessPanel'),scroll=[];
-  for(let node=oldPanel;node;node=node.parentElement)scroll.push({node,top:node.scrollTop,left:node.scrollLeft});
-  const focused=oldPanel?.contains(document.activeElement)?document.activeElement.getAttribute('aria-label'):null;
   if(ge('rdBanner'))ge('rdBanner').innerHTML=rdBannerHTML(cl);
-  if(OBJTAB==='ready'&&oldPanel){
-    renderReadiness(cl);
-    scroll.forEach(item=>{const node=item.node===oldPanel?ge('readinessPanel'):item.node;if(node){node.scrollTop=item.top;node.scrollLeft=item.left;}});
-    if(focused){const control=Array.from(ge('readinessPanel').querySelectorAll('[aria-label]')).find(el=>el.getAttribute('aria-label')===focused);control?.focus({preventScroll:true});}
-  }
+  if(OBJTAB==='ready'&&ge('readinessPanel'))renderReadiness(cl);
 }
 function rdSet(key,field,value,redraw=true){
   const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt||cl.purgedAt)return;
@@ -1649,7 +1626,7 @@ function renderReadiness(cl){
       return `<article class="rd-item ${i.state}" id="rd-${i.key}">
         <div class="rd-item-top"><div><h3>${i.label}</h3><p>${esc(i.detail)}</p></div>${i.auto?`<span class="ops-pill ${i.state==='done'?'ready':i.state==='unknown'?'unknown':'blocked'}">${RD_STATES[i.state]}</span>`:`<label class="rd-state-label"><span class="sr-only">Состояние: ${i.label}</span><select aria-label="Состояние: ${i.label}" onchange="rdSet('${i.key}','state',this.value)">${Object.entries(RD_STATES).filter(([key])=>key!=='na'||i.optional).map(([key,label])=>`<option value="${key}"${key===i.state?' selected':''}>${label}</option>`).join('')}</select></label>`}</div>
         ${i.key==='install'&&opsValidDate(cl.dateInstall)?`<label class="rd-confirm"><input type="checkbox" ${i.state==='done'?'checked':''} onchange="rdSet('install','confirmed',this.checked)"> Дата ${fds(cl.dateInstall)} согласована с клиентом</label>`:''}
-        ${i.state!=='done'&&i.state!=='na'?`<div class="rd-fields"><label>Ответственный<select aria-label="Ответственный: ${i.label}" onchange="rdSet('${i.key}','owner',this.value)">${opsOwnerOptions(saved.owner,rd.owner?'Как у объекта · '+OPS_PEOPLE[rd.owner]:'Не назначен')}</select></label><label>Срок<input type="date" aria-label="Срок: ${i.label}" value="${escA(i.deadline)}" onblur="if(this.validity.valid)rdSet('${i.key}','deadline',this.value,false)"></label></div>`:''}
+        ${i.state!=='done'&&i.state!=='na'?`<div class="rd-fields"><label>Ответственный<select aria-label="Ответственный: ${i.label}" onchange="rdSet('${i.key}','owner',this.value)">${opsOwnerOptions(saved.owner,rd.owner?'Как у объекта · '+OPS_PEOPLE[rd.owner]:'Не назначен')}</select></label><label>Срок<input type="date" aria-label="Срок: ${i.label}" value="${escA(i.deadline)}" onchange="rdSet('${i.key}','deadline',this.value)"></label></div>`:''}
         <label class="rd-note-label">${i.state==='blocked'?'Что мешает и что нужно сделать':'Примечание'}<input aria-label="Примечание: ${i.label}" value="${escA(i.note)}" placeholder="Например: поставщик обещал карниз к четвергу" oninput="rdSet('${i.key}','note',this.value,false)"></label>
       </article>`;
     }).join('')}</div>
@@ -4649,7 +4626,7 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // Versioned export container; business records retain their existing schema.
 function makeBackup(){
-  return {format:'parallax-backup',version:1,build:'24.09-2',exportedAt:new Date().toISOString(),
+  return {format:'parallax-backup',version:1,build:'23.09-5',exportedAt:new Date().toISOString(),
     records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
 }
 function parseBackup(value){
@@ -4754,7 +4731,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 24.09-2','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+console.log('%cParallax CRM — сборка 23.09-5','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
 // Запуск через проверку авторизации
 checkAuth();
 
