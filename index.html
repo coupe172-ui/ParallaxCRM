@@ -708,6 +708,54 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 .login-hint{color:var(--mu);}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ac);outline-offset:2px;}
 .stat-val,.fv,.oi-sum{font-variant-numeric:tabular-nums;}
+/* Execution readiness and owner workspace. */
+.ops-page{flex:1;min-height:0;overflow-y:auto;padding:28px;scroll-behavior:smooth;}
+.ops-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:22px;}
+.ops-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.6px;color:var(--ac);margin-bottom:10px;}
+.ops-header h1{font-size:27px;font-weight:600;letter-spacing:-.7px;line-height:1.25;}
+.ops-header p,.rd-heading p{font-size:13px;color:var(--mu);line-height:1.6;margin-top:8px;}
+.ops-link{border:1px solid var(--br2);border-radius:8px;padding:9px 12px;background:var(--sf);color:var(--tx2);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;}
+.ops-link:hover{border-color:var(--ac);color:var(--ac);}
+.ops-view-switch{display:inline-flex;gap:4px;background:var(--s2);border:1px solid var(--br2);padding:4px;border-radius:10px;margin-bottom:22px;}
+.ops-view-switch button{border:1px solid transparent;background:transparent;color:var(--mu);border-radius:7px;padding:10px 16px;cursor:pointer;font:inherit;font-weight:600;text-align:left;}
+.ops-view-switch button span{display:block;font-size:11px;font-weight:400;margin-top:3px;}
+.ops-view-switch button.selected{background:var(--sf);border-color:var(--br3);color:var(--ac);}
+.ops-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px;}
+.ops-metric{display:flex;flex-direction:column;gap:5px;border:1px solid var(--br2);border-radius:12px;background:var(--sf);padding:18px;color:var(--tx);text-decoration:none;}
+.ops-metric strong{font-size:30px;line-height:1.2;font-weight:600;font-variant-numeric:tabular-nums;}
+.ops-metric span{font-size:13px;}.ops-metric small{font-size:11px;color:var(--mu);}
+.ops-metric.danger strong{color:var(--dn);}.ops-metric:hover{border-color:var(--ac);}
+.ops-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;}
+.ops-grid>div{min-width:0;}
+.ops-section{background:var(--sf);border:1px solid var(--br2);border-radius:12px;margin-bottom:18px;overflow:hidden;}
+.ops-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px;border-bottom:1px solid var(--br);}
+.ops-section-head h2{font-size:15px;font-weight:600;}.ops-section-head p{color:var(--mu);font-size:11px;line-height:1.6;margin-top:4px;}
+.ops-section-body{max-height:420px;overflow-y:auto;}
+.ops-count{font-size:12px;border:1px solid var(--br2);border-radius:20px;padding:4px 10px;color:var(--mu);}
+.ops-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:14px 18px;border:0;border-bottom:1px solid var(--br);background:transparent;text-align:left;cursor:pointer;color:var(--tx);font:inherit;border-left:3px solid transparent;}
+.ops-row:last-child{border-bottom:0;}.ops-row:hover{background:var(--s2);}.ops-row.danger{border-left-color:var(--dn);}.ops-row.warning{border-left-color:var(--wn);}.ops-row.success{border-left-color:var(--ok);}
+.ops-row-copy{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere;}.ops-row strong{font-size:13px;font-weight:500;line-height:1.45;}
+.ops-object{font-size:12px;color:var(--ac);}.ops-row small{font-size:11px;color:var(--mu);line-height:1.6;}.ops-arrow{color:var(--mu);flex-shrink:0;}
+.ops-empty{padding:20px;color:var(--mu);font-size:12px;line-height:1.7;}.ops-footnote{font-size:11px;color:var(--mu);line-height:1.7;max-width:800px;}
+.rd-banner{display:flex;justify-content:space-between;align-items:center;width:100%;padding:11px 14px;text-align:left;border:0;border-bottom:1px solid var(--br2);background:var(--s2);color:var(--tx);font:inherit;cursor:pointer;}
+.rd-banner b{display:block;font-size:12px;font-weight:600;}.rd-banner small{display:block;font-size:10px;color:var(--mu);margin-top:4px;}.rd-banner.ready b{color:var(--ok);}.rd-banner.blocked b{color:var(--wn);}
+.rd-panel{padding:22px;overflow-y:auto;flex:1;min-width:0;}.rd-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;}.rd-heading h2{font-size:21px;font-weight:600;line-height:1.3;}
+.ops-pill{display:inline-block;white-space:nowrap;border-radius:20px;font-size:11px;padding:6px 10px;background:var(--s4);color:var(--mu);}.ops-pill.ready{color:var(--ok);background:var(--okb);}.ops-pill.blocked{color:var(--wn);background:var(--wnb);}
+.rd-owner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px;border:1px solid var(--br2);border-radius:9px;margin-bottom:16px;}.rd-owner label{font-size:12px;}.rd-owner>span{font-size:11px;color:var(--mu);line-height:1.5;flex-basis:100%;}
+.rd-panel select,.rd-panel input:not([type=checkbox]),.ops-owner-select{background:var(--s2);color:var(--tx);border:1px solid var(--br2);border-radius:6px;padding:8px;font:inherit;font-size:12px;min-width:0;}
+.rd-panel select{max-width:100%;}.rd-progress{height:4px;background:var(--br2);border-radius:4px;overflow:hidden;}.rd-progress span{display:block;height:100%;background:var(--ac);}.rd-progress-label{font-size:11px;color:var(--mu);margin:8px 0 18px;}
+.rd-item{border:1px solid var(--br2);border-left:3px solid var(--br3);border-radius:9px;padding:14px;margin-bottom:10px;background:var(--sf);scroll-margin-top:12px;}.rd-item.done{border-left-color:var(--ok);}.rd-item.blocked{border-left-color:var(--dn);}.rd-item.pending{border-left-color:var(--wn);}.rd-item.na{background:var(--s2);}
+.rd-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}.rd-item-top h3{font-size:13px;font-weight:600;}.rd-item-top p{font-size:11px;color:var(--mu);line-height:1.6;margin-top:5px;}.rd-state-label{flex-shrink:0;max-width:50%;}
+.rd-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}.rd-fields label,.rd-note-label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--mu);}.rd-note-label{margin-top:12px;}.rd-note-label input{width:100%;}.rd-confirm{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;margin-top:12px;}.rd-confirm input{margin-top:3px;accent-color:var(--ac);}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+@media(max-width:1100px){.ops-grid{grid-template-columns:1fr;}.rd-item-top{flex-wrap:wrap;}.rd-state-label{max-width:100%;}}
+@media(max-width:768px){
+  .ops-page{padding:18px 12px;}.ops-header{gap:12px;flex-wrap:wrap;margin-bottom:16px;}.ops-header h1{font-size:24px;}.ops-header p{font-size:12px;}
+  .ops-view-switch{display:flex;}.ops-view-switch button{flex:1;padding:10px 12px;}.ops-metrics{gap:7px;}.ops-metric{padding:12px 9px;}.ops-metric strong{font-size:26px;}.ops-metric span{font-size:11px;line-height:1.5;}.ops-metric small{display:none;}
+  .ops-section-head{padding:14px;}.ops-row{padding:13px 12px;}.ops-section-body{max-height:none;}.ops-grid{gap:0;}
+  .rd-panel{padding:18px 12px;overflow:visible;}.rd-fields{grid-template-columns:1fr;}.rd-panel select,.rd-panel input:not([type=checkbox]){font-size:16px;min-height:42px;}.rd-panel select{width:100%;}.rd-owner select{flex:1;}.rd-item{padding:12px;}.rd-state-label{width:100%;}.or-tabs{overflow-x:auto;flex-shrink:0;}.or-tabs .otab{white-space:nowrap;}
+}
+
 </style>
 </head>
 <body>
@@ -721,7 +769,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 23.09-1</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 23.09-5</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -729,9 +777,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 23.09-1</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 23.09-5</span></div>
   <nav class="hdr-nav">
-    <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Дашборд</button>
+    <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Центр</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
     <button class="hn" id="nv-tasks" onclick="showAllTasks()">&#9989; Задачи</button>
     <button class="hn" id="nv-cal" onclick="showCalendar()">&#128197; Календарь</button>
@@ -773,7 +821,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="modal" id="modalContent"></div>
 </div>
 <nav class="mobile-nav">
-  <button class="mn-btn" id="mn-dash" onclick="showDash()"><span class="mn-ic">📊</span>Дашборд</button>
+  <button class="mn-btn" id="mn-dash" onclick="showDash()"><span class="mn-ic">📊</span>Центр</button>
   <button class="mn-btn" id="mn-kb" onclick="showKanban()"><span class="mn-ic">🗂</span>Канбан</button>
   <button class="mn-btn" id="mn-tasks" onclick="showAllTasks()"><span class="mn-ic">✅</span>Задачи</button>
   <button class="mn-btn" id="mn-cal" onclick="showCalendar()"><span class="mn-ic">📅</span>Календарь</button>
@@ -899,56 +947,57 @@ const GS='https://script.google.com/macros/s/AKfycbzX0V1NGgEv0Ekm7EaGOfYdVxNCaIG
 // ═══════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════
-const PWD_HASH='58ccaa81e0e763d16b8dc11d040865436f1fb78c55756bbad04366837df1a09d';
-const SESSION_KEY='px_auth_v1';
-
-async function hashStr(s){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+const SESSION_KEY='px_server_session_v2';
+let AUTH_TOKEN='',REMOTE_REVISION=null;
+function authRequired(){
+  AUTH_TOKEN='';REMOTE_REVISION=null;
+  try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
+  const screen=ge('loginScreen');if(screen){screen.style.display='';screen.style.opacity='1';}
+  const error=ge('loginErr');if(error)error.textContent='Войдите для синхронизации. Локальные данные сохранены.';
 }
-
 async function doLogin(){
-  const pwd=document.getElementById('loginPwd')?.value||'';
-  const err=document.getElementById('loginErr');
-  if(!pwd){if(err)err.textContent='Введите пароль';return;}
-  const h=await hashStr(pwd);
-  if(h===PWD_HASH){
-    try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
-    const ls=document.getElementById('loginScreen');
-    if(ls){ls.style.opacity='0';ls.style.transition='opacity .4s';
-      setTimeout(()=>{ls.style.display='none';},400);}
-    init();
-  }else{
-    if(err){err.textContent='Неверный пароль';
-      setTimeout(()=>{if(err)err.textContent='';},2000);}
-    const inp=document.getElementById('loginPwd');
-    if(inp){inp.style.borderColor='#e05555';
-      setTimeout(()=>{inp.style.borderColor='';},1500);}
-  }
+  const pwd=ge('loginPwd')?.value||'',err=ge('loginErr');
+  if(!pwd){if(err)err.textContent='Введите новый серверный пароль';return;}
+  if(err)err.textContent='Проверяем вход…';
+  try{
+    const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({action:'login',password:pwd})});
+    if(result.apiVersion!==2||typeof result.token!=='string'||!Number.isFinite(result.expiresAt))throw new Error('Обновите сервер Apps Script по инструкции');
+    AUTH_TOKEN=result.token;
+    try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:result.token,expiresAt:result.expiresAt}));}catch(e){}
+    if(ge('loginPwd'))ge('loginPwd').value='';
+    if(err)err.textContent='';
+    ge('loginScreen').style.display='none';
+    if(APP_READY)await pullSheets();else init();
+  }catch(error){if(err)err.textContent=error.message;}
 }
-
-function checkAuth(){
-  let ok=false;
-  try{ok=sessionStorage.getItem(SESSION_KEY)==='1';}catch(e){}
-  if(ok){
-    const ls=document.getElementById('loginScreen');
-    if(ls)ls.style.display='none';
-    init();
-  }else{
-    // Показываем экран входа, фокус на поле
-    setTimeout(()=>{document.getElementById('loginPwd')?.focus();},300);
-  }
+async function checkAuth(){
+  try{
+    const session=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+    if(session&&session.expiresAt>Date.now()&&typeof session.token==='string'){
+      AUTH_TOKEN=session.token;
+      await serverCall('load'); // Validate server session before opening cached records.
+      ge('loginScreen').style.display='none';init();return;
+    }
+  }catch(e){const err=ge('loginErr');if(err)err.textContent=e.message;}
+  AUTH_TOKEN='';setTimeout(()=>ge('loginPwd')?.focus(),300);
+}
+async function serverCall(action,values={}){
+  if(!AUTH_TOKEN){authRequired();throw new Error('Необходимо войти');}
+  const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({...values,action,token:AUTH_TOKEN})});
+  if(result.apiVersion!==2||typeof result.revision!=='string')throw new Error('Несовместимая версия сервера');
+  return result;
 }
 
 function init(){
   if(APP_READY)return;
   APP_READY=true;
-  purgeTrash();
+  // Keep all existing records, including the trash, unchanged on startup.
   renderList();
   showDash();
-  if(navigator.onLine){pushSheets();}
+  if(navigator.onLine){pullSheets();}
   else{notify('warn','Офлайн','Работаете без интернета');}
   setTimeout(checkAlerts,2500);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&VIEW==='dash')showDash();});
   // Autosave
   // Inputs are persisted immediately; no delayed form reads on navigation.
   // Online/offline
@@ -956,7 +1005,7 @@ function init(){
     setSS('offline');});
   window.addEventListener('online',()=>{
     ge('syncbadge').textContent='🔄 Подключено';ge('syncbadge').style.color='var(--ok)';
-    setTimeout(()=>{pushSheets();},1000);});
+    setTimeout(()=>{if(SAVE_REV>0)pushSheets();else pullSheets();},1000);});
 }
 
 let DB=(function(){
@@ -973,7 +1022,7 @@ let DB=(function(){
 let KB_SEARCH_Q='';
 let KB_SHOW_TASKS=localStorage.getItem('px_kb_tasks')==='1'; // показывать на карточках текст задач, а не просто счётчик
 let KB_TAG_FILTER=localStorage.getItem('px_kb_tag')||''; // фильтр канбана по тегу (Потолки/Карнизы/…)
-let CID=null,DOCTAB='dog',OBJTAB='tl',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null;
+let CID=null,DOCTAB='dog',OBJTAB='ready',VIEW='dash',FSTAT=null,EROWS=[],EMODE=false,DRAGSRC=null,SYNCT=null;
 // Склонение числительных: plural(1,'задача','задачи','задач') → «задача»
 function plural(n,one,few,many){n=Math.abs(n)%100;const n1=n%10;if(n>10&&n<20)return many;if(n1>1&&n1<5)return few;if(n1===1)return one;return many;}
 function toggleKbTasks(){KB_SHOW_TASKS=!KB_SHOW_TASKS;localStorage.setItem('px_kb_tasks',KB_SHOW_TASKS?'1':'0');showKanban();}
@@ -1035,20 +1084,10 @@ function clientLabel(c){
 function ctotal(rows){return(rows||[]).reduce((s,r)=>s+(+r.price||0)*(+r.qty||0),0);}
 function objectTotal(c){return Math.max(0,ctotal(c.rows)-Math.max(0,+c.discount||0));}
 function liveDB(){return DB.filter(c=>!c.deletedAt&&!c.purgedAt);}
-const TRASH_DAYS=30;
 function trashCount(){return DB.filter(c=>c.deletedAt&&!c.purgedAt).length;}
 function deletionRecord(c){
   const ts=Date.now();
   return {id:c.id,deletedAt:c.deletedAt||ts,purgedAt:ts,updatedAt:ts};
-}
-function purgeTrash(){
-  const cutoff=Date.now()-TRASH_DAYS*864e5;
-  let changed=false;
-  DB=DB.map(c=>{
-    if(c.deletedAt&&!c.purgedAt&&c.deletedAt<cutoff){changed=true;return deletionRecord(c);}
-    return c;
-  });
-  if(changed)save();
 }
 function updTrashBadge(){const b=ge('trashBtn');if(b){const n=trashCount();b.textContent=n?`🗑 ${n}`:'🗑';}}
 function restoreObj(id){
@@ -1077,15 +1116,14 @@ function showTrash(){
       <button class="vsw" onclick="showDash()">← Дашборд</button>
       ${items.length?`<button class="vsw" style="margin-left:auto;color:var(--dn);border-color:var(--dn)" onclick="emptyTrash()">Очистить корзину</button>`:''}
     </div>
-    <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Удалённые объекты хранятся ${TRASH_DAYS} дней, затем удаляются автоматически.</div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Объекты хранятся в корзине до явного удаления. Автоматическая очистка отключена.</div>
     ${items.length===0?`<div style="color:var(--mu);text-align:center;padding:40px;font-size:14px">Корзина пуста</div>`:
       items.map(c=>{
-        const left=Math.max(0,Math.ceil((c.deletedAt+TRASH_DAYS*864e5-Date.now())/864e5));
         const tot=objectTotal(c);
         return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--br);border-radius:8px;margin-bottom:8px;background:var(--sf)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cname(c))}</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:2px">${gst(c).label}${tot?' · '+fmtS(tot)+' ₽':''} · удалён ${fdt(c.deletedAt).split(' ')[0]} · осталось ${left} дн.</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">${gst(c).label}${tot?' · '+fmtS(tot)+' ₽':''} · удалён ${fdt(c.deletedAt).split(' ')[0]}</div>
           </div>
           <button class="kact" onclick="restoreObj('${c.id}')" title="Восстановить">↩ Восстановить</button>
           <button class="tdel" onclick="purgeObj('${c.id}')" title="Удалить навсегда">×</button>
@@ -1117,6 +1155,91 @@ function setSS(s){
   if(button){button.style.color=st.c;button.title=st.t||'Синхронизировать';}
 }
 let PULLP=null, PUSHP=null, PUSH_AGAIN=false, SAVE_REV=0;
+// Cloud baseline is local metadata, not a migration of business records.
+let SYNC_BASE=null,SYNC_CONFLICT=null;
+function stableRecord(value){
+  if(Array.isArray(value))return '['+value.map(stableRecord).join(',')+']';
+  if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableRecord(value[k])).join(',')+'}';
+  return JSON.stringify(value);
+}
+function recordKey(record){return record?stableRecord(validateRecords([record])[0]):null;}
+function readSyncBase(){
+  if(SYNC_BASE)return SYNC_BASE;
+  try{
+    const saved=JSON.parse(localStorage.getItem('px_sync_base_v1')||'null');
+    if(saved&&saved.server===GS&&saved.version===1)return SYNC_BASE=validateRecords(saved.records);
+  }catch(e){console.warn('Sync baseline unavailable');}
+  return null;
+}
+function storeSyncBase(records){
+  const normalized=JSON.parse(JSON.stringify(validateRecords(records)));
+  localStorage.setItem('px_sync_base_v1',JSON.stringify({version:1,server:GS,records:normalized}));
+  SYNC_BASE=normalized;
+}
+function planCloudMerge(local,incoming){
+  const base=readSyncBase(),baseMap=new Map((base||[]).map(c=>[c.id,c]));
+  const merged=new Map(local.map(c=>[c.id,c])),conflicts=[];
+  incoming.forEach(remote=>{
+    const here=merged.get(remote.id),previous=baseMap.get(remote.id);
+    if(!here){merged.set(remote.id,remote);return;}
+    const l=recordKey(here),r=recordKey(remote),b=recordKey(previous);
+    if(here.purgedAt&&!remote.purgedAt){
+      if(previous&&!previous.purgedAt&&r===b)return;
+      throw new Error('Облако содержит ранее окончательно удалённый объект. Синхронизация остановлена для проверки.');
+    }
+    if(l===r)return;
+    if(previous&&l===b){merged.set(remote.id,remote);return;}
+    if(previous&&r===b)return;
+    conflicts.push({id:remote.id,local:here,remote});
+  });
+  // A server-side disappearance is not interpreted as permission to re-upload a record.
+  const remoteIds=new Set(incoming.map(c=>c.id));
+  local.forEach(here=>{if(baseMap.has(here.id)&&!remoteIds.has(here.id))throw new Error('Объект отсутствует в облаке. Синхронизация остановлена; сохраните экспорт для проверки.');});
+  return {records:Array.from(merged.values()),conflicts};
+}
+function conflictSummary(c){
+  return `${c.purgedAt?'Удалено навсегда':c.deletedAt?'В корзине':c.projectName||cname(c)||'Объект'} · Оплачено: ${fmt(+c.paid||0)} ₽ · Задач: ${(c.tasks||[]).length}`;
+}
+function showSyncConflicts(incoming,conflicts){
+  clearTimeout(SYNCT);
+  SYNC_CONFLICT={incoming:JSON.parse(JSON.stringify(incoming)),conflicts:JSON.parse(JSON.stringify(conflicts)),choices:{}};
+  ge('syncConflictDialog')?.remove();
+  const panel=document.createElement('div');panel.id='syncConflictDialog';
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Различия между устройством и облаком');
+  panel.style.cssText='position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:14px';
+  panel.innerHTML=`<div style="background:var(--bg);color:var(--tx);padding:20px;border:1px solid var(--br);border-radius:12px;max-width:720px;width:100%;max-height:85vh;overflow:auto">
+    <h2 style="font-size:18px">Есть разные версии карточек</h2>
+    <p>Сохранение в облако остановлено. Выберите версию для каждой карточки. Перед применением на устройстве сохраняется резервная копия.</p>
+    <button class="bs" onclick="exportSyncConflict()">Скачать обе версии для проверки</button>
+    ${conflicts.map((c,i)=>`<div style="border-top:1px solid var(--br);padding:12px 0;margin-top:12px"><b>${esc(c.local.projectName||cname(c.local)||'Объект')}</b><p>На устройстве: ${esc(conflictSummary(c.local))}</p><p>В облаке: ${esc(conflictSummary(c.remote))}</p><label>Сохранить версию <select id="syncChoice${i}" style="max-width:100%"><option value="">Выберите…</option><option value="local">С этого устройства</option><option value="remote">Из облака</option></select></label></div>`).join('')}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px"><button class="bp" onclick="resolveSyncConflicts()">Применить выбранные версии</button><button class="bs" onclick="ge('syncConflictDialog').remove()">Решить позже</button></div>
+    <p style="font-size:12px">Выбор заменяет карточку целиком. Если нужны изменения из обеих версий, сначала скачайте их и выберите «Решить позже».</p>
+  </div>`;
+  document.body.appendChild(panel);panel.querySelector('button')?.focus();
+}
+function exportSyncConflict(){
+  if(!SYNC_CONFLICT)return;
+  const data={format:'parallax-conflict-review',exportedAt:new Date().toISOString(),local:makeBackup(),cloudRecords:SYNC_CONFLICT.incoming};
+  const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  link.download='parallax-conflict-review.json';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+}
+function resolveSyncConflicts(){
+  if(!SYNC_CONFLICT)return;
+  const state=SYNC_CONFLICT,choices=state.conflicts.map((c,i)=>ge('syncChoice'+i)?.value);
+  if(choices.some(c=>c!=='local'&&c!=='remote')){notify('warn','Выберите версии','Нужно выбрать версию каждой карточки');return;}
+  if(state.conflicts.some(c=>recordKey(DB.find(r=>r.id===c.id))!==recordKey(c.local))){notify('warn','Карточка изменилась','Повторите синхронизацию для обновления сравнения');return;}
+  const byId=new Map(planCloudMerge(DB,state.incoming).records.map(c=>[c.id,c]));
+  state.conflicts.forEach((c,i)=>{if(choices[i]==='remote')byId.set(c.id,c.remote);});
+  try{
+    // Persist the recoverable local state before changing either the baseline or DB.
+    localStorage.setItem('px_before_conflict',JSON.stringify({local:makeBackup(),cloudRecords:state.incoming}));
+    commitBackup(Array.from(byId.values()),null);
+    storeSyncBase(state.incoming);
+    SYNC_CONFLICT=null;ge('syncConflictDialog')?.remove();
+    CID=null;renderList();showDash();save();
+  }catch(e){notify('err','Решение не отправлено',e.message);}
+}
+
 function mergeRecords(local,incoming){
   const merged=new Map(local.map(c=>[c.id,c]));
   incoming.forEach(rc=>{
@@ -1142,9 +1265,26 @@ function validateRecords(records){
     for(const key of ['rows','tasks','files','tl']){
       if((c[key]||[]).some(v=>!v||typeof v!=='object'||Array.isArray(v)))throw new Error('Некорректное поле '+key);
     }
+    opsValidateReadiness(c.readiness);
     if(c.purgedAt)return {id:c.id,deletedAt:c.deletedAt||c.purgedAt,purgedAt:c.purgedAt,updatedAt:c.updatedAt||c.purgedAt};
     return {...c,rows:c.rows||[],tasks:c.tasks||[],files:c.files||[],tags:c.tags||[],tl:c.tl||[]};
   });
+}
+// Network timeout includes reading and parsing the response body.
+async function sheetsRequest(url,options={},timeout=20000){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+  try{
+    const response=await fetch(url,{...options,signal:controller.signal});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const result=await response.json();
+    if(result.ok!==true){
+      if(result.code==='AUTH_REQUIRED')authRequired();
+      const messages={RECOVERY_REQUIRED:'Запись была прервана. Облачная база заблокирована до проверки резервной копии; сохраните локальный экспорт.',AUTH_REQUIRED:'Сессия завершена. Войдите снова.',AUTH_FAILED:'Неверный пароль',TRY_LATER:'Слишком много попыток. Повторите через 5 минут.',NOT_CONFIGURED:'Сначала настройте серверный пароль в Apps Script',CONFLICT:'База изменена на другом устройстве. Повторите синхронизацию.',MISSING_RECORDS:'Запись остановлена: в отправке отсутствуют существующие объекты.',BUSY:'Сервер занят. Повторите синхронизацию.',INVALID_DATA:'Сервер отклонил данные. Сохраните экспорт и сообщите об ошибке.'};
+      throw new Error(messages[result.code]||'Сервер не подтвердил операцию. Данные не отправлены или результат неизвестен.');
+    }
+    return result;
+  }finally{clearTimeout(timer);}
 }
 function pushSheets(){
   if(!navigator.onLine){setSS('offline');return Promise.resolve(false);}
@@ -1159,12 +1299,12 @@ function pushSheets(){
         const config={id:'__config__',statuses:STATUSES,brigades:BRIGADES,statusesUpdatedAt:STATUS_TS,brigadesUpdatedAt:BRIGADE_TS};
         const revision=SAVE_REV;
         const rows=[...DB.map(c=>[JSON.stringify(c)]),[JSON.stringify(config)]];
-        const r=await fetch(GS,{method:'POST',body:JSON.stringify({action:'save_all',rows})});
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        const d=await r.json();
+        const d=await serverCall('save_all',{rows,baseRevision:REMOTE_REVISION});
+        REMOTE_REVISION=d.revision;
+        storeSyncBase(rows.map(r=>JSON.parse(r[0])).filter(c=>c.id!=='__config__'));
         if(d.ok!==true)throw new Error('Сервер не подтвердил запись');
         ok=true;setSS(revision===SAVE_REV?'saved':'pending');
-      }catch(e){console.warn('Sync:',e);setSS('error');return false;}
+      }catch(e){console.warn('Sync:',e);setSS('error');notify('err','Синхронизация остановлена',e.message);return false;}
     }while(PUSH_AGAIN);
     return ok;
   })().finally(()=>{PUSHP=null;});
@@ -1184,9 +1324,7 @@ function pullSheets(){
 async function _pullSheets(){
   setSS('loading');
   try{
-    const r=await fetch(GS+'?t='+Date.now());
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
+    const d=await serverCall('load');
     if(d.ok!==true||!Array.isArray(d.data))throw new Error('Некорректный ответ сервера');
     // A damaged row must stop the upload, not silently disappear from save_all.
     const loaded=d.data.flat().filter(s=>s!==''&&s!=null).map(s=>JSON.parse(s));
@@ -1200,7 +1338,12 @@ async function _pullSheets(){
       if(cfg.brigades!=null&&(!Array.isArray(cfg.brigades)||cfg.brigades.some(b=>typeof b!=='string')))throw new Error('Повреждены бригады');
     }
     const previous=DB.find(c=>c.id===CID);
-    DB=mergeRecords(DB,incoming);
+    const plan=planCloudMerge(DB,incoming);
+    if(plan.conflicts.length){showSyncConflicts(incoming,plan.conflicts);throw new Error('Есть разные версии карточек. Выберите, какие изменения сохранить.');}
+    storeSyncBase(incoming);
+    DB=plan.records;
+    SYNC_CONFLICT=null;ge('syncConflictDialog')?.remove();
+    REMOTE_REVISION=d.revision;
     if(cfg&&(+cfg.statusesUpdatedAt||0)>=STATUS_TS){
       STATUSES=cfg.statuses;STATUS_TS=+cfg.statusesUpdatedAt||0;saveStatuses(false);ensureSupportColumn();
     }
@@ -1215,10 +1358,11 @@ async function _pullSheets(){
       else{EROWS=current.rows.map(r=>({...r}));renderObjView(current);notify('info','Карточка обновлена','Загружена более свежая версия с другого устройства');}
     }else if(VIEW==='kanban')renderKB();
     else if(VIEW==='dash')showDash();
+    else if(VIEW==='overview')showOverview();
     else if(VIEW==='planner')renderPlanner();
     else if(VIEW==='analytics')showAnalytics();
     setSS('idle');return true;
-  }catch(e){console.warn('Sync:',e);setSS('error');return false;}
+  }catch(e){console.warn('Sync:',e);setSS('error');notify('err','Синхронизация остановлена',e.message);return false;}
 }
 function persistDB(){
   try{
@@ -1369,8 +1513,215 @@ function setF(s){FSTAT=s;renderList();}
 // ═══════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════
+// Object readiness and the two operational views share the existing object data.
+const OPS_PEOPLE={max:'Макс',dima:'Дима'};
+const RD_STATES={unknown:'Не проверено',pending:'В работе',blocked:'Есть препятствие',done:'Готово',na:'Не требуется'};
+const RD_DEFS=[
+  {key:'contract',label:'Договор подписан',action:'Подтвердить подписание договора',missing:'Подписание договора не подтверждено'},
+  {key:'advance',label:'Аванс получен',action:'Проверить получение аванса',auto:true},
+  {key:'measure',label:'Замер завершён',action:'Завершить замер',missing:'Замер не завершён'},
+  {key:'project',label:'Проект согласован',action:'Согласовать проект',missing:'Проект не согласован',optional:true},
+  {key:'canvas',label:'Полотно готово',action:'Подготовить полотно',missing:'Полотно не готово',optional:true},
+  {key:'profile',label:'Профиль получен',action:'Получить профиль',missing:'Профиль не получен',optional:true},
+  {key:'light',label:'Свет получен',action:'Получить свет',missing:'Свет не получен',optional:true},
+  {key:'cornice',label:'Карниз получен',action:'Получить карниз',missing:'Карниз не получен',optional:true},
+  {key:'brigade',label:'Бригада назначена',action:'Назначить бригаду',auto:true},
+  {key:'install',label:'Дата монтажа подтверждена',action:'Подтвердить дату монтажа',auto:true}
+];
+let OPS_VIEW=localStorage.getItem('px_ops_view')==='dima'?'dima':'max';
+function opsToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function opsValidDate(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s;}
+function opsDays(from,to){return opsValidDate(from)&&opsValidDate(to)?Math.round((Date.parse(to)-Date.parse(from))/864e5):null;}
+function opsOwnerOptions(value,empty='Не назначен'){
+  return `<option value="">${esc(empty)}</option>`+Object.entries(OPS_PEOPLE).map(([id,name])=>`<option value="${id}"${value===id?' selected':''}>${name}</option>`).join('');
+}
+function readinessItems(cl){
+  const rd=cl.readiness||{},items=rd.items||{};
+  return RD_DEFS.map(def=>{
+    const saved=items[def.key]||{};
+    let state=RD_STATES[saved.state]?saved.state:'unknown';
+    if(state==='na'&&!def.optional)state='unknown';
+    let detail=state==='unknown'?'Нужно проверить':(state==='done'?'Подтверждено':state==='na'?'Исключено из подготовки':def.missing);
+    if(def.key==='advance'){
+      const total=objectTotal(cl),pct=cl.advPct===''||cl.advPct==null?50:+cl.advPct;
+      const needed=Math.round(total*pct)/100,paid=+cl.paid||0;
+      state=total<=0||!Number.isFinite(pct)||pct<0||pct>100?'unknown':paid>=needed?'done':'pending';
+      detail=state==='unknown'?'Укажите сумму сметы и процент аванса':`Получено ${fmt(paid)} ₽ из ${fmt(needed)} ₽ аванса`;
+    }
+    if(def.key==='brigade'){
+      const brigades=clBrigs(cl);state=brigades.length?'done':'pending';
+      detail=brigades.length?brigades.join(', '):'Назначьте бригаду в карточке или планировщике';
+    }
+    if(def.key==='install'){
+      const valid=opsValidDate(cl.dateInstall);
+      state=valid&&rd.confirmedDate===cl.dateInstall?'done':'pending';
+      detail=!valid?'Дата монтажа не назначена':state==='done'?`Подтверждено на ${fds(cl.dateInstall)}`:`Нужно подтвердить ${fds(cl.dateInstall)} с клиентом`;
+    }
+    return {...def,state,detail,owner:saved.owner||rd.owner||'',deadline:saved.deadline||'',note:saved.note||''};
+  });
+}
+function readinessSummary(cl){
+  const items=readinessItems(cl),applicable=items.filter(i=>i.state!=='na');
+  const rank={blocked:0,pending:1,unknown:2};
+  const unresolved=applicable.filter(i=>i.state!=='done').sort((a,b)=>rank[a.state]-rank[b.state]);
+  const blocked=unresolved.filter(i=>i.state==='pending'||i.state==='blocked');
+  const status=!cl.readiness?'unknown':blocked.length?'blocked':unresolved.length?'unknown':'ready';
+  return {items,unresolved,status,done:applicable.length-unresolved.length,total:applicable.length,
+    label:{blocked:'Есть препятствия',unknown:'Не проверено',ready:'Готов к монтажу'}[status]};
+}
+function rdBannerHTML(cl){
+  const r=readinessSummary(cl);
+  return `<button class="rd-banner ${r.status}" type="button" onclick="rdOpenCurrent()"><span><b>${r.label}</b><small>Готовность к монтажу · ${r.done} из ${r.total} проверок</small></span><span aria-hidden="true">→</span></button>`;
+}
+function rdOpenCurrent(){
+  swOTab('ready',ge('rdTab'));
+  if(window.innerWidth<=768)requestAnimationFrame(()=>ge('readinessPanel')?.scrollIntoView({behavior:'smooth',block:'start'}));
+}
+function rdRefresh(cl){
+  if(ge('rdBanner'))ge('rdBanner').innerHTML=rdBannerHTML(cl);
+  if(OBJTAB==='ready'&&ge('readinessPanel'))renderReadiness(cl);
+}
+function rdSet(key,field,value,redraw=true){
+  const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt||cl.purgedAt)return;
+  const def=RD_DEFS.find(d=>d.key===key);
+  if(key!=='object'&&!def)return;
+  if(!['owner','state','deadline','note','confirmed'].includes(field))return;
+  if(field==='owner'&&value!==''&&!OPS_PEOPLE[value])return;
+  if(field==='deadline'&&value!==''&&!opsValidDate(value))return;
+  if(field==='state'&&(!RD_STATES[value]||def.auto||(value==='na'&&!def.optional)))return;
+  if(field==='confirmed'&&(key!=='install'||!opsValidDate(cl.dateInstall)))return;
+  if(key==='object'&&field!=='owner')return;
+  if(!cl.readiness)cl.readiness={items:{}};
+  const rd=cl.readiness;
+  if(!rd.items)rd.items={};
+  let before;
+  if(key==='object'){before=rd.owner||'';rd.owner=value;}
+  else if(field==='confirmed'){before=rd.confirmedDate||'';value=value?cl.dateInstall:'';rd.confirmedDate=value;}
+  else{
+    if(!rd.items[key])rd.items[key]={};
+    before=rd.items[key][field]||'';rd.items[key][field]=value;
+    rd.items[key].updatedAt=Date.now();
+  }
+  if(before===value)return;
+  rd.updatedAt=Date.now();cl.updatedAt=Date.now();
+  if(field!=='note'){
+    const label=key==='object'?'Ответственный за подготовку':def.label;
+    const shown=field==='state'?RD_STATES[value]:field==='owner'?(OPS_PEOPLE[value]||'Не назначен'):field==='confirmed'?(value?'Подтверждена '+fds(value):'Подтверждение снято'):(value?fds(value):'Срок не задан');
+    log(cl,`Подготовка · ${label}: ${shown}`,'◉','#c8a96e');
+  }
+  save();
+  if(redraw)rdRefresh(cl);
+}
+function renderReadiness(cl){
+  const panel=ge('orbody');if(!panel)return;
+  const r=readinessSummary(cl),rd=cl.readiness||{};
+  panel.innerHTML=`<section class="rd-panel" id="readinessPanel">
+    <div class="ops-eyebrow">ИСПОЛНЕНИЕ ОБЪЕКТА</div>
+    <div class="rd-heading"><div><h2>Готовность к монтажу</h2><p>Отметьте факты. Для лишних пунктов выберите «Не требуется».</p></div><span class="ops-pill ${r.status}">${r.label}</span></div>
+    <div class="rd-owner"><label for="rd-owner">Ответственный за подготовку</label><select id="rd-owner" onchange="rdSet('object','owner',this.value)">${opsOwnerOptions(rd.owner)}</select><span>Для отдельного пункта можно назначить другого ответственного.</span></div>
+    <div class="rd-progress" aria-label="${r.done} из ${r.total} проверок выполнено"><span style="width:${r.total?r.done/r.total*100:0}%"></span></div>
+    <div class="rd-progress-label">${r.done} из ${r.total} проверок выполнено${r.items.some(i=>i.state==='na')?' · ненужные пункты исключены':''}</div>
+    <div class="rd-items">${r.items.map(i=>{
+      const saved=rd.items?.[i.key]||{};
+      return `<article class="rd-item ${i.state}" id="rd-${i.key}">
+        <div class="rd-item-top"><div><h3>${i.label}</h3><p>${esc(i.detail)}</p></div>${i.auto?`<span class="ops-pill ${i.state==='done'?'ready':i.state==='unknown'?'unknown':'blocked'}">${RD_STATES[i.state]}</span>`:`<label class="rd-state-label"><span class="sr-only">Состояние: ${i.label}</span><select aria-label="Состояние: ${i.label}" onchange="rdSet('${i.key}','state',this.value)">${Object.entries(RD_STATES).filter(([key])=>key!=='na'||i.optional).map(([key,label])=>`<option value="${key}"${key===i.state?' selected':''}>${label}</option>`).join('')}</select></label>`}</div>
+        ${i.key==='install'&&opsValidDate(cl.dateInstall)?`<label class="rd-confirm"><input type="checkbox" ${i.state==='done'?'checked':''} onchange="rdSet('install','confirmed',this.checked)"> Дата ${fds(cl.dateInstall)} согласована с клиентом</label>`:''}
+        ${i.state!=='done'&&i.state!=='na'?`<div class="rd-fields"><label>Ответственный<select aria-label="Ответственный: ${i.label}" onchange="rdSet('${i.key}','owner',this.value)">${opsOwnerOptions(saved.owner,rd.owner?'Как у объекта · '+OPS_PEOPLE[rd.owner]:'Не назначен')}</select></label><label>Срок<input type="date" aria-label="Срок: ${i.label}" value="${escA(i.deadline)}" onchange="rdSet('${i.key}','deadline',this.value)"></label></div>`:''}
+        <label class="rd-note-label">${i.state==='blocked'?'Что мешает и что нужно сделать':'Примечание'}<input aria-label="Примечание: ${i.label}" value="${escA(i.note)}" placeholder="Например: поставщик обещал карниз к четвергу" oninput="rdSet('${i.key}','note',this.value,false)"></label>
+      </article>`;
+    }).join('')}</div>
+  </section>`;
+}
+function opsTaskOwner(cid,index,value,globalView=false){
+  if(value!==''&&!OPS_PEOPLE[value])return;
+  const cl=DB.find(c=>c.id===cid),task=cl?.tasks?.[index];if(!task)return;
+  task.owner=value;log(cl,`Ответственный за задачу «${task.text}»: ${OPS_PEOPLE[value]||'Не назначен'}`,'✅','#5b9bd5');
+  save();if(globalView)renderAllTasksView(ge('main'));else renderTasks(cl);
+}
+function opsValidateReadiness(rd){
+  if(rd==null)return;
+  const plain=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  if(!plain(rd)||(rd.items!=null&&!plain(rd.items)))throw new Error('Некорректная готовность объекта');
+  if(rd.owner!=null&&rd.owner!==''&&!OPS_PEOPLE[rd.owner])throw new Error('Некорректный ответственный');
+  if(rd.confirmedDate&& !opsValidDate(rd.confirmedDate))throw new Error('Некорректная дата подтверждения');
+  for(const def of RD_DEFS){
+    const v=rd.items?.[def.key];if(v==null)continue;
+    if(!plain(v)||(v.state!=null&&!RD_STATES[v.state])||(v.owner!=null&&v.owner!==''&&!OPS_PEOPLE[v.owner])||(v.note!=null&&typeof v.note!=='string')||(v.deadline&& !opsValidDate(v.deadline)))throw new Error('Некорректный пункт готовности');
+  }
+}
+function opsData(role=OPS_VIEW,today=opsToday()){
+  const live=liveDB(),active=live.filter(c=>!['done','closed','support','cancel','claim'].includes(c.status));
+  const installs=active.filter(c=>{const d=opsDays(today,c.dateInstall);return d!==null&&d>=0&&d<14;}).sort((a,b)=>a.dateInstall.localeCompare(b.dateInstall));
+  const risks=[],actions=[],events=[],payments=[];
+  active.forEach(cl=>{
+    const ready=readinessSummary(cl),days=opsDays(today,cl.dateInstall);
+    if(days!==null&&days<0)risks.push({cl,level:'danger',title:'Дата монтажа прошла',detail:'Проверьте выполнение или перенесите дату',tab:'ready'});
+    else if((days!==null&&days<14)||cl.status==='sched'){
+      if(ready.status!=='ready')risks.push({cl,level:days!==null&&days<=3?'danger':'warning',title:days===null?'Монтаж без даты':days===0?'Монтаж сегодня':`Монтаж через ${days} ${plural(days,'день','дня','дней')}`,detail:ready.unresolved.map(i=>(i.state==='unknown'?i.label+' — не проверено':i.detail)+(i.note?' ('+i.note+')':'')).join(' · '),tab:'ready'});
+    }
+    ready.unresolved.forEach(i=>{
+      if(((i.deadline&&i.deadline<=today)||(!i.deadline&&cl.readiness))&&(!i.owner||i.owner===role))actions.push({cl,text:i.action,detail:i.note||i.detail,deadline:i.deadline,owner:i.owner,tab:'ready',key:i.key});
+    });
+    for(const [field,label] of [['dateMeasure','Замер'],['dateProd','Производство'],['dateInstall','Монтаж']])if(cl[field]===today)events.push({cl,label,tab:'ready'});
+  });
+  live.filter(cl=>cl.status!=='cancel').forEach(cl=>{
+    if(cl.status==='claim')risks.push({cl,level:'warning',title:'Открытая рекламация',detail:cl.comment||'Проверьте причину и назначьте следующее действие',tab:'tasks'});
+    (cl.tasks||[]).forEach((task,index)=>{
+      if(!task.done&&(!task.deadline||task.deadline<=today)&&(!task.owner||task.owner===role))actions.push({cl,text:task.text,deadline:task.deadline||'',owner:task.owner||'',detail:task.time?'Время: '+task.time:'',tab:'tasks',taskIndex:index});
+    });
+    const debt=clDebt(cl);if(debt>0)payments.push({cl,debt});
+  });
+  actions.sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||cname(a.cl).localeCompare(cname(b.cl),'ru'));
+  risks.sort((a,b)=>(a.level==='danger'?0:1)-(b.level==='danger'?0:1)||(a.cl.dateInstall||'9999').localeCompare(b.cl.dateInstall||'9999'));
+  payments.sort((a,b)=>b.debt-a.debt);
+  const sales=active.filter(c=>['lead','measure','measured','estimate','contract','awaiting'].includes(c.status));
+  const unattended=sales.filter(c=>!(c.tasks||[]).some(t=>!t.done&&t.deadline&&t.deadline>=today));
+  return {today,active,installs,risks,actions,events,payments,unattended,claims:live.filter(c=>c.status==='claim')};
+}
+function opsOpen(id,tab='ready',key=''){
+  const cl=DB.find(c=>c.id===id);if(!cl||cl.deletedAt||cl.purgedAt)return;
+  OBJTAB=tab;openObj(id);
+  if(key||window.innerWidth<=768)requestAnimationFrame(()=>ge(key?'rd-'+key:'orbody')?.scrollIntoView({behavior:'smooth',block:'start'}));
+}
+function opsSetView(value){
+  if(!OPS_PEOPLE[value])return;
+  OPS_VIEW=value;localStorage.setItem('px_ops_view',value);showDash();
+}
+function opsOpenPlan(){PLAN_START=opsToday();PLAN_DAYS=14;showPlanner();}
+function opsRow(cl,title,detail='',tab='ready',tone='',key=''){
+  return `<button type="button" class="ops-row ${tone}" data-ops-id="${escA(cl.id)}" data-ops-tab="${tab}" data-ops-key="${key}"><span class="ops-row-copy"><strong>${esc(title)}</strong><span class="ops-object">${esc(cname(cl))}</span>${detail?`<small>${esc(detail)}</small>`:''}</span><span class="ops-arrow" aria-hidden="true">↗</span></button>`;
+}
+function opsSection(title,subtitle,rows,empty,extra=''){
+  return `<section class="ops-section"><div class="ops-section-head"><div><h2>${title}</h2><p>${subtitle}</p></div>${extra}</div><div class="ops-section-body">${rows||`<div class="ops-empty">${empty}</div>`}</div></section>`;
+}
 function showDash(){
   VIEW='dash';setNav('dash');sbHide();
+  const d=opsData(),max=OPS_VIEW==='max';
+  const urgent=d.risks.filter(r=>r.level==='danger').length;
+  const tasks=d.actions.map(a=>opsRow(a.cl,a.text,[a.deadline?(a.deadline<d.today?'Просрочено · ':'Сегодня · ')+fds(a.deadline):'Без срока',OPS_PEOPLE[a.owner]||'Ответственный не назначен',a.detail].filter(Boolean).join(' · '),a.tab,a.deadline&&a.deadline<d.today?'danger':'',a.key||'')).join('');
+  const schedule=d.installs.map(cl=>{const r=readinessSummary(cl);return opsRow(cl,`Монтаж ${fds(cl.dateInstall)}`,`${clBrigs(cl).join(', ')||'Без бригады'} · ${r.label}`,'ready',r.status==='ready'?'success':'');}).join('');
+  const debts=d.payments.map(({cl,debt})=>opsRow(cl,`${fmt(debt)} ₽ к получению`,gst(cl).label,'ready')).join('');
+  const sales=d.unattended.map(cl=>opsRow(cl,'Назначить следующий контакт',gst(cl).label,'tasks')).join('');
+  const actions=opsSection('Следующие действия',`Для ${max?'Макса':'Димы'} и без назначенного ответственного · ${d.actions.length}`,tasks,'Нет просроченных задач и задач на сегодня.');
+  const plan=opsSection('Монтажи · 14 дней',`${d.installs.length} объектов · готовность и бригады`,schedule,'На ближайшие 14 дней монтажей нет.',`<button class="ops-link" onclick="opsOpenPlan()">Планировщик →</button>`);
+  const money=opsSection('К получению',`${fmt(d.payments.reduce((sum,p)=>sum+p.debt,0))} ₽ по данным CRM`,debts,'Нет объектов с остатком к оплате.');
+  const salesPanel=opsSection('Продажи без следующего контакта','Нет незавершённой задачи с датой сегодня или позже',sales,'У объектов в продаже запланированы следующие действия.');
+  const claimPanel=opsSection('Рекламации',`${d.claims.length} в работе`,d.claims.map(cl=>opsRow(cl,'Проверить рекламацию',cl.comment||'Уточните следующее действие','tasks','warning')).join(''),'Открытых рекламаций нет.');
+  ge('main').innerHTML=`<div class="ops-page fade-in" id="opsCenter">
+    <header class="ops-header"><div><div class="ops-eyebrow">PARALLAX · ЦЕНТР УПРАВЛЕНИЯ</div><h1>Сегодня, ${new Date(d.today+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</h1><p>${max?'Продажи, обязательства и объекты, которым нужно внимание.':'Подготовка, ближайшие монтажи и препятствия в работе.'}</p></div><button class="ops-link" onclick="showOverview()">Общая сводка ↗</button></header>
+    <div class="ops-view-switch" role="group" aria-label="Рабочее представление"><button aria-pressed="${max}" class="${max?'selected':''}" onclick="opsSetView('max')">Макс <span>Продажи и деньги</span></button><button aria-pressed="${!max}" class="${!max?'selected':''}" onclick="opsSetView('dima')">Дима <span>Исполнение объектов</span></button></div>
+    <div class="ops-metrics"><a href="#opsRisks" class="ops-metric ${urgent?'danger':''}"><strong>${d.risks.length}</strong><span>Объектов требуют проверки</span><small>${urgent?'Срочных: '+urgent:'Ближайшие монтажи'}</small></a><a href="#opsActions" class="ops-metric"><strong>${d.actions.length}</strong><span>Следующих действий</span><small>Просрочено, сегодня и без срока</small></a><a href="#opsPlan" class="ops-metric"><strong>${d.installs.length}</strong><span>Монтажей за 14 дней</span><small>Бригады и готовность</small></a></div>
+    <section class="ops-section ops-risks" id="opsRisks"><div class="ops-section-head"><div><h2>Что мешает работе</h2><p>Общие риски видны в обоих представлениях</p></div><span class="ops-count">${d.risks.length}</span></div><div class="ops-section-body">${d.risks.map(r=>opsRow(r.cl,r.title,r.detail,r.tab,r.level)).join('')||'<div class="ops-empty">По датам и проверкам готовности рисков не найдено. Непроверенные объекты без даты монтажа сюда не входят.</div>'}</div></section>
+    <div class="ops-grid"><div id="opsActions">${actions}${opsSection('Сегодня на объектах','По назначенным датам',d.events.map(e=>opsRow(e.cl,e.label,gst(e.cl).label,e.tab)).join(''),'На сегодня замеров, запусков производства и монтажей нет.')}${max?salesPanel:claimPanel}</div><div><div id="opsPlan">${plan}</div>${max?money:salesPanel}</div></div>
+    <p class="ops-footnote">Долг показан без оценки просрочки оплаты: сроки платежей ещё не ведутся. Готовность подтверждается по фактам, а не по этапу воронки.</p>
+  </div>`;
+  ge('opsCenter').addEventListener('click',event=>{
+    const button=event.target.closest('[data-ops-id]');if(button)opsOpen(button.dataset.opsId,button.dataset.opsTab,button.dataset.opsKey);
+  });
+}
+
+function showOverview(){
+  VIEW='overview';setNav('dash');sbHide();
   const mc=ge('main');
   const today=new Date().toISOString().split('T')[0];
   const active=liveDB().filter(c=>c.status!=='closed');
@@ -1730,6 +2081,7 @@ function renderObjView(cl){
           ${STATUSES.map(s=>`<option value="${s.id}"${cl.status===s.id?' selected':''}>${s.label}</option>`).join('')}
         </select>
       </div>
+      <div id="rdBanner">${rdBannerHTML(cl)}</div>
       <div class="oc-body" id="cbody"></div>
       <div class="oc-ft">
         <button class="bsave" onclick="saveObj()">💾 Сохранить</button>
@@ -1742,6 +2094,7 @@ function renderObjView(cl){
     </div>
     <div class="or">
       <div class="or-tabs">
+        <button id="rdTab" class="otab${OBJTAB==='ready'?' on':''}" onclick="swOTab('ready',this)">◉ Готовность</button>
         <button class="otab${OBJTAB==='tl'?' on':''}" onclick="swOTab('tl',this)">📋 История</button>
         <button class="otab${OBJTAB==='docs'?' on':''}" onclick="swOTab('docs',this)">📄 Документы</button>
         <button class="otab${OBJTAB==='tasks'?' on':''}" onclick="swOTab('tasks',this)">✅ Задачи${(()=>{const cl2=DB.find(c=>c.id===CID);const open=(cl2?.tasks||[]).filter(t=>!t.done).length;return open?` <span style="background:var(--wn);color:#0f0f0f;border-radius:8px;padding:0 5px;font-size:9px;font-weight:700">${open}</span>`:''})()}</button>
@@ -1763,7 +2116,8 @@ function swOTab(t,el){
   document.querySelectorAll('.otab').forEach(b=>b.classList.remove('on'));
   if(el)el.classList.add('on');
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
-  if(t==='docs')renderDocsTab(cl);
+  if(t==='ready')renderReadiness(cl);
+  else if(t==='docs')renderDocsTab(cl);
   else if(t==='tl')renderTL(cl);
   else if(t==='tasks')renderTasks(cl);
   else if(t==='files')renderFiles(cl);
@@ -2014,6 +2368,7 @@ function syncCard(){
   cl.docNum=gv('f_docNum');cl.docDate=gv('f_docDate');
   cl.w1=gcb('f_w1');cl.w2=gcb('f_w2');
   cl.dateMeasure=gv('f_dmeas');cl.dateProd=gv('f_dprod');
+  if(cl.dateInstall!==gv('f_dinst')&&cl.readiness)delete cl.readiness.confirmedDate;
   cl.dateInstall=gv('f_dinst');cl.dateDead=gv('f_ddead');
   cl.startDays=gv('f_sddays');cl.execDays=gv('f_exdays');
   cl.brigades=[...document.querySelectorAll('.f_brig_cb:checked')].map(c=>c.value);
@@ -2051,6 +2406,7 @@ function autoSave(){
   save();
   renderDocD();
   refreshCardFinance();
+  rdRefresh(DB.find(c=>c.id===CID));
 }
 function refreshCardFinance(){
   const cl=DB.find(c=>c.id===CID);if(!cl||!ge('oc'))return;
@@ -2083,7 +2439,7 @@ function delObj(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
   cl.deletedAt=Date.now();cl.updatedAt=Date.now();save();CID=null;renderList();
   ge('main').innerHTML='<div class="welcome"><div class="welcome-logo">PARALLAX</div><div>Выберите объект или создайте новый</div></div>';
-  notify('warn','В корзине','Объект перемещён в корзину (хранится 30 дней)');
+  notify('warn','В корзине','Объект перемещён в корзину; можно восстановить');
 }
 
 // ═══════════════════════════════════════════════
@@ -2123,6 +2479,7 @@ function renderTasks(cl){
         <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
           <input type="date" class="tdate-inp${isLate(t.deadline)&&!t.done?' late':''}" value="${t.deadline||''}" onchange="setTaskDate(${i},this.value)">
           <input type="time" class="ttime-inp" value="${t.time||''}" onchange="setTaskTime(${i},this.value)">
+          <select class="ops-owner-select" aria-label="Ответственный за задачу" data-cid="${escA(cl.id)}" onchange="opsTaskOwner(this.dataset.cid,${i},this.value)">${opsOwnerOptions(t.owner)}</select>
           <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="cycleTaskPrio(${i})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
@@ -2132,6 +2489,7 @@ function renderTasks(cl){
       <input id="tinp" placeholder="Новая задача..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2 1 100%">
       <input type="date" id="tddate" style="flex:0 0 auto">
       <input type="time" id="tdtime" style="flex:0 0 auto">
+      <select id="tdowner" aria-label="Ответственный за новую задачу">${opsOwnerOptions('')}</select>
       <select id="tdprio" style="flex:0 0 auto"><option value="">Приоритет</option><option value="high">Высокий</option><option value="med">Средний</option><option value="low">Низкий</option></select>
       <button onclick="addTask()">+</button>
     </div>
@@ -2157,7 +2515,7 @@ function addTask(){
   const tm=ge('tdtime')?.value;
   const pr=ge('tdprio')?.value||'';
   if(!txt)return;if(!cl.tasks)cl.tasks=[];
-  cl.tasks.push({text:txt,deadline:dl,time:tm||'',priority:pr,done:false,createdAt:Date.now()});
+  cl.tasks.push({text:txt,deadline:dl,time:tm||'',priority:pr,owner:ge('tdowner')?.value||'',done:false,createdAt:Date.now()});
   log(cl,`Задача: "${txt}"`, '✅','#5b9bd5');
   save();renderTasks(cl);
 }
@@ -2187,9 +2545,9 @@ function renderFiles(cl){
   </div>`;
 }
 function fCardHTML(f,i){
-  const isImg=f.type&&f.type.startsWith('image/');
+  const isImg=typeof f.data==='string'&&/^data:image\/(png|jpeg|gif|webp);base64,[a-z0-9+/=\s]+$/i.test(f.data);
   return`<div class="fcrd2">
-    ${isImg?`<img src="${f.data}" alt="${f.name}">`:`<div class="ficon">${f.type?.includes('pdf')?'📄':'📎'}</div>`}
+    ${isImg?`<img src="${escA(f.data||'')}" alt="${escA(f.name||'')}">`:`<div class="ficon">${f.type?.includes('pdf')?'📄':'📎'}</div>`}
     <div class="fn">${esc(f.name)}</div><div class="fs">${(f.size/1024).toFixed(0)} KB</div>
     <button class="fdl" onclick="rmFile(${i})">×</button>
   </div>`;
@@ -3224,7 +3582,7 @@ function duplicateObj(){
   copy.projectName=(cl.projectName?cl.projectName+' (копия)':cname(cl)+' (копия)');
   copy.status='lead';
   copy.paid=0;copy.tl=[{ts:Date.now(),act:'Объект дублирован из «'+cname(cl)+'»',ic:'⧉',col:'#9b72cf'}];
-  copy.tasks=[];copy.files=[];
+  copy.tasks=[];copy.files=[];delete copy.readiness;
   copy.dateInstall='';copy.dateMeasure='';copy.dateProd='';copy.dateDead='';
   DB.unshift(copy);save();
   CID=copy.id;
@@ -3244,13 +3602,15 @@ function importJSON(){
     const reader=new FileReader();
     reader.onload=ev=>{
       try{
-        const data=validateRecords(JSON.parse(ev.target.result));
+        const backup=parseBackup(JSON.parse(ev.target.result));
+        const data=backup.records;
+        const restoreSettings=backup.settings&&confirm('В копии есть колонки и бригады. Восстановить их? Отмена — импортировать только объекты.');
         const before=new Map(DB.map(c=>[c.id,c]));
         const next=mergeRecords(DB,data);
         const added=next.filter(c=>!before.has(c.id)).length;
         const updated=next.filter(c=>before.has(c.id)&&before.get(c.id)!==c).length;
         const skipped=data.length-added-updated;
-        DB=next;
+        commitBackup(next,restoreSettings?backup.settings:null);
         const stored=save();renderList();
         if(ge('oc')){
           const cl=DB.find(c=>c.id===CID);
@@ -3261,6 +3621,7 @@ function importJSON(){
         if(stored)notify('ok','Импорт',`Добавлено: ${added}, обновлено: ${updated}, пропущено: ${skipped}`);
       }catch(err){notify('err','Ошибка импорта',err.message);}
     };
+    reader.onerror=()=>notify('err','Ошибка импорта','Не удалось прочитать файл. База не изменена.');
     reader.readAsText(file);
   };
   inp.click();
@@ -3682,6 +4043,7 @@ function renderAllTasksView(mc){
           <span class="at-obj" onclick="openObj('${t._cid}')">${esc(t._cname)}</span>
           <input type="date" class="tdate-inp${late?' late':''}" value="${t.deadline||''}" onchange="gSetTaskDate('${t._cid}',${t._idx},this.value)">
           <input type="time" class="ttime-inp" value="${t.time||''}" onchange="gSetTaskTime('${t._cid}',${t._idx},this.value)">
+          <select class="ops-owner-select" aria-label="Ответственный за задачу" data-cid="${escA(t._cid)}" onchange="opsTaskOwner(this.dataset.cid,${t._idx},this.value,true)">${opsOwnerOptions(t.owner)}</select>
           <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="gCyclePrio('${t._cid}',${t._idx})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
@@ -3752,6 +4114,7 @@ function showAddTaskModal(){
       <div class="field"><label>Дата</label><input type="date" id="atDate"></div>
       <div class="field"><label>Время</label><input type="time" id="atTime"></div>
     </div>
+    <div class="field"><label for="atOwner">Ответственный</label><select id="atOwner">${opsOwnerOptions('')}</select></div>
     <div class="field"><label>Приоритет</label>
       <select id="atPrio"><option value="">Без приоритета</option><option value="high">Высокий</option><option value="med">Средний</option><option value="low">Низкий</option></select>
     </div>
@@ -3772,7 +4135,7 @@ function saveNewTask(){
   if(!cid){ge('atObj').focus();return;}
   const cl=DB.find(c=>c.id===cid);if(!cl)return;
   if(!cl.tasks)cl.tasks=[];
-  cl.tasks.push({text,deadline:date,time:time||'',priority:prio,done:false,createdAt:Date.now()});
+  cl.tasks.push({text,deadline:date,time:time||'',priority:prio,owner:ge('atOwner')?.value||'',done:false,createdAt:Date.now()});
   log(cl,`Задача: "${text}"`, '✅','#5b9bd5');
   save();
   ge('modalOverlay').classList.add('hidden');
@@ -3953,6 +4316,7 @@ function plApplyMove(id,idx,tgtBrig,srcBrig){
   const dur=(cl.dateDead&&cl.dateDead>=oldStart)?plDiff(oldStart,cl.dateDead):0;
   let changed=false;
   if(idx!==oldStartIdx){
+    if(cl.readiness)delete cl.readiness.confirmedDate;
     cl.dateInstall=plAddDays(PLAN_START,idx);
     if(cl.dateDead)cl.dateDead=plAddDays(cl.dateInstall,dur);
     changed=true;
@@ -4100,6 +4464,7 @@ function plQuickSave(){
   if(sel){cl=DB.find(c=>c.id===sel);if(!cl)return;}
   else{cl=mkObj();cl.projectName=(ge('plqName')?.value||'').trim();DB.unshift(cl);}
   if(brig){const set=new Set(clBrigs(cl));set.add(brig);cl.brigades=[...set];delete cl.brigade;}
+  if(cl.dateInstall!==start&&cl.readiness)delete cl.readiness.confirmedDate;
   cl.dateInstall=start;cl.dateDead=end;
   cl.updatedAt=Date.now();
   log(cl,`Запланирован: ${clBrigs(cl).join(', ')||'Без бригады'}, монтаж ${fds(start)}–${fds(end)}`,'📋','#5b9bd5');
@@ -4259,11 +4624,60 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // EXPORT / INIT
 // ═══════════════════════════════════════════════
+// Versioned export container; business records retain their existing schema.
+function makeBackup(){
+  return {format:'parallax-backup',version:1,build:'23.09-5',exportedAt:new Date().toISOString(),
+    records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
+}
+function parseBackup(value){
+  if(Array.isArray(value))return {records:validateRecords(value),settings:null};
+  if(!value||value.format!=='parallax-backup'||value.version!==1)throw new Error('Неизвестный формат или версия резервной копии');
+  const settings=value.settings;
+  if(!settings||!Array.isArray(settings.statuses)||!settings.statuses.length||
+    settings.statuses.some(s=>!s||typeof s.id!=='string'||!s.id||typeof s.label!=='string'||
+      typeof s.color!=='string'||typeof s.bg!=='string')||
+    new Set(settings.statuses.map(s=>s.id)).size!==settings.statuses.length||
+    !Array.isArray(settings.brigades)||settings.brigades.some(b=>typeof b!=='string'))
+    throw new Error('Повреждены настройки резервной копии');
+  return {records:validateRecords(value.records),settings};
+}
+function commitBackup(records,settings){
+  // Preserve the state before import independently of the rolling browser backup.
+  const keys=['px_v2','px_v2_backup','px_statuses','px_statuses_backup','px_statuses_ts','px_brigades','px_brigades_ts','px_before_import'];
+  const previous=keys.map(key=>[key,localStorage.getItem(key)]);
+  const statusTime=Math.max(Date.now(),STATUS_TS+1),brigadeTime=Math.max(Date.now(),BRIGADE_TS+1);
+  try{
+    localStorage.setItem('px_before_import',JSON.stringify(makeBackup()));
+    localStorage.setItem('px_v2',JSON.stringify(records));
+    if(settings){
+      localStorage.setItem('px_statuses',JSON.stringify(settings.statuses));
+      localStorage.setItem('px_statuses_backup',JSON.stringify(settings.statuses));
+      localStorage.setItem('px_statuses_ts',String(statusTime));
+      localStorage.setItem('px_brigades',JSON.stringify(settings.brigades));
+      localStorage.setItem('px_brigades_ts',String(brigadeTime));
+    }
+  }catch(error){
+    // Remove the newly written values first, freeing space for the original ones.
+    try{
+      keys.forEach(key=>localStorage.removeItem(key));
+      previous.forEach(([key,value])=>{if(value!==null)localStorage.setItem(key,value);});
+    }catch(rollbackError){
+      console.error('Import rollback:',rollbackError);
+      throw new Error('Импорт не завершён. Данные остаются в памяти: экспортируйте их перед закрытием страницы.');
+    }
+    throw new Error('Импорт отменён: не удалось сохранить данные на устройстве');
+  }
+  DB=records;
+  if(settings){
+    STATUSES=settings.statuses;BRIGADES=settings.brigades;STATUS_TS=statusTime;BRIGADE_TS=brigadeTime;
+    Object.keys(SM).forEach(key=>delete SM[key]);STATUSES.forEach(s=>{SM[s.id]=s;});
+  }
+}
 function doExport(){
-  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(makeBackup(),null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`parallax_${new Date().toISOString().slice(0,10)}.json`;a.click();
-  notify('ok','Экспорт','Резервная копия скачана');
+  notify('ok','Экспорт','Подготовлена копия объектов, колонок и бригад. Сохраните скачанный файл.');
 }
 function checkAlerts(){
   const today=new Date().toISOString().split('T')[0];
@@ -4317,7 +4731,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 23.09-1','color:#c8a96e;font-weight:700');console.log('Включает: корзину, ИП-документы, поиск по ФИО, safe-area iPhone');
+console.log('%cParallax CRM — сборка 23.09-5','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
 // Запуск через проверку авторизации
 checkAuth();
 
