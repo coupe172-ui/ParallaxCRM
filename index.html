@@ -769,7 +769,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 24.09-2</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 24.09-3</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -777,7 +777,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 24.09-2</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 24.09-3</span></div>
   <nav class="hdr-nav">
     <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Центр</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
@@ -952,8 +952,20 @@ let AUTH_TOKEN='',REMOTE_REVISION=null;
 function authRequired(){
   AUTH_TOKEN='';REMOTE_REVISION=null;
   try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}
-  const screen=ge('loginScreen');if(screen){screen.style.display='';screen.style.opacity='1';}
-  const error=ge('loginErr');if(error)error.textContent='Войдите для синхронизации. Локальные данные сохранены.';
+  // Background requests must never replace an open card with the login screen.
+  if(APP_READY){setSS('auth');return;}
+  const error=ge('loginErr');if(error)error.textContent='Войдите для синхронизации.';
+}
+function openSyncLogin(){
+  const screen=ge('loginScreen');if(!screen)return;
+  screen.style.display='';screen.style.opacity='1';
+  const error=ge('loginErr');if(error)error.textContent='Войдите для отправки изменений в облако. Карточка останется открытой.';
+  if(APP_READY&&!ge('cancelSyncLogin')){
+    const button=document.createElement('button');button.id='cancelSyncLogin';button.type='button';button.className='bs';button.textContent='Продолжить без синхронизации';
+    button.onclick=()=>{screen.style.display='none';button.remove();};
+    ge('loginPwd').parentElement.appendChild(button);
+  }
+  ge('loginPwd')?.focus();
 }
 async function doLogin(){
   const pwd=ge('loginPwd')?.value||'',err=ge('loginErr');
@@ -966,26 +978,39 @@ async function doLogin(){
     try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:result.token,expiresAt:result.expiresAt}));}catch(e){}
     if(ge('loginPwd'))ge('loginPwd').value='';
     if(err)err.textContent='';
-    ge('loginScreen').style.display='none';
-    if(APP_READY)await pullSheets();else init();
+    ge('loginScreen').style.display='none';ge('cancelSyncLogin')?.remove();
+    if(APP_READY)await syncNow();else init();
   }catch(error){if(err)err.textContent=error.message;}
 }
 async function checkAuth(){
+  let checkedToken='';
   try{
     const session=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
     if(session&&session.expiresAt>Date.now()&&typeof session.token==='string'){
-      AUTH_TOKEN=session.token;
-      await serverCall('load'); // Validate server session before opening cached records.
+      checkedToken=session.token;AUTH_TOKEN=checkedToken;
+      await serverCall('load');
+      if(AUTH_TOKEN!==checkedToken)return;
       ge('loginScreen').style.display='none';init();return;
     }
-  }catch(e){const err=ge('loginErr');if(err)err.textContent=e.message;}
-  AUTH_TOKEN='';setTimeout(()=>ge('loginPwd')?.focus(),300);
+  }catch(e){
+    if(AUTH_TOKEN&&AUTH_TOKEN!==checkedToken)return;
+    const err=ge('loginErr');if(err)err.textContent=e.message;
+  }
+  if(AUTH_TOKEN&&AUTH_TOKEN!==checkedToken)return;
+  AUTH_TOKEN='';setTimeout(()=>{if(!APP_READY)ge('loginPwd')?.focus();},300);
 }
 async function serverCall(action,values={}){
-  if(!AUTH_TOKEN){authRequired();throw new Error('Необходимо войти');}
-  const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({...values,action,token:AUTH_TOKEN})});
-  if(result.apiVersion!==2||typeof result.revision!=='string')throw new Error('Несовместимая версия сервера');
-  return result;
+  const token=AUTH_TOKEN;
+  if(!token){const error=new Error('Для отправки изменений нажмите «Синхронизировать» и войдите.');error.code='AUTH_REQUIRED';throw error;}
+  try{
+    const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({...values,action,token})});
+    if(result.apiVersion!==2||typeof result.revision!=='string')throw new Error('Несовместимая версия сервера');
+    if(AUTH_TOKEN!==token)throw new Error('Сессия обновилась. Повторите синхронизацию.');
+    return result;
+  }catch(error){
+    if(error.code==='AUTH_REQUIRED'&&AUTH_TOKEN===token)authRequired();
+    throw error;
+  }
 }
 
 function init(){
@@ -1147,11 +1172,12 @@ function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
 // SYNC
 // ═══════════════════════════════════════════════
 function setSS(s){
+  if(APP_READY&&!AUTH_TOKEN&&s!=='offline')s='auth';
   const el=ge('syncbadge');if(!el)return;
-  const m={idle:{t:'',c:'var(--mu)'},pending:{t:'✓ На устройстве · ожидает отправки',c:'var(--mu)'},offline:{t:'📴 Офлайн',c:'var(--wn)'},saving:{t:'⟳ Сохранение...',c:'var(--ac)'},saved:{t:'✓ Синхронизировано',c:'var(--ok)'},error:{t:'⚠ Ошибка',c:'var(--dn)'},loading:{t:'⟳ Загрузка...',c:'var(--ac)'}};
+  const m={auth:{t:'⚠ Войдите для отправки в облако',c:'var(--wn)'},idle:{t:'',c:'var(--mu)'},pending:{t:'✓ На устройстве · ожидает отправки',c:'var(--mu)'},offline:{t:'📴 Офлайн',c:'var(--wn)'},saving:{t:'⟳ Сохранение...',c:'var(--ac)'},saved:{t:'✓ Синхронизировано',c:'var(--ok)'},error:{t:'⚠ Ошибка',c:'var(--dn)'},loading:{t:'⟳ Загрузка...',c:'var(--ac)'}};
   const st=m[s]||m.idle;el.textContent=st.t;el.style.color=st.c;
   const mobile=ge('mobileSyncLabel'),button=ge('mn-sync');
-  if(mobile)mobile.textContent=({pending:'Локально',offline:'Офлайн',saving:'Отправка',saved:'В облаке',error:'Ошибка',loading:'Загрузка'})[s]||'Синхр.';
+  if(mobile)mobile.textContent=({auth:'Войти',pending:'Локально',offline:'Офлайн',saving:'Отправка',saved:'В облаке',error:'Ошибка',loading:'Загрузка'})[s]||'Синхр.';
   if(button){button.style.color=st.c;button.title=st.t||'Синхронизировать';}
 }
 let PULLP=null, PUSHP=null, PUSH_AGAIN=false, SAVE_REV=0;
@@ -1279,9 +1305,9 @@ async function sheetsRequest(url,options={},timeout=60000){
     if(!response.ok)throw new Error('HTTP '+response.status);
     const result=await response.json();
     if(result.ok!==true){
-      if(result.code==='AUTH_REQUIRED')authRequired();
       const messages={RECOVERY_REQUIRED:'Запись была прервана. Облачная база заблокирована до проверки резервной копии; сохраните локальный экспорт.',AUTH_REQUIRED:'Сессия завершена. Войдите снова.',AUTH_FAILED:'Неверный пароль',TRY_LATER:'Слишком много попыток. Повторите через 5 минут.',NOT_CONFIGURED:'Сначала настройте серверный пароль в Apps Script',CONFLICT:'База изменена на другом устройстве. Повторите синхронизацию.',MISSING_RECORDS:'Запись остановлена: в отправке отсутствуют существующие объекты.',BUSY:'Сервер занят. Повторите синхронизацию.',INVALID_DATA:'Сервер отклонил данные. Сохраните экспорт и сообщите об ошибке.'};
-      throw new Error(messages[result.code]||'Сервер не подтвердил операцию. Данные не отправлены или результат неизвестен.');
+      const error=new Error(messages[result.code]||'Сервер не подтвердил операцию. Данные не отправлены или результат неизвестен.');
+      error.code=result.code;throw error;
     }
     return result;
   }catch(error){
@@ -1290,6 +1316,7 @@ async function sheetsRequest(url,options={},timeout=60000){
   }finally{clearTimeout(timer);}
 }
 function pushSheets(){
+  if(!AUTH_TOKEN){setSS('auth');return Promise.resolve(false);}
   if(!navigator.onLine){setSS('offline');return Promise.resolve(false);}
   if(PUSHP){PUSH_AGAIN=true;return PUSHP;}
   PUSHP=(async()=>{
@@ -1315,6 +1342,7 @@ function pushSheets(){
 }
 async function syncNow(){
   clearTimeout(SYNCT);
+  if(!AUTH_TOKEN){openSyncLogin();return false;}
   const ok=await pushSheets();
   notify(ok?'ok':'err',ok?'Синхронизировано':'Ошибка синхронизации',
     ok?'Изменения отправлены на сервер':'Сервер не подтвердил синхронизацию. Повторите позже.');
@@ -4649,7 +4677,7 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // Versioned export container; business records retain their existing schema.
 function makeBackup(){
-  return {format:'parallax-backup',version:1,build:'24.09-2',exportedAt:new Date().toISOString(),
+  return {format:'parallax-backup',version:1,build:'24.09-3',exportedAt:new Date().toISOString(),
     records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
 }
 function parseBackup(value){
@@ -4754,7 +4782,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 24.09-2','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+console.log('%cParallax CRM — сборка 24.09-3','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
 // Запуск через проверку авторизации
 checkAuth();
 
