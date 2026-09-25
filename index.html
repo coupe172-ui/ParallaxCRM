@@ -769,7 +769,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 24.09-3</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 25.09-1</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -777,7 +777,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 24.09-3</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 25.09-1</span></div>
   <nav class="hdr-nav">
     <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Центр</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
@@ -1188,7 +1188,12 @@ function stableRecord(value){
   if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableRecord(value[k])).join(',')+'}';
   return JSON.stringify(value);
 }
-function recordKey(record){return record?stableRecord(validateRecords([record])[0]):null;}
+function recordKey(record){
+  if(!record)return null;
+  const normalized=validateRecords([record])[0];
+  delete normalized.sortOrder;
+  return stableRecord(normalized);
+}
 function readSyncBase(){
   if(SYNC_BASE)return SYNC_BASE;
   try{
@@ -1210,8 +1215,12 @@ function planCloudMerge(local,incoming){
     if(!here){merged.set(remote.id,remote);return;}
     const l=recordKey(here),r=recordKey(remote),b=recordKey(previous);
     if(here.purgedAt&&!remote.purgedAt){
-      if(previous&&!previous.purgedAt&&r===b)return;
-      throw new Error('Облако содержит ранее окончательно удалённый объект. Синхронизация остановлена для проверки.');
+      // An unchanged trash record predating the local purge is not a resurrection.
+      const deleted=+here.deletedAt,cloudUpdated=+remote.updatedAt;
+      const olderTrash=deleted>0&&cloudUpdated>0&&Number.isFinite(cloudUpdated)&&
+        +remote.deletedAt===deleted&&cloudUpdated<=deleted&&+here.purgedAt>=deleted;
+      if(olderTrash||(previous&&!previous.purgedAt&&r===b))return;
+      throw new Error('Удалённый объект изменён в облаке. Нужна проверка версий; данные не перезаписаны.');
     }
     if(l===r)return;
     if(previous&&l===b){merged.set(remote.id,remote);return;}
@@ -4677,7 +4686,7 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // Versioned export container; business records retain their existing schema.
 function makeBackup(){
-  return {format:'parallax-backup',version:1,build:'24.09-3',exportedAt:new Date().toISOString(),
+  return {format:'parallax-backup',version:1,build:'25.09-1',exportedAt:new Date().toISOString(),
     records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
 }
 function parseBackup(value){
@@ -4782,7 +4791,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 24.09-3','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+console.log('%cParallax CRM — сборка 25.09-1','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
 // Запуск через проверку авторизации
 checkAuth();
 
