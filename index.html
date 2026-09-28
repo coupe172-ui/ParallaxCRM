@@ -2,13 +2,19 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="referrer" content="no-referrer">
+<script>
+// Remove OAuth codes before loading third-party resources.
+(()=>{const q=new URLSearchParams(location.search);if(q.has('state')&&(q.has('code')||q.has('error'))){window.__googleReturn={state:q.get('state'),code:q.get('code'),error:q.get('error')};history.replaceState(null,'',location.pathname+location.hash);}})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Parallax CRM">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f0f0f">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDYwLCAyMDIwLzA1LzEyLTE2OjA0OjE3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo4NzQ0RkM5NDI3MDMxMUVCOTg3OEIwMjREQjExOTQ1MCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo4NzQ0RkM5NTI3MDMxMUVCOTg3OEIwMjREQjExOTQ1MCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjg3NDRGQ0ZYIDI3MDMxMUVCOTg3OEIwMjREQjExOTQ1MCIgc3RSZWk6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4NzQ0RkM5MzI3MDMxMUVCOTg3OEIwMjREQjExOTQ1MCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACH5BAAAAAAALAAAAAACAAIAAAIFBAAAAA==">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>Parallax CRM</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -180,14 +186,15 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 
 /* OBJECT VIEW */
 .ov{flex:1;display:grid;grid-template-columns:var(--oc-width,370px) 1fr;overflow:hidden;}
-.oc{background:var(--s2);border-right:1px solid var(--br);display:flex;flex-direction:column;overflow:hidden;position:relative;min-width:260px;max-width:600px;}
+.oc{background:var(--s2);border-right:1px solid var(--br);display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:0;min-width:260px;max-width:600px;}
 .oc-resizer{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;background:transparent;z-index:10;transition:background .15s;}
 .oc-resizer:hover{background:var(--ac);}
 .oc-hd{padding:11px 15px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:7px;flex-shrink:0;}
 .oc-ttl{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--ac);flex:1;}
 .tgl{background:var(--s4);border:1px solid var(--br);border-radius:4px;padding:3px 9px;color:var(--mu);font-family:"Golos Text",sans-serif;font-size:11px;cursor:pointer;transition:all .2s;}
 .tgl.on{background:rgba(200,169,110,.18);border-color:var(--ac);color:var(--ac);}
-.oc-body{flex:1;overflow-y:auto;}
+.oc-scroll{flex:1;min-height:0;overflow-y:auto;}
+.oc-body{overflow:visible;}
 .st-bar{padding:11px 15px;border-bottom:1px solid var(--br);background:var(--sf);flex-shrink:0;}
 .st-lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mu);margin-bottom:5px;}
 .st-sel{width:100%;background:var(--s4);border:1px solid var(--br);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:"Golos Text",sans-serif;font-size:12px;font-weight:700;outline:none;cursor:pointer;}
@@ -256,8 +263,6 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
 .kc-task-chk{cursor:pointer;user-select:none;}
 .mobonly{display:none!important;}
 .task-add button{background:var(--ac);color:#0f0f0f;border:none;border-radius:5px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:"Golos Text",sans-serif;}
-.fdrop{border:2px dashed var(--br);border-radius:8px;padding:14px;text-align:center;color:var(--mu);font-size:11px;cursor:pointer;transition:all .2s;margin-bottom:9px;}
-.fdrop:hover,.fdrop.dov{border-color:var(--ac);color:var(--ac);}
 .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
 .fcrd2{background:var(--s4);border:1px solid var(--br);border-radius:6px;padding:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
 .fcrd2:hover{border-color:var(--ac);}
@@ -552,7 +557,9 @@ body{background:var(--bg);color:var(--tx);font-family:"Golos Text",sans-serif;fo
   .docsflex{overflow:visible!important;}
   .sheet{padding:14px 16px;font-size:11px;}
   /* Карточка объекта — полная ширина */
-  .ov .oc{max-height:none;}
+  .ov .oc{max-height:none;overflow:visible;}
+  .oc-scroll{flex:none;overflow:visible;}
+  .oc-ft{position:sticky;bottom:0;z-index:2;background:var(--s2);}
   .oc-resizer{display:none;}
   .kc-drag-handle,.kch-drag,.kch-edit{opacity:.55!important;}
 }
@@ -756,6 +763,62 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .rd-panel{padding:18px 12px;overflow:visible;}.rd-fields{grid-template-columns:1fr;}.rd-panel select,.rd-panel input:not([type=checkbox]){font-size:16px;min-height:42px;}.rd-panel select{width:100%;}.rd-owner select{flex:1;}.rd-item{padding:12px;}.rd-state-label{width:100%;}.or-tabs{overflow-x:auto;flex-shrink:0;}.or-tabs .otab{white-space:nowrap;}
 }
 
+
+/* Card workflow and attachments: scoped refinements, no layout changes elsewhere. */
+.stage-name{font-size:19px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.stage-hint{font-size:12px;line-height:1.5;color:var(--mu);margin:8px 0}
+.stage-options{border-top:1px solid var(--br);margin-top:10px;padding-top:10px}
+.stage-options summary,.manual-finance summary{font-size:12px;color:var(--tx2);cursor:pointer;line-height:1.5}
+.stage-field{display:block;font-size:12px;color:var(--mu);margin:10px 0 5px}
+.manual-finance{margin:12px 0;padding:10px;border:1px solid var(--br);border-radius:8px}
+.manual-finance p{font-size:12px;line-height:1.5;color:var(--mu);margin:8px 0}
+.files-panel{padding:20px;overflow:auto;flex:1;min-width:0}
+.files-help{color:var(--mu);font-size:12px;line-height:1.6;margin:8px 0 16px;max-width:640px}
+.files-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.files-toolbar button,.cloud-file-row button,#stageNavigation button,#cloudFilePreview button,#cloudFilePreview a{min-height:40px}
+.cloud-file-row{padding:14px 0;border-bottom:1px solid var(--br);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cloud-file-title{flex:1;min-width:160px;overflow-wrap:anywhere;line-height:1.5}
+.files-empty{padding:28px 16px;border:1px dashed var(--br2);border-radius:10px;text-align:center;color:var(--tx2)}
+.files-empty p{font-size:12px;color:var(--mu);line-height:1.6;margin-top:6px}
+.stage-options :focus-visible,.manual-finance :focus-visible,.files-panel :focus-visible,#cloudFilePreview :focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+@media(max-width:768px){
+ .files-panel{padding:14px}
+ .files-toolbar button{flex:1 1 calc(50% - 8px);min-height:44px;white-space:normal}
+ .cloud-file-title{flex-basis:100%;min-width:0}
+ .cloud-file-row button{min-height:44px;flex:1}
+ .stage-options summary,.manual-finance summary{padding:7px 0}
+ #stageNavigation button,#cloudFilePreview button,#cloudFilePreview a{min-height:44px}
+ .stage-options select{font-size:16px;min-height:44px}
+}
+
+
+.handoff-box{padding:16px;margin-bottom:20px;border:1px solid var(--br2);border-radius:10px;background:var(--sf)}
+.handoff-heading{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.handoff-next{font-size:14px;line-height:1.5;margin:10px 0;overflow-wrap:anywhere}
+.handoff-form{margin-top:10px}
+.handoff-form summary{cursor:pointer;font-size:13px;color:var(--ac);padding:6px 0}
+.handoff-form label{display:block;margin:12px 0 5px;font-size:12px;color:var(--mu)}
+.handoff-form input,.handoff-form select,.handoff-form textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--br2);border-radius:6px;background:var(--s2);color:var(--tx);font:inherit}
+.handoff-form button{margin-top:12px;min-height:44px}
+#handoffError{color:var(--dn);font-size:12px;line-height:1.5;margin-top:8px}
+@media(max-width:768px){.handoff-form input,.handoff-form select,.handoff-form textarea{font-size:16px}.handoff-box>.bs{min-height:44px}}
+
+
+body.team-mode> :not(#teamApp):not(#teamUsersPanel):not(#loginScreen):not(#nfpanel):not(#cloudFilePreview):not(#pushSettings):not(#taskReminderDialog):not(script){display:none!important}
+#teamApp{position:fixed;inset:0;overflow:auto;background:var(--bg);padding:24px;z-index:50}
+.team-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.team-layout{display:grid;grid-template-columns:minmax(200px,300px) minmax(0,1fr);gap:24px;margin:20px auto;max-width:1200px}
+.team-object{display:block;width:100%;padding:16px;margin-bottom:8px;background:var(--sf);color:var(--tx);border:1px solid var(--br2);border-radius:10px;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.team-object span{display:block;font-size:13px;color:var(--mu);margin-top:8px}
+#teamCard{background:var(--sf);padding:20px;border-radius:12px}
+#teamObjectForm input,#staffForm input:not([type=checkbox]),#staffForm select{width:100%;min-height:44px;background:var(--s2);color:var(--tx);border:1px solid var(--br2);border-radius:6px;padding:10px;font:inherit;box-sizing:border-box}
+#teamObjectForm button{margin-top:16px;min-height:44px}
+#teamMessage{min-height:24px;line-height:1.5;margin-top:12px}
+.team-users{position:fixed;inset:24px;z-index:1500;background:var(--bg);border:1px solid var(--br2);padding:24px;border-radius:12px;overflow:auto}
+#staffForm{max-width:600px;margin-top:20px}#staffForm label{display:block;margin-bottom:14px}
+#teamApp button,.team-users button{min-height:44px}
+@media(max-width:768px){#teamApp{padding:16px}.team-layout{grid-template-columns:1fr}.team-users{inset:8px;padding:16px}#teamObjectForm input{font-size:16px}}
+.push-dialog{width:min(520px,92vw);max-height:90dvh;overflow:auto;background:var(--sf);color:var(--tx);border:1px solid var(--br2);border-radius:14px;padding:24px}.push-dialog::backdrop{background:#0008}.push-dialog label{display:block;margin:14px 0}.push-dialog p{line-height:1.5;margin:14px 0}.push-dialog select{width:100%;min-height:44px}.push-dialog input[type=number]{width:65px;min-height:40px}.push-dialog button{min-height:44px}.push-dialog select,.push-dialog input{background:var(--s2);color:var(--tx);border:1px solid var(--br2);font-size:16px}
 </style>
 </head>
 <body>
@@ -768,8 +831,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       onkeydown="if(event.key==='Enter')doLogin()"
       autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Войти</button>
+    <button class="bs" style="width:100%;margin-top:12px" onclick="startGoogleLogin()">Войти через Google</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 25.09-2</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 28.09-5</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -777,7 +841,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 25.09-2</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 28.09-5</span></div>
+  <button class="bs" onclick="openPushSettings()" title="Напоминания на телефоне">🔔</button>
+  <button class="bs" onclick="ownerTeamPanel()" title="Сотрудники и права">Сотрудники</button>
   <nav class="hdr-nav">
     <button class="hn on" id="nv-dash" onclick="showDash()">&#128202; Центр</button>
     <button class="hn" id="nv-kb" onclick="showKanban()">&#9646;&#9646;&#9646; Канбан</button>
@@ -981,7 +1047,7 @@ async function doLogin(){
     try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:result.token,expiresAt:result.expiresAt}));}catch(e){}
     if(ge('loginPwd'))ge('loginPwd').value='';
     if(err)err.textContent='';
-    ge('loginScreen').style.display='none';ge('cancelSyncLogin')?.remove();
+    leaveTeamShell();ge('loginScreen').style.display='none';ge('cancelSyncLogin')?.remove();
     if(APP_READY)await syncNow();else init();
   }catch(error){if(err)err.textContent=error.message;}
   finally{LOGIN_PENDING=false;if(button)button.disabled=false;}
@@ -994,7 +1060,8 @@ async function checkAuth(){
       checkedToken=session.token;AUTH_TOKEN=checkedToken;
       const initial=await serverCall('load');
       if(AUTH_TOKEN!==checkedToken)return;
-      ge('loginScreen').style.display='none';init(initial);return;
+      if(initial.user?.role&&initial.user.role!=='OWNER'){enterTeam(initial);return;}
+      leaveTeamShell();ge('loginScreen').style.display='none';init(initial);return;
     }
   }catch(e){
     if(AUTH_TOKEN&&AUTH_TOKEN!==checkedToken)return;
@@ -1023,8 +1090,9 @@ function init(initial=null){
   // Keep all existing records, including the trash, unchanged on startup.
   renderList();
   showDash();
-  if(initial||navigator.onLine){pullSheets(initial);}
+  if(initial||navigator.onLine){pullSheets(initial).then(()=>openNotificationTask());}
   else{notify('warn','Офлайн','Работаете без интернета');}
+  refreshPushDevice();
   setTimeout(checkAlerts,2500);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&VIEW==='dash')showDash();});
   // Autosave
@@ -1152,10 +1220,10 @@ function showTrash(){
         return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--br);border-radius:8px;margin-bottom:8px;background:var(--sf)">
           <div style="flex:1;min-width:0">
             <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cname(c))}</div>
-            <div style="font-size:11px;color:var(--mu);margin-top:2px">${gst(c).label}${tot?' · '+fmtS(tot)+' ₽':''} · удалён ${fdt(c.deletedAt).split(' ')[0]}</div>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">${esc(gst(c).label)}${tot?' · '+fmtS(tot)+' ₽':''} · удалён ${fdt(c.deletedAt).split(' ')[0]}</div>
           </div>
-          <button class="kact" onclick="restoreObj('${c.id}')" title="Восстановить">↩ Восстановить</button>
-          <button class="tdel" onclick="purgeObj('${c.id}')" title="Удалить навсегда">×</button>
+          <button class="kact" onclick="restoreObj(${escA(JSON.stringify(c.id))})" title="Восстановить">↩ Восстановить</button>
+          <button class="tdel" onclick="purgeObj(${escA(JSON.stringify(c.id))})" title="Удалить навсегда">×</button>
         </div>`;
       }).join('')}
   </div>`;
@@ -1170,7 +1238,6 @@ function clDebt(c){
   return Math.max(0,objectTotal(c)-(+c.paid||0));
 }
 
-function cap(s){return s?s[0].toUpperCase()+s.slice(1):'';}
 
 // ═══════════════════════════════════════════════
 // SYNC
@@ -1288,11 +1355,13 @@ function mergeRecords(local,incoming){
   });
   return Array.from(merged.values());
 }
+function safeIdentifier(value){return typeof value==='string'&&value.length>0&&value.length<=300&&!/[<>"'`\\&\x00-\x20]/.test(value)&&!['__proto__','constructor','prototype'].includes(value);}
+function safeColor(value,fallback='#888'){return typeof value==='string'&&/^(#[a-f0-9]{3,8}|rgba?\([\d\s.,%]+\)|[a-z]+)$/i.test(value)?value:fallback;}
 function validateRecords(records){
   if(!Array.isArray(records))throw new Error('Ожидается массив объектов');
   const ids=new Set();
   return records.map(c=>{
-    if(!c||typeof c!=='object'||typeof c.id!=='string'||!c.id||c.id==='__config__'||ids.has(c.id))
+    if(!c||typeof c!=='object'||!safeIdentifier(c.id)||c.id==='__config__'||ids.has(c.id))
       throw new Error('Некорректный или повторяющийся ID объекта');
     ids.add(c.id);
     for(const key of ['updatedAt','createdAt','deletedAt','purgedAt']){
@@ -1318,13 +1387,13 @@ async function sheetsRequest(url,options={},timeout=60000){
     if(!response.ok)throw new Error('HTTP '+response.status);
     const result=await response.json();
     if(result.ok!==true){
-      const messages={RECOVERY_REQUIRED:'Запись была прервана. Облачная база заблокирована до проверки резервной копии; сохраните локальный экспорт.',AUTH_REQUIRED:'Сессия завершена. Войдите снова.',AUTH_FAILED:'Неверный пароль',TRY_LATER:'Слишком много попыток. Повторите через 5 минут.',NOT_CONFIGURED:'Сначала настройте серверный пароль в Apps Script',CONFLICT:'База изменена на другом устройстве. Повторите синхронизацию.',MISSING_RECORDS:'Запись остановлена: в отправке отсутствуют существующие объекты.',BUSY:'Сервер занят. Повторите синхронизацию.',INVALID_DATA:'Сервер отклонил данные. Сохраните экспорт и сообщите об ошибке.'};
+      const messages={PUSH_NOT_CONFIGURED:'Укажите Firebase Project ID в свойствах Apps Script.',PUSH_SEND_FAILED:'Сервис не подтвердил отправку. Проверьте Firebase и разрешения Apps Script.',PUSH_DEVICE_CONFLICT:'Это устройство уже подключено. Сначала отключите уведомления в прежнем профиле.',GOOGLE_NOT_CONFIGURED:'Google-вход ещё не настроен. Используйте текущий вход владельца.',GOOGLE_AUTH_FAILED:'Google не подтвердил вход. Начните вход заново.',GOOGLE_EMAIL_UNSUPPORTED:'Используйте Gmail или Google Workspace для входа.',ACCESS_DENIED:'Нет доступа к этому действию или объекту.',USERS_INVALID:'Нужна проверка списка сотрудников владельцем.',UNKNOWN_ACTION:'Обновите Apps Script: сервер ещё не поддерживает эту операцию.',FILE_FOLDER_ACCESS:'Папка файлов недоступна или открыта по ссылке. Нужна проверка владельцем.',FILE_TYPE:'Формат или содержимое файла не поддерживается.',FILE_SIZE:'Файл должен быть непустым и не больше 20 МБ.',FILE_OBJECT:'Объект ещё не сохранён в облаке или удалён. Выполните синхронизацию.',FILE_NOT_FOUND:'Файл удалён или недоступен.',FILE_INVALID:'Не удалось проверить файл.',FILE_REQUEST_CONFLICT:'Этот повтор загрузки не соответствует исходному файлу.',FILE_STORAGE_ERROR:'Не удалось подтвердить сохранность файла. Повторите загрузку.',RECOVERY_REQUIRED:'Запись была прервана. Облачная база заблокирована до проверки резервной копии; сохраните локальный экспорт.',AUTH_REQUIRED:'Сессия завершена. Войдите снова.',AUTH_FAILED:'Неверный пароль',TRY_LATER:'Слишком много попыток. Повторите через 5 минут.',NOT_CONFIGURED:'Сначала настройте серверный пароль в Apps Script',CONFLICT:'База изменена на другом устройстве. Повторите синхронизацию.',MISSING_RECORDS:'Запись остановлена: в отправке отсутствуют существующие объекты.',BUSY:'Сервер занят. Повторите синхронизацию.',INVALID_DATA:'Сервер отклонил данные. Сохраните экспорт и сообщите об ошибке.'};
       const error=new Error(messages[result.code]||'Сервер не подтвердил операцию. Данные не отправлены или результат неизвестен.');
       error.code=result.code;throw error;
     }
     return result;
   }catch(error){
-    if(controller.signal.aborted)throw new Error('Сервер не ответил за минуту. Результат записи пока неизвестен. Подождите и повторите синхронизацию; локальные данные не очищайте.');
+    if(controller.signal.aborted)throw new Error('Сервер не ответил за '+Math.round(timeout/1000)+' секунд. Результат операции пока неизвестен. Подождите и повторите её; локальные данные не очищайте.');
     throw error;
   }finally{clearTimeout(timer);}
 }
@@ -1391,7 +1460,7 @@ async function _pullSheets(initial=null){
     const cfg=mergeCloudConfigs(configs);
     const incoming=validateRecords(loaded.filter(c=>c.id!=='__config__'));
     if(cfg){
-      if(!Array.isArray(cfg.statuses)||!cfg.statuses.length||cfg.statuses.some(s=>!s||typeof s.id!=='string'||typeof s.label!=='string'))throw new Error('Повреждены колонки');
+      if(!Array.isArray(cfg.statuses)||!cfg.statuses.length||cfg.statuses.some(s=>!s||!safeIdentifier(s.id)||typeof s.label!=='string'))throw new Error('Повреждены колонки');
       if(cfg.brigades!=null&&(!Array.isArray(cfg.brigades)||cfg.brigades.some(b=>typeof b!=='string')))throw new Error('Повреждены бригады');
     }
     const previous=DB.find(c=>c.id===CID);
@@ -1461,7 +1530,7 @@ function notify(type,title,text){
   const ic={ok:'✓',warn:'⚠',err:'✕',info:'ℹ'};
   const el=document.createElement('div');
   el.className=`nf ${type}`;
-  el.innerHTML=`<div class="nf-ic">${ic[type]||'ℹ'}</div><div class="nf-body"><div class="nf-title">${title}</div><div class="nf-text">${text}</div></div><button class="nf-x" onclick="rmNf(this.parentNode)">×</button>`;
+  el.innerHTML=`<div class="nf-ic">${ic[type]||'ℹ'}</div><div class="nf-body"><div class="nf-title">${esc(title)}</div><div class="nf-text">${esc(text)}</div></div><button class="nf-x" onclick="rmNf(this.parentNode)">×</button>`;
   p.appendChild(el);setTimeout(()=>rmNf(el),4500);
 }
 function rmNf(el){if(!el||!el.parentNode)return;el.classList.add('out');setTimeout(()=>el.parentNode&&el.parentNode.removeChild(el),280);}
@@ -1537,25 +1606,25 @@ function renderList(){
     const active=['paid','sched','prod','awaiting','claim'];
     sf.innerHTML=`<span class="sff${!FSTAT?' on':''}" onclick="setF(null)">Все (${liveDB().length})</span>`+
       active.map(sid=>{const st=SM[sid];const n=cnt[sid]||0;if(!n)return'';
-        return`<span class="sff${FSTAT===sid?' on':''}" onclick="setF('${sid}')" style="color:${st.color}">${st.label} (${n})</span>`;
+        return`<span class="sff${FSTAT===sid?' on':''}" onclick="setF('${sid}')" style="color:${safeColor(st.color)}">${esc(st.label)} (${n})</span>`;
       }).join('');
   }
-  if(!items.length){el.innerHTML=`<div class="sb-empty">${q?'Ничего не найдено по запросу «'+q+'»':'Объектов не найдено'}</div>`;return;}
+  if(!items.length){el.innerHTML=`<div class="sb-empty">${q?'Ничего не найдено по запросу «'+esc(q)+'»':'Объектов не найдено'}</div>`;return;}
   const searchHint=q?`<div style="font-size:10px;color:var(--ac);padding:4px 11px 2px;font-weight:600">Найдено: ${items.length} из ${liveDB().length}</div>`:'';
   el.innerHTML=searchHint+items.map(c=>{
     const st=gst(c);const tot=objectTotal(c);
     const late=isLate(c.dateDead)&&!['closed','done','cancel','support'].includes(c.status);
     const proj=c.projectName&&c.projectName.trim();
     const client=c.type==='fiz'?(c.fio||''):(c.orgName||'');
-    return`<div class="oi${c.id===CID?' on':''}" onclick="openObj('${c.id}')">
+    return`<div class="oi${c.id===CID?' on':''}" onclick="openObj(${escA(JSON.stringify(c.id))})">
       <div class="oi-top">
         <span class="oi-name">${esc(proj||client||'Без названия')}</span>
         ${tot?`<span class="oi-sum">${fmtS(tot)} ₽</span>`:''}
       </div>
       ${proj&&client?`<div style="font-size:10px;color:var(--mu);margin-bottom:3px;padding-left:1px">${esc(client)}</div>`:''}
       <div class="oi-meta">
-        <span class="oi-st" style="color:${st.color};background:${st.bg}">
-          <span class="oi-dot" style="background:${st.color}"></span>${st.label}
+        <span class="oi-st" style="color:${safeColor(st.color)};background:${safeColor(st.bg)}">
+          <span class="oi-dot" style="background:${safeColor(st.color)}"></span>${esc(st.label)}
         </span>
         ${c.phone||c.orgPhone?`<span>${c.phone||c.orgPhone}</span>`:''}
       </div>
@@ -1676,10 +1745,44 @@ function rdSet(key,field,value,redraw=true){
   save();
   if(redraw)rdRefresh(cl);
 }
+const HANDOFF_DEPARTMENTS={sales:'Продажи',admin:'Администратор',production:'Производство'};
+function handoffHTML(cl){
+  const flow=cl.workflow||{},department=HANDOFF_DEPARTMENTS[flow.department];
+  return `<section class="handoff-box" aria-label="Передача между отделами">
+    <div class="handoff-heading"><strong>${department?'Сейчас: '+department:'Передача между отделами'}</strong>${flow.state==='waiting'?'<span class="ops-pill unknown">Ждёт приёма</span>':flow.state==='accepted'?'<span class="ops-pill ready">Принято в работу</span>':''}</div>
+    ${flow.nextAction?`<p class="handoff-next">${esc(flow.nextAction)}</p>`:'<p class="stage-hint">Передайте объект вместе с понятным следующим действием.</p>'}
+    ${flow.note?`<p class="stage-hint">${esc(flow.note)}</p>`:''}
+    ${flow.state==='waiting'?'<button class="bs" type="button" onclick="acceptHandoff()">Принять в работу</button>':''}
+    <details class="handoff-form"><summary>${department?'Передать дальше / изменить поручение':'Передать объект'}</summary>
+      <label for="handoffDepartment">Кому</label><select id="handoffDepartment"><option value="">Выберите отдел</option>${Object.entries(HANDOFF_DEPARTMENTS).map(([id,label])=>`<option value="${id}">${label}</option>`).join('')}</select>
+      <label for="handoffAction">Что нужно сделать</label><input id="handoffAction" maxlength="500" placeholder="Например: проверить смету и отправить клиенту">
+      <label for="handoffNote">Что важно знать · необязательно</label><textarea id="handoffNote" maxlength="2000" rows="2" placeholder="Недостающие данные, договорённости, препятствия"></textarea>
+      <button class="bp" type="button" onclick="submitHandoff()">Передать</button><p id="handoffError" role="status"></p>
+    </details>
+  </section>`;
+}
+function submitHandoff(){
+  const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt||cl.purgedAt)return;
+  const department=gv('handoffDepartment'),nextAction=gv('handoffAction').trim(),note=gv('handoffNote').trim();
+  if(!HANDOFF_DEPARTMENTS[department]||!nextAction||nextAction.length>500||note.length>2000){ge('handoffError').textContent='Выберите отдел и укажите следующее действие (до 500 символов).';return;}
+  if(cl.workflow?.state==='waiting'&&cl.workflow.department===department&&cl.workflow.nextAction===nextAction&&cl.workflow.note===note){if(save())rdRefresh(cl);return;}
+  cl.workflow={...cl.workflow,department,nextAction,note,state:'waiting',sentAt:Date.now(),acceptedAt:null};
+  log(cl,`Передано: ${HANDOFF_DEPARTMENTS[department]}. ${nextAction}`,'↗','#5b9bd5');
+  if(save()){rdRefresh(cl);notify('ok','Передача сохранена','После синхронизации её увидят на другом устройстве.');}
+}
+function acceptHandoff(){
+  const cl=DB.find(c=>c.id===CID);if(!cl||cl.deletedAt||cl.workflow?.state!=='waiting')return;
+  const previous={workflow:cl.workflow,updatedAt:cl.updatedAt,tl:(cl.tl||[]).slice()};
+  cl.workflow={...cl.workflow,state:'accepted',acceptedAt:Date.now()};
+  log(cl,`Принято в работу: ${HANDOFF_DEPARTMENTS[cl.workflow.department]}`,'✓','#5db87a');
+  if(save())rdRefresh(cl);else Object.assign(cl,previous);
+}
+
 function renderReadiness(cl){
   const panel=ge('orbody');if(!panel)return;
   const r=readinessSummary(cl),rd=cl.readiness||{};
   panel.innerHTML=`<section class="rd-panel" id="readinessPanel">
+    ${handoffHTML(cl)}
     <div class="ops-eyebrow">ИСПОЛНЕНИЕ ОБЪЕКТА</div>
     <div class="rd-heading"><div><h2>Готовность к монтажу</h2><p>Отметьте факты. Для лишних пунктов выберите «Не требуется».</p></div><span class="ops-pill ${r.status}">${r.label}</span></div>
     <div class="rd-owner"><label for="rd-owner">Ответственный за подготовку</label><select id="rd-owner" onchange="rdSet('object','owner',this.value)">${opsOwnerOptions(rd.owner)}</select><span>Для отдельного пункта можно назначить другого ответственного.</span></div>
@@ -1729,6 +1832,7 @@ function opsData(role=OPS_VIEW,today=opsToday()){
     for(const [field,label] of [['dateMeasure','Замер'],['dateProd','Производство'],['dateInstall','Монтаж']])if(cl[field]===today)events.push({cl,label,tab:'ready'});
   });
   live.filter(cl=>cl.status!=='cancel').forEach(cl=>{
+    if(cl.workflow?.state==='waiting'&&HANDOFF_DEPARTMENTS[cl.workflow.department])actions.push({cl,text:'Принять объект: '+HANDOFF_DEPARTMENTS[cl.workflow.department],detail:cl.workflow.nextAction||'',deadline:'',owner:'',tab:'ready'});
     if(cl.status==='claim')risks.push({cl,level:'warning',title:'Открытая рекламация',detail:cl.comment||'Проверьте причину и назначьте следующее действие',tab:'tasks'});
     (cl.tasks||[]).forEach((task,index)=>{
       if(!task.done&&(!task.deadline||task.deadline<=today)&&(!task.owner||task.owner===role))actions.push({cl,text:task.text,deadline:task.deadline||'',owner:task.owner||'',detail:task.time?'Время: '+task.time:'',tab:'tasks',taskIndex:index});
@@ -1813,21 +1917,21 @@ function showOverview(){
       <div class="dash-block">
         <div class="db-title">📅 Сегодня <a onclick="showKanban()">→ Канбан</a></div>
         ${(todayI.length+todayM.length+overdue.length)===0?'<div style="color:var(--mu);font-size:12px;padding:6px 0">Событий нет</div>':[
-          ...todayI.map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--okb)">🔧</div><div class="tr-name" onclick="openObj('${c.id}')">${cname(c)}</div><span class="tr-badge" style="color:var(--ok);background:var(--okb)">Монтаж</span></div>`),
-          ...todayM.map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--inb)">📐</div><div class="tr-name" onclick="openObj('${c.id}')">${cname(c)}</div><span class="tr-badge" style="color:var(--in);background:var(--inb)">Замер</span></div>`),
-          ...overdue.slice(0,4).map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--dnb)">⚠</div><div class="tr-name" onclick="openObj('${c.id}')">${cname(c)}</div><span class="tr-badge" style="color:var(--dn);background:var(--dnb)">Просрочен</span></div>`)
+          ...todayI.map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--okb)">🔧</div><div class="tr-name" onclick="openObj(${escA(JSON.stringify(c.id))})">${cname(c)}</div><span class="tr-badge" style="color:var(--ok);background:var(--okb)">Монтаж</span></div>`),
+          ...todayM.map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--inb)">📐</div><div class="tr-name" onclick="openObj(${escA(JSON.stringify(c.id))})">${cname(c)}</div><span class="tr-badge" style="color:var(--in);background:var(--inb)">Замер</span></div>`),
+          ...overdue.slice(0,4).map(c=>`<div class="today-row"><div class="tr-ic" style="background:var(--dnb)">⚠</div><div class="tr-name" onclick="openObj(${escA(JSON.stringify(c.id))})">${cname(c)}</div><span class="tr-badge" style="color:var(--dn);background:var(--dnb)">Просрочен</span></div>`)
         ].join('')}
       </div>
       <div class="dash-block">
         <div class="db-title">🔄 Последние события</div>
         ${evts.length===0?'<div style="color:var(--mu);font-size:12px;padding:6px 0">Событий нет</div>':
-          evts.slice(0,8).map(ev=>`<div class="ev-row"><span class="ev-dot" style="background:${ev.col}"></span><span class="ev-txt"><b style="cursor:pointer;color:var(--ac)" onclick="openObj('${ev.cid}')">${ev.cn}</b> — ${ev.act}</span><span class="ev-time">${fdt(ev.ts).split(' ')[0]}</span></div>`).join('')}
+          evts.slice(0,8).map(ev=>`<div class="ev-row"><span class="ev-dot" style="background:${safeColor(ev.col)}"></span><span class="ev-txt"><b style="cursor:pointer;color:var(--ac)" onclick="openObj(${escA(JSON.stringify(ev.cid))})">${esc(ev.cn)}</b> — ${esc(ev.act)}</span><span class="ev-time">${fdt(ev.ts).split(' ')[0]}</span></div>`).join('')}
       </div>
     </div>
     <div class="dash-block">
       <div class="db-title">📊 Воронка</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${fdata.map(s=>`<div class="funnel-item"><div class="fi-head"><span style="color:var(--tx2)">${s.label}</span><span style="color:var(--ac);font-weight:700">${s.cnt}</span></div><div class="fi-bar"><div class="fi-fill" style="width:${Math.round(s.cnt/maxC*100)}%;background:${s.color}"></div></div></div>`).join('')}
+        ${fdata.map(s=>`<div class="funnel-item"><div class="fi-head"><span style="color:var(--tx2)">${esc(s.label)}</span><span style="color:var(--ac);font-weight:700">${s.cnt}</span></div><div class="fi-bar"><div class="fi-fill" style="width:${Math.round(s.cnt/maxC*100)}%;background:${safeColor(s.color)}"></div></div></div>`).join('')}
       </div>
     </div>
   </div>`;
@@ -1880,28 +1984,28 @@ function renderKB(){
       });
     }
     const csum=cards.reduce((s,c)=>s+objectTotal(c),0);
-    return`<div class="kb-col" id="kc-${st.id}" data-col-id="${st.id}"
+    return`<div class="kb-col" id="kc-${st.id}" data-col-id="${escA(st.id)}"
       draggable="true"
-      ondragstart="colDragStart(event,'${st.id}')"
+      ondragstart="colDragStart(event,${escA(JSON.stringify(st.id))})"
       ondragend="colDragEnd(event)"
-      ondragover="colDragOver(event,'${st.id}')"
-      ondragleave="colDragLeave(event,'${st.id}')"
-      ondrop="colDrop(event,'${st.id}')">
+      ondragover="colDragOver(event,${escA(JSON.stringify(st.id))})"
+      ondragleave="colDragLeave(event,${escA(JSON.stringify(st.id))})"
+      ondrop="colDrop(event,${escA(JSON.stringify(st.id))})">
       <div class="kb-col-hd">
         <span class="kch-drag" title="Перетащить колонку" onmousedown="event.stopPropagation()">⠿</span>
-        <span class="kch-name" style="color:${st.color}" id="kch-label-${st.id}"
-          ondblclick="kbEditColName('${st.id}')">${st.label}</span>
+        <span class="kch-name" style="color:${safeColor(st.color)}" id="kch-label-${st.id}"
+          ondblclick="kbEditColName(${escA(JSON.stringify(st.id))})">${esc(st.label)}</span>
         <span class="kch-cnt">${cards.length}</span>
         ${csum>0?`<span class="kch-sum">${fmtS(csum)}₽</span>`:''}
-        <button class="kch-edit" onclick="kbEditCol('${st.id}')" title="Настроить колонку">⚙</button>
+        <button class="kch-edit" onclick="kbEditCol(${escA(JSON.stringify(st.id))})" title="Настроить колонку">⚙</button>
       </div>
       <div class="kb-cards" id="kcc-${st.id}"
         ondragover="event.preventDefault();if(!event.dataTransfer.types.includes('col-drag')){ge('kc-${st.id}').classList.add('dov');}"
         ondragleave="event.target===ge('kc-${st.id}')||event.target===ge('kcc-${st.id}')?ge('kc-${st.id}').classList.remove('dov'):null"
-        ondrop="kdrop(event,'${st.id}')">
+        ondrop="kdrop(event,${escA(JSON.stringify(st.id))})">
         ${cards.map(c=>kcardHTML(c,st)).join('')}
       </div>
-      <button class="kb-add-btn" onclick="kbQuickAdd('${st.id}')">+ Добавить объект</button>
+      <button class="kb-add-btn" onclick="kbQuickAdd(${escA(JSON.stringify(st.id))})">+ Добавить объект</button>
     </div>`;
   }).join('');
 }
@@ -1913,10 +2017,10 @@ function kcardHTML(c,st){
   const tasks=c.tasks||[];
   const openTasks=tasks.filter(t=>!t.done);
   const lateTasks=openTasks.filter(t=>t.deadline&&isLate(t.deadline));
-  const projLine=c.projectName&&c.projectName.trim()?`<div class="proj-name" onclick="openObj('${c.id}')" style="cursor:pointer">${esc(c.projectName)}</div>`:'';
+  const projLine=c.projectName&&c.projectName.trim()?`<div class="proj-name" onclick="openObj(${escA(JSON.stringify(c.id))})" style="cursor:pointer">${esc(c.projectName)}</div>`:'';
   const clientLine=(c.projectName&&c.projectName.trim())?
-    `<div class="kc-name" onclick="openObj('${c.id}')" style="font-weight:400;color:var(--tx2)">${esc(c.type==='fiz'?(c.fio||''):(c.orgName||''))}</div>`:
-    `<div class="kc-name" onclick="openObj('${c.id}')">${esc(cname(c))}</div>`;
+    `<div class="kc-name" onclick="openObj(${escA(JSON.stringify(c.id))})" style="font-weight:400;color:var(--tx2)">${esc(c.type==='fiz'?(c.fio||''):(c.orgName||''))}</div>`:
+    `<div class="kc-name" onclick="openObj(${escA(JSON.stringify(c.id))})">${esc(cname(c))}</div>`;
   const tagsLine=(c.tags&&c.tags.length)?
     `<div class="kc-tags" style="margin-top:4px">${c.tags.map(tid=>{const t=TAGS.find(x=>x.id===tid);return t?`<span class="ktag" style="color:${t.color};background:${t.color}22">${t.label}</span>`:''}).join('')}</div>`:'';
   let taskBadge='';
@@ -1925,7 +2029,7 @@ function kcardHTML(c,st){
       taskBadge=`<div class="kc-tasks-list">${tasks.map((t,idx)=>({t,idx})).filter(o=>!o.t.done).map(({t,idx})=>{
         const tl=t.deadline&&isLate(t.deadline);
         const pc=(!tl&&t.priority)?PRIO[t.priority].c:'';
-        return`<div class="kc-task${tl?' late':''}"${pc?` style="border-left-color:${pc}"`:''}><span class="kc-task-chk" onclick="event.stopPropagation();kbToggleTask('${c.id}',${idx})" title="Отметить выполненной">▢</span> ${esc(t.text||'')}${t.deadline?` <span class="kc-task-dl">📅 ${fds(t.deadline)}</span>`:''}</div>`;
+        return`<div class="kc-task${tl?' late':''}"${pc?` style="border-left-color:${pc}"`:''}><span class="kc-task-chk" onclick="event.stopPropagation();kbToggleTask(${escA(JSON.stringify(c.id))},${idx})" title="Отметить выполненной">▢</span> ${esc(t.text||'')}${t.deadline?` <span class="kc-task-dl">📅 ${fds(t.deadline)}</span>`:''}</div>`;
       }).join('')}</div>`;
     }else{
       taskBadge=`<div class="kc-tasks-badge${lateTasks.length?' late':''}">
@@ -1933,12 +2037,12 @@ function kcardHTML(c,st){
       </div>`;
     }
   }
-  return`<div class="kc" draggable="true" data-id="${c.id}" data-status="${c.status}"
-    ondragstart="kcDragStart(event,'${c.id}')"
+  return`<div class="kc" draggable="true" data-id="${escA(c.id)}" data-status="${c.status}"
+    ondragstart="kcDragStart(event,${escA(JSON.stringify(c.id))})"
     ondragend="kcDragEnd(event)"
     ondragover="kcDragOver(event)"
-    ondrop="kcDrop(event,'${c.id}','${c.status}')">
-    <div class="kc-stripe" style="background:${st.color}"></div>
+    ondrop="kcDrop(event,${escA(JSON.stringify(c.id))},'${c.status}')">
+    <div class="kc-stripe" style="background:${safeColor(st.color)}"></div>
     <div class="kc-drag-handle" title="Перетащить для сортировки">⠿</div>
     <div style="padding-left:7px">
       ${projLine}
@@ -1958,7 +2062,7 @@ function kcardHTML(c,st){
     <div class="kc-acts">
       ${ph?`<button class="kact mobonly" onclick="window.open('tel:${ph}')">📞</button>`:''}
       ${tg?`<button class="kact" onclick="window.open('https://t.me/${tg.replace('@','')}')">TG</button>`:''}
-      <button class="kact" onclick="openObj('${c.id}')">Открыть →</button>
+      <button class="kact" onclick="openObj(${escA(JSON.stringify(c.id))})">Открыть →</button>
     </div>
   </div>`;
 }
@@ -2070,10 +2174,10 @@ function showTable(){
           ${getSortedDB().map((c,i)=>{
             const st=gst(c);const tot=objectTotal(c);const paid=+c.paid||0;const debt=clDebt(c);
             const late=isLate(c.dateDead)&&!['closed','done','cancel','support'].includes(c.status);
-            return`<tr class="${c.id===CID?'sel':''}" onclick="openObjTbl('${c.id}')" style="cursor:pointer">
+            return`<tr class="${c.id===CID?'sel':''}" onclick="openObjTbl(${escA(JSON.stringify(c.id))})" style="cursor:pointer">
               <td style="color:var(--mu);font-size:10px">${i+1}</td>
               <td><b>${esc(cname(c))}</b></td>
-              <td><span class="oi-st" style="color:${st.color};background:${st.bg};font-size:9px;padding:2px 6px;border-radius:3px">${st.label}</span></td>
+              <td><span class="oi-st" style="color:${safeColor(st.color)};background:${safeColor(st.bg)};font-size:9px;padding:2px 6px;border-radius:3px">${esc(st.label)}</span></td>
               <td style="font-size:11px;color:var(--tx2)">${c.objAddr?esc(c.objAddr):'—'}</td>
               <td style="color:var(--ac);font-weight:600">${tot?fmt(tot)+' ₽':'—'}</td>
               <td style="color:var(--ok)">${paid?fmt(paid)+' ₽':'—'}</td>
@@ -2139,14 +2243,25 @@ function renderObjView(cl){
         <button class="tgl${cl.type==='fiz'?' on':''}" onclick="setType('fiz')">Физлицо</button>
         <button class="tgl${cl.type==='yur'?' on':''}" onclick="setType('yur')">Юрлицо</button>
       </div>
+      <div class="oc-scroll" id="cardScroll">
       <div class="st-bar">
-        <div class="st-lbl">Статус</div>
-        <select class="st-sel" id="f_status" onchange="onStChange()" style="border-color:${gst(cl).color}">
-          ${STATUSES.map(s=>`<option value="${s.id}"${cl.status===s.id?' selected':''}>${s.label}</option>`).join('')}
-        </select>
+        <div class="st-lbl">Этап работы</div>
+        <div id="stageName" class="stage-name">${esc(cardStage(cl.status)?.label||SM[cl.status]?.label||cl.status)}</div>
+        <p id="stageHint" class="stage-hint">${esc(cardStage(cl.status)?.hint||'Ваш дополнительный статус. Его название и значение сохранены.')}</p>
+        <div id="stageNavigation">${cardStepNavigation(cl)}</div>
+        <details class="stage-options"><summary>Другой шаг или точный статус</summary>
+          <label class="stage-field" for="f_stage">Этап работы</label>
+          <select class="st-sel" id="f_stage" aria-label="Этап работы" onchange="onCardStageChange()" style="border-color:${safeColor(gst(cl).color)}">${cardStageOptions(cl)}</select>
+          <label id="stageDetailLabel" class="stage-field" for="f_status">Точный статус: ${esc(SM[cl.status]?.label||cl.status)}</label>
+          <select class="st-sel" id="f_status" aria-label="Точный статус" onchange="onStChange()" style="border-color:${safeColor(gst(cl).color)}">
+            ${STATUSES.map(s=>`<option value="${escA(s.id)}"${cl.status===s.id?' selected':''}>${esc(s.label)}</option>`).join('')}
+            ${!STATUSES.some(s=>s.id===cl.status)?`<option value="${escA(cl.status)}" selected>${esc(cl.status)}</option>`:''}
+          </select>
+        </details>
       </div>
       <div id="rdBanner">${rdBannerHTML(cl)}</div>
       <div class="oc-body" id="cbody"></div>
+      </div>
       <div class="oc-ft">
         <button class="bsave" onclick="saveObj()">💾 Сохранить</button>
         <span class="svd" id="svd">✓ Сохранено</span>
@@ -2162,7 +2277,7 @@ function renderObjView(cl){
         <button class="otab${OBJTAB==='tl'?' on':''}" onclick="swOTab('tl',this)">📋 История</button>
         <button class="otab${OBJTAB==='docs'?' on':''}" onclick="swOTab('docs',this)">📄 Документы</button>
         <button class="otab${OBJTAB==='tasks'?' on':''}" onclick="swOTab('tasks',this)">✅ Задачи${(()=>{const cl2=DB.find(c=>c.id===CID);const open=(cl2?.tasks||[]).filter(t=>!t.done).length;return open?` <span style="background:var(--wn);color:#0f0f0f;border-radius:8px;padding:0 5px;font-size:9px;font-weight:700">${open}</span>`:''})()}</button>
-        <button class="otab${OBJTAB==='files'?' on':''}" onclick="swOTab('files',this)">📁 Файлы 🚧</button>
+        <button class="otab${OBJTAB==='files'?' on':''}" onclick="swOTab('files',this)">📁 Файлы</button>
       </div>
       <div class="or-body" id="orbody"></div>
     </div>
@@ -2266,8 +2381,8 @@ function cardFiz(cl){
       </div>
     </div>
     <div class="fr" style="margin-top:9px">
-      <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
-      <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${cl.execDays||'30'}"></div>
+      <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${escA(cl.startDays||'20')}"></div>
+      <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${escA(cl.execDays||'30')}"></div>
     </div>`)+
   sec('Финансы','fin',`
     <div class="fin-grid">
@@ -2279,15 +2394,18 @@ function cardFiz(cl){
     <div class="payprog"><div class="payfill" style="width:${payPct}%"></div></div>
     <div style="font-size:10px;color:var(--mu);text-align:right;margin:2px 0 9px">${payPct}% оплачено</div>
     <div class="fr">
-      <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${cl.advPct||'50'}" min="1" max="99" oninput="syncRest()"></div>
+      <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${escA(cl.advPct||'50')}" min="1" max="99" oninput="syncRest()"></div>
       <div class="field"><label>Остаток (%)</label><input type="number" id="f_rest" value="${restPct}" readonly style="opacity:.4"></div>
     </div>
     <div class="field"><label>Фактически оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
-    <div class="fr">
-      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Себестоимость (₽) 🚧</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
-      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Маржа (%) 🚧</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
-    </div>
-    <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
+    <details class="manual-finance"><summary>Ручные показатели</summary>
+      <p>Справочные значения. Пока не участвуют в расчётах прибыли.</p>
+      <div class="fr">
+        <div class="field"><label for="f_cost">Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+        <div class="field"><label for="f_margin">Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
+      </div>
+    </details>
+    <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${escA(cl.billDays||'3')}"></div>`)+
   sec('Позиции','rows',`
     <table class="svc-tbl">
       <thead><tr><th style="width:42%">Наименование</th><th style="width:17%">Цена</th><th style="width:12%">Кол-во</th><th style="width:14%">Ед.</th><th></th></tr></thead>
@@ -2362,8 +2480,8 @@ function cardYur(cl){
       </div>
     </div>
     <div class="fr" style="margin-top:9px">
-      <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${cl.startDays||'20'}"></div>
-      <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${cl.execDays||'30'}"></div>
+      <div class="field"><label>Начало (раб. дней)</label><input type="number" id="f_sddays" value="${escA(cl.startDays||'20')}"></div>
+      <div class="field"><label>Выполнение (раб. дней)</label><input type="number" id="f_exdays" value="${escA(cl.execDays||'30')}"></div>
     </div>`)+
   sec('Финансы','fin',`
     <div class="fin-grid">
@@ -2373,15 +2491,18 @@ function cardYur(cl){
     <div class="payprog"><div class="payfill" style="width:${payPct}%"></div></div>
     <div style="font-size:10px;color:var(--mu);text-align:right;margin:2px 0 9px">${payPct}% оплачено</div>
     <div class="fr">
-      <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${cl.advPct||'50'}" min="1" max="99" oninput="syncRest()"></div>
+      <div class="field"><label>Аванс (%)</label><input type="number" id="f_adv" value="${escA(cl.advPct||'50')}" min="1" max="99" oninput="syncRest()"></div>
       <div class="field"><label>Остаток (%)</label><input type="number" id="f_rest" value="${restPct}" readonly style="opacity:.4"></div>
     </div>
     <div class="field"><label>Оплачено (₽)</label><input type="number" id="f_paid" value="${escA(cl.paid)}"></div>
-    <div class="fr">
-      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Себестоимость (₽) 🚧</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
-      <div class="field"><label title="Пока не учитывается в расчётах — функция в разработке">Маржа (%) 🚧</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
-    </div>
-    <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${cl.billDays||'3'}"></div>`)+
+    <details class="manual-finance"><summary>Ручные показатели</summary>
+      <p>Справочные значения. Пока не участвуют в расчётах прибыли.</p>
+      <div class="fr">
+        <div class="field"><label for="f_cost">Себестоимость (₽)</label><input type="number" id="f_cost" value="${escA(cl.costPrice)}"></div>
+        <div class="field"><label for="f_margin">Маржа (%)</label><input type="number" id="f_margin" value="${escA(cl.margin)}"></div>
+      </div>
+    </details>
+    <div class="field"><label>Счёт действителен (дней)</label><input type="number" id="f_bdays" value="${escA(cl.billDays||'3')}"></div>`)+
   sec('Позиции','rows',`
     <table class="svc-tbl">
       <thead><tr><th style="width:42%">Наименование</th><th style="width:17%">Цена</th><th style="width:12%">Кол-во</th><th style="width:14%">Ед.</th><th></th></tr></thead>
@@ -2457,13 +2578,64 @@ function syncCard(){
   cl.updatedAt=Date.now();
   return true;
 }
+// A short card menu over existing status IDs. Opening a card never migrates data.
+const CARD_STAGES=[
+  {id:'request',label:'Заявка',ids:['lead'],hint:'Первый контакт: уточните задачу клиента и договоритесь о следующем действии.'},
+  {id:'estimate',label:'Замер и смета',ids:['measure','measured','estimate'],hint:'Снимите размеры, подготовьте расчёт и передайте смету клиенту.'},
+  {id:'agreement',label:'Согласование',ids:['contract','awaiting'],hint:'Согласуйте условия, договор и аванс. Оплата указана в разделе «Финансы».'},
+  {id:'preparation',label:'Подготовка',ids:['paid','prod'],hint:'Подготовьте материалы и производство. Проверьте готовность к монтажу справа.'},
+  {id:'installation',label:'Монтаж',ids:['sched'],hint:'Назначьте дату и бригаду. После выполнения работ выберите «Завершён».'},
+  {id:'complete',label:'Завершён',ids:['done','support','closed'],hint:'Основные работы выполнены. Проверьте остаток оплаты и задачи сопровождения.'},
+  {id:'claim',label:'Рекламация',ids:['claim'],hint:'Зафиксируйте проблему и назначьте задачу на её устранение.',special:true},
+  {id:'cancel',label:'Отменён',ids:['cancel'],hint:'Работы по объекту отменены.',special:true}
+];
+function cardStage(status){return CARD_STAGES.find(stage=>stage.ids.includes(status));}
+function cardStageOptions(cl){
+  const current=cardStage(cl.status),available=CARD_STAGES.filter(stage=>stage.ids.some(id=>STATUSES.some(s=>s.id===id)));
+  const option=stage=>`<option value="${stage.id}"${current===stage?' selected':''}>${esc(stage.label)}</option>`;
+  const extra=STATUSES.filter(s=>!cardStage(s.id));
+  return available.filter(s=>!s.special).map(option).join('')+'<optgroup label="Особые случаи">'+available.filter(s=>s.special).map(option).join('')+'</optgroup>'+
+    (extra.length?'<optgroup label="Ваши дополнительные статусы">'+extra.map(s=>`<option value="custom:${escA(s.id)}"${cl.status===s.id?' selected':''}>${esc(s.label)}</option>`).join('')+'</optgroup>':'')+
+    (!STATUSES.some(s=>s.id===cl.status)?`<option value="custom:${escA(cl.status)}" selected>${esc(cl.status)} · прежний статус</option>`:'');
+}
+function cardStepNavigation(cl){
+  const stage=cardStage(cl.status),path=CARD_STAGES.filter(s=>!s.special&&s.ids.some(id=>STATUSES.some(st=>st.id===id)));
+  const index=path.indexOf(stage),next=index>=0?path[index+1]:null;
+  return `<div style="margin:8px 0;color:var(--mu);font-size:12px">${index>=0?'Шаг '+(index+1)+' из '+path.length:'Особый случай'}</div>`+
+    `<div style="display:flex;gap:4px;margin:8px 0" aria-hidden="true">${path.map((s,i)=>`<span style="height:4px;flex:1;border-radius:4px;background:${i<=index?'var(--ac)':'var(--br)'}"></span>`).join('')}</div>`+
+    (next?`<button type="button" class="bp" style="width:100%;margin:6px 0" onclick="advanceCardStep()">Далее: ${esc(next.label)} →</button>`:'');
+}
+function advanceCardStep(){
+  const cl=DB.find(c=>c.id===CID);if(!cl)return;
+  const path=CARD_STAGES.filter(s=>!s.special&&s.ids.some(id=>STATUSES.some(st=>st.id===id))),index=path.indexOf(cardStage(cl.status));
+  if(index<0||!path[index+1])return;
+  const next=path[index+1];
+  if(next.id==='complete'&&!confirm('Основные работы по объекту выполнены? Перевести в «Завершён»?'))return;
+  ge('f_stage').value=next.id;onCardStageChange();
+}
+function refreshCardStage(cl){
+  const select=ge('f_stage');if(!select)return;
+  ge('stageName').textContent=cardStage(cl.status)?.label||SM[cl.status]?.label||cl.status;
+  ge('stageNavigation').innerHTML=cardStepNavigation(cl);
+  select.innerHTML=cardStageOptions(cl);select.style.borderColor=gst(cl).color;
+  ge('stageHint').textContent=cardStage(cl.status)?.hint||'Ваш дополнительный статус. Его название и значение сохранены.';
+  ge('stageDetailLabel').textContent='Точный статус: '+(SM[cl.status]?.label||cl.status);
+}
+function onCardStageChange(){
+  const cl=DB.find(c=>c.id===CID);if(!cl)return;
+  const value=gv('f_stage'),stage=CARD_STAGES.find(s=>s.id===value);
+  const next=stage?(stage.ids.includes(cl.status)?cl.status:stage.ids.find(id=>STATUSES.some(s=>s.id===id))):value.slice(7);
+  if(!next||!STATUSES.some(s=>s.id===next)){refreshCardStage(cl);return;}
+  ge('f_status').value=next;onStChange();
+}
+
 function onStChange(){
   const cl=DB.find(c=>c.id===CID);if(!cl)return;
   const ns=gv('f_status');if(ns===cl.status)return;
   const old=gst(cl).label;cl.status=ns;
   const st=gst(cl);ge('f_status').style.borderColor=st.color;
   log(cl,`Статус: "${old}" → "${st.label}"`, '🔄',st.color);
-  save();renderList();
+  save();renderList();refreshCardStage(cl);refreshCardFinance();rdRefresh(cl);
 }
 function autoSave(){
   if(!syncCard())return;
@@ -2516,13 +2688,13 @@ function renderTL(cl){
     ${evts.length===0?'<div style="color:var(--mu);font-size:12px">История пуста</div>':
     evts.map((ev,i)=>`<div class="tl-item">
       <div class="tl-left">
-        <div class="tl-dot" style="background:${ev.col||'#555'}"></div>
+        <div class="tl-dot" style="background:${safeColor(ev.col,'#555')}"></div>
         ${i<evts.length-1?'<div class="tl-line"></div>':''}
       </div>
       <div class="tl-right">
-        <div class="tl-act">${ev.ic||'📝'} ${esc(ev.act)}</div>
+        <div class="tl-act">${esc(ev.ic||'📝')} ${esc(ev.act)}</div>
         <div class="tl-meta">${fdt(ev.ts)} · Администратор</div>
-        ${ev.note?`<div class="tl-note">${ev.note}</div>`:''}
+        ${ev.note?`<div class="tl-note">${esc(ev.note)}</div>`:''}
       </div>
     </div>`).join('')}
   </div>`;
@@ -2541,13 +2713,13 @@ function renderTasks(cl){
       <div class="tbody">
         <div class="ttxt${t.done?' done':''}" ondblclick="editTaskInline(${i},this)" title="Двойной клик — изменить текст">${esc(t.text)}</div>
         <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
-          <input type="date" class="tdate-inp${isLate(t.deadline)&&!t.done?' late':''}" value="${t.deadline||''}" onchange="setTaskDate(${i},this.value)">
-          <input type="time" class="ttime-inp" value="${t.time||''}" onchange="setTaskTime(${i},this.value)">
+          <input type="date" class="tdate-inp${isLate(t.deadline)&&!t.done?' late':''}" value="${escA(t.deadline||'')}" onchange="setTaskDate(${i},this.value)">
+          <input type="time" class="ttime-inp" value="${escA(t.time||'')}" onchange="setTaskTime(${i},this.value)">
           <select class="ops-owner-select" aria-label="Ответственный за задачу" data-cid="${escA(cl.id)}" onchange="opsTaskOwner(this.dataset.cid,${i},this.value)">${opsOwnerOptions(t.owner)}</select>
           <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="cycleTaskPrio(${i})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
-      <button class="tdel" onclick="rmTask(${i})">×</button>
+      <button class="bs" onclick="configureTaskReminder(${i})" title="Напоминание на телефон">${t.reminder?'🔔':'Напомнить'}</button><button class="tdel" onclick="rmTask(${i})">×</button>
     </div>`).join('')}
     <div class="task-add" style="margin-top:10px">
       <input id="tinp" placeholder="Новая задача..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2 1 100%">
@@ -2597,17 +2769,231 @@ function rmTask(i){
 // ═══════════════════════════════════════════════
 // FILES TAB
 // ═══════════════════════════════════════════════
-function renderFiles(cl){
-  const tc=ge('orbody');if(!tc)return;
-  const files=cl.files||[];
-  tc.innerHTML=`<div style="padding:14px;flex:1;overflow-y:auto">
-    <div style="background:rgba(232,160,32,.12);border:1px solid var(--wn);border-radius:8px;padding:14px;text-align:center;color:var(--wn);margin-bottom:12px">
-      🚧 <b>Функция в разработке</b><br>
-      <span style="font-size:11px;color:var(--tx2)">Загрузка файлов временно отключена — она ломает синхронизацию с облаком. Скоро доработаем.</span>
-    </div>
-    ${files.length>0?`<div style="font-size:11px;color:var(--mu);margin-bottom:6px">Ранее прикреплённые файлы (можно удалить):</div><div class="fgrid">${files.map((f,i)=>fCardHTML(f,i)).join('')}</div>`:''}
-  </div>`;
+const FILE_JOBS=[];
+window.addEventListener('beforeunload',event=>{if(FILE_JOBS.some(j=>j.state==='queued'||j.state==='running')){event.preventDefault();event.returnValue='';}});
+let FILE_BUSY=false,FILE_VIEW=0;
+async function fileCall(action,values){
+  if(TEAM_USER&&TEAM_USER.role!=='OWNER')return teamRequest(action,values);
+  const token=AUTH_TOKEN;
+  if(!token)throw new Error('Нажмите «Синхронизировать» и войдите для работы с файлами');
+  try{
+    const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({...values,action,token})},90000);
+    if(result.apiVersion!==2)throw new Error('Обновите Apps Script для работы с файлами');
+    return result;
+  }catch(error){
+    if(error.code==='AUTH_REQUIRED'&&AUTH_TOKEN===token)authRequired();
+    throw error;
+  }
 }
+function renderFiles(cl){
+  const panel=ge('orbody');if(!panel)return;
+  const view=++FILE_VIEW;
+  panel.innerHTML=`<div class="files-panel">
+    <h3>Файлы объекта</h3><p class="files-help">PDF и документы — до 20 МБ. Фото, включая HEIC с iPhone, — до 40 МБ; большие фото автоматически уменьшаются.</p>
+    <div class="files-toolbar"><button class="bp" type="button" onclick="ge('cloudFilePicker').click()">Добавить файлы</button><input id="cloudFilePicker" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" style="display:none">
+    <button class="bs" type="button" onclick="ge('cloudPhotoPicker').click()">Фото из галереи</button><input id="cloudPhotoPicker" type="file" multiple accept="image/jpeg,image/png,image/heic,image/heif" style="display:none"><button class="bs" type="button" onclick="ge('cloudCameraPicker').click()">Снять фото</button><input id="cloudCameraPicker" type="file" accept="image/*" capture="environment" style="display:none">
+    <button class="bs" id="cloudFileReload">Обновить список</button></div>
+    <div id="cloudFileQueue" aria-live="polite"></div><div id="cloudFileList" style="margin-top:16px">Загружаем список…</div>
+    ${(cl.files||[]).length?`<h4 style="margin-top:20px">Ранее прикреплённые файлы</h4><div class="fgrid">${cl.files.map((f,i)=>fCardHTML(f,i)).join('')}</div>`:''}
+  </div>`;
+  ge('cloudFilePicker').onchange=e=>{queueCloudFiles(cl.id,e.target.files);e.target.value='';};
+  for(const id of ['cloudPhotoPicker','cloudCameraPicker'])ge(id).onchange=e=>{queueCloudFiles(cl.id,e.target.files);e.target.value='';};
+  ge('cloudFileReload').onclick=()=>loadCloudFiles(cl.id,view);
+  renderFileQueue();loadCloudFiles(cl.id,view);
+}
+function renderFileQueue(){
+  const panel=ge('cloudFileQueue');if(!panel)return;panel.replaceChildren();
+  FILE_JOBS.filter(j=>j.objectId===CID).forEach(job=>{
+    const row=document.createElement('div');row.style.cssText='padding:10px 0;border-bottom:1px solid var(--br)';
+    const label=document.createElement('div');label.textContent=job.file.name+' — '+job.message;row.appendChild(label);
+    if(job.state==='running'){const progress=document.createElement('progress');progress.setAttribute('aria-label','Загрузка '+job.file.name);row.appendChild(progress);}
+    if(job.state==='error'){
+      const retry=document.createElement('button');retry.className='bs';retry.textContent='Повторить';retry.onclick=()=>{job.state='queued';job.message='В очереди';runFileQueue();};row.appendChild(retry);
+    }
+    panel.appendChild(row);
+  });
+}
+function queueCloudFiles(objectId,files){
+  Array.from(files).forEach(file=>{
+    const photo=/\.(heic|heif|jpe?g|png)$/i.test(file.name),limit=(photo?40:20)*1024*1024;
+    if(!/\.(pdf|docx?|xlsx?|jpe?g|png|heic|heif)$/i.test(file.name)||!file.size||file.size>limit){notify('err','Файл не добавлен',file.name+': документы до 20 МБ, фото JPG, PNG или HEIC до 40 МБ');return;}
+    FILE_JOBS.push({objectId,file,requestId:crypto.randomUUID(),state:'queued',message:'В очереди'});
+  });
+  renderFileQueue();runFileQueue();
+}
+function fileRetryKey(job){return JSON.stringify([GS,job.objectId,job.file.name,job.file.size,job.file.lastModified]);}
+function rememberFileRequest(job){
+  const value=JSON.parse(localStorage.getItem('px_file_retries_v1')||'{}');
+  const key=fileRetryKey(job);
+  if(typeof value[key]==='string')job.requestId=value[key];
+  else{value[key]=job.requestId;localStorage.setItem('px_file_retries_v1',JSON.stringify(value));}
+  return key;
+}
+function forgetFileRequest(key){
+  try{const value=JSON.parse(localStorage.getItem('px_file_retries_v1')||'{}');delete value[key];localStorage.setItem('px_file_retries_v1',JSON.stringify(value));}catch(e){console.warn('File retry marker retained');}
+}
+function fileBase64(file){return new Promise((resolve,reject)=>{
+  const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=()=>reject(new Error('Не удалось прочитать файл'));reader.onabort=()=>reject(new Error('Чтение отменено'));reader.readAsDataURL(file);
+});}
+async function runFileQueue(){
+  if(FILE_BUSY)return;FILE_BUSY=true;
+  try{
+    for(let job;(job=FILE_JOBS.find(j=>j.state==='queued'));){
+      job.state='running';job.message='Подготовка…';renderFileQueue();
+      try{
+        // New objects must exist on the server before an attachment can be linked.
+        if(!(readSyncBase()||[]).some(c=>c.id===job.objectId&&!c.deletedAt&&!c.purgedAt)&&!await pushSheets())throw new Error('Сначала завершите синхронизацию объекта, затем повторите загрузку');
+        const retryKey=rememberFileRequest(job);
+        if(!job.prepared)job.prepared=await prepareCloudFile(job.file);
+        const data=await fileBase64(job.prepared);job.message='Загружаем в облако…';renderFileQueue();
+        await fileCall('files_upload',{objectId:job.objectId,requestId:job.requestId,originalName:job.prepared.name,size:job.prepared.size,base64:data});
+        forgetFileRequest(retryKey);job.state='done';job.message='Загружен';job.file={name:job.file.name};delete job.prepared;
+        if(CID===job.objectId&&ge('cloudFileList'))await loadCloudFiles(job.objectId,FILE_VIEW);
+      }catch(e){job.state='error';job.message=e.message;}
+      renderFileQueue();
+    }
+  }finally{FILE_BUSY=false;}
+}
+async function loadCloudFiles(objectId,view){
+  try{
+    const result=await fileCall('files_list',{objectId});
+    if(CID!==objectId||view!==FILE_VIEW||!ge('cloudFileList'))return;
+    const list=ge('cloudFileList');list.replaceChildren();
+    if(!result.files.length){list.innerHTML='<div class="files-empty"><strong>Пока нет облачных файлов</strong><p>Добавьте смету, договор или фотографии объекта.</p></div>';return;}
+    result.files.forEach(file=>{
+      const row=document.createElement('div');row.className='cloud-file-row';
+      const title=document.createElement('span');title.className='cloud-file-title';title.textContent=file.originalName+' · '+Math.ceil(file.size/1024)+' КБ';row.appendChild(title);
+      if(file.mimeType==='application/pdf'||/^image\/(jpeg|png)$/.test(file.mimeType)){const preview=document.createElement('button');preview.className='bs';preview.textContent='Просмотреть';preview.onclick=()=>previewCloudFile(objectId,file);row.appendChild(preview);}
+      const download=document.createElement('button');download.className='bs';download.textContent='Скачать';download.onclick=()=>downloadCloudFile(objectId,file,download);row.appendChild(download);
+      const remove=document.createElement('button');remove.className='bs';remove.textContent='Удалить';remove.onclick=async()=>{
+        if(!confirm('Удалить «'+file.originalName+'» из карточки?'))return;
+        remove.disabled=true;
+        try{await fileCall('files_delete',{objectId,fileId:file.id});await loadCloudFiles(objectId,view);}catch(e){notify('err','Не удалось удалить файл',e.message);remove.disabled=false;}
+      };row.appendChild(remove);list.appendChild(row);
+    });
+  }catch(e){if(CID===objectId&&view===FILE_VIEW&&ge('cloudFileList'))ge('cloudFileList').textContent=e.message;}
+}
+async function downloadCloudFile(objectId,file,button){
+  button.disabled=true;button.textContent='Получаем…';
+  try{
+    const result=await fileCall('files_download',{objectId,fileId:file.id});
+    const bytes=Uint8Array.from(atob(result.base64),c=>c.charCodeAt(0));
+    const url=URL.createObjectURL(new Blob([bytes],{type:result.file.mimeType}));
+    // A real second tap is required for browsers that block asynchronous downloads.
+    const link=document.createElement('a');link.className='bs';link.href=url;link.download=result.file.originalName;link.textContent='Сохранить файл';
+    button.replaceWith(link);setTimeout(()=>{URL.revokeObjectURL(url);if(link.isConnected){button.disabled=false;button.textContent='Скачать';link.replaceWith(button);}},300000);
+  }catch(e){notify('err','Не удалось скачать файл',e.message);button.disabled=false;button.textContent='Скачать';}
+}
+
+// Libraries run locally; file contents are sent only to the configured CRM server.
+let HEIC_LIBRARY=null,PDF_LIBRARY=null;
+function loadHeicLibrary(){
+  if(window.HeicTo)return Promise.resolve(window.HeicTo);
+  if(!HEIC_LIBRARY)HEIC_LIBRARY=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='https://cdn.jsdelivr.net/npm/heic-to@1.5.2/dist/iife/heic-to.js';script.crossOrigin='anonymous';script.integrity='sha384-cVm8gaWQ5+URpoh6ACKXpm8TuyoHkfIDDBkxvDoUdIZ18w8nV5en0lVQvWMwO/6S';
+    const timer=setTimeout(()=>{script.remove();reject(new Error('Не удалось загрузить обработку HEIC. Проверьте интернет и повторите.'));},45000);
+    script.onload=()=>{clearTimeout(timer);window.HeicTo?resolve(window.HeicTo):reject(new Error('Обработка HEIC недоступна'));};
+    script.onerror=()=>{clearTimeout(timer);script.remove();reject(new Error('Не удалось загрузить обработку HEIC. Повторите.'));};document.head.appendChild(script);
+  }).catch(e=>{HEIC_LIBRARY=null;throw e;});
+  return HEIC_LIBRARY;
+}
+function loadPdfLibrary(){
+  if(!PDF_LIBRARY)PDF_LIBRARY=import('https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/legacy/build/pdf.min.mjs').then(lib=>{
+    lib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/legacy/build/pdf.worker.min.mjs';return lib;
+  }).catch(()=>{PDF_LIBRARY=null;throw new Error('Не удалось загрузить просмотр PDF. Проверьте интернет и повторите.');});
+  return PDF_LIBRARY;
+}
+function readPhoto(blob){return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(blob),img=new Image();
+  img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Не удалось прочитать фотографию'));};img.src=url;
+});}
+async function prepareCloudFile(file){
+  if(!/\.(heic|heif|jpe?g|png)$/i.test(file.name))return file;
+  const heic=/\.(heic|heif)$/i.test(file.name);
+  let img;
+  try{img=await readPhoto(file);}catch(e){
+    if(!heic)throw e;
+    const convert=await loadHeicLibrary();
+    img=await readPhoto(await convert({blob:file,type:'image/jpeg',quality:0.92}));
+  }
+  const width=img.naturalWidth,height=img.naturalHeight;
+  if(!width||!height)throw new Error('Не удалось определить размер фотографии');
+  if(!heic&&file.size<=5*1024*1024&&Math.max(width,height)<=2560)return file;
+  const ratio=Math.min(1,2560/Math.max(width,height)),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(width*ratio));canvas.height=Math.max(1,Math.round(height*ratio));
+  try{
+    const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Обработка фотографий недоступна');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    let blob;
+    for(const quality of [0.9,0.8,0.65]){
+      blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+      if(blob&&blob.size<=5*1024*1024)break;
+    }
+    if(!blob||blob.size>5*1024*1024)throw new Error('Не удалось подготовить фото. Выберите меньшую копию.');
+    return new File([blob],file.name.replace(/\.[^.]+$/,'.jpg'),{type:'image/jpeg',lastModified:file.lastModified});
+  }finally{canvas.width=canvas.height=0;}
+}
+let CLOSE_FILE_PREVIEW=null;
+async function previewCloudFile(objectId,file){
+  if(CLOSE_FILE_PREVIEW)CLOSE_FILE_PREVIEW();
+  const previousFocus=document.activeElement,dialog=document.createElement('dialog');
+  dialog.id='cloudFilePreview';dialog.setAttribute('aria-label','Просмотр файла');
+  dialog.style.cssText='width:min(1100px,96vw);height:92vh;height:92dvh;max-width:96vw;max-height:96dvh;padding:0;border:1px solid var(--br);border-radius:12px;background:var(--sf);color:var(--tx)';
+  dialog.innerHTML='<style>#cloudFilePreview [hidden]{display:none!important}#cloudFilePreview::backdrop{background:rgba(0,0,0,.55)}</style><div style="height:100%;display:flex;flex-direction:column"><div style="padding:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--br)"><strong id="previewTitle" style="flex:1;overflow-wrap:anywhere;min-width:140px"></strong><a id="previewSave" class="bs" hidden>Скачать</a><button id="previewClose" class="bs" type="button">Закрыть</button></div><div id="previewTools" style="padding:8px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap" hidden><button class="bs" id="previewPrev" aria-label="Предыдущая страница">←</button><span id="previewPage" aria-live="polite"></span><button class="bs" id="previewNext" aria-label="Следующая страница">→</button><button class="bs" id="previewMinus" aria-label="Уменьшить">−</button><button class="bs" id="previewPlus" aria-label="Увеличить">+</button></div><div id="previewBody" style="flex:1;overflow:auto;padding:12px;background:var(--bg);min-height:0"><p id="previewMessage" role="status">Загружаем файл…</p><canvas id="previewCanvas" hidden style="display:block;margin:auto"></canvas></div></div>';
+  document.body.appendChild(dialog);
+  const find=id=>dialog.querySelector('#'+id),message=find('previewMessage'),canvas=find('previewCanvas');
+  find('previewTitle').textContent=file.originalName;
+  let closed=false,url=null,task=null,pdf=null,pageNumber=1,zoom=1,rendering=false;
+  const close=()=>{
+    if(closed)return;closed=true;if(task)Promise.resolve(task.destroy()).catch(()=>{});
+    if(url)URL.revokeObjectURL(url);canvas.width=canvas.height=0;dialog.remove();
+    if(CLOSE_FILE_PREVIEW===close)CLOSE_FILE_PREVIEW=null;
+    if(previousFocus&&previousFocus.isConnected)previousFocus.focus();
+  };
+  CLOSE_FILE_PREVIEW=close;find('previewClose').onclick=close;
+  dialog.addEventListener('cancel',e=>{e.preventDefault();close();});dialog.addEventListener('close',close);
+  if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');find('previewClose').focus();
+  const updateControls=()=>{
+    find('previewPrev').disabled=rendering||pageNumber<=1;find('previewNext').disabled=rendering||!pdf||pageNumber>=pdf.numPages;
+    find('previewMinus').disabled=rendering||zoom<=0.75;find('previewPlus').disabled=rendering||zoom>=2;
+    find('previewPage').textContent=pdf?pageNumber+' / '+pdf.numPages:'';
+  };
+  async function renderPage(){
+    if(closed||rendering)return;rendering=true;message.hidden=false;message.textContent='Открываем страницу…';updateControls();
+    try{
+      const page=await pdf.getPage(pageNumber);if(closed)return;
+      const base=page.getViewport({scale:1}),available=Math.max(240,find('previewBody').clientWidth-24);
+      const scale=Math.min(available/base.width,1.7)*zoom,viewport=page.getViewport({scale});
+      const density=Math.min(window.devicePixelRatio||1,2,Math.sqrt(8000000/(viewport.width*viewport.height)));
+      canvas.width=Math.ceil(viewport.width*density);canvas.height=Math.ceil(viewport.height*density);
+      canvas.style.width=viewport.width+'px';canvas.style.height=viewport.height+'px';canvas.hidden=false;
+      await page.render({canvasContext:canvas.getContext('2d'),viewport,transform:density===1?null:[density,0,0,density,0,0]}).promise;
+      page.cleanup();if(!closed)message.hidden=true;
+    }catch(e){if(!closed){canvas.hidden=true;message.textContent='Не удалось показать страницу. Можно скачать файл кнопкой сверху.';}}
+    finally{rendering=false;if(!closed)updateControls();}
+  }
+  find('previewPrev').onclick=()=>{if(pageNumber>1&&!rendering){pageNumber--;renderPage();}};
+  find('previewNext').onclick=()=>{if(pdf&&pageNumber<pdf.numPages&&!rendering){pageNumber++;renderPage();}};
+  find('previewMinus').onclick=()=>{if(!rendering){zoom=Math.max(0.75,zoom-0.25);renderPage();}};
+  find('previewPlus').onclick=()=>{if(!rendering){zoom=Math.min(2,zoom+0.25);renderPage();}};
+  try{
+    const result=await fileCall('files_download',{objectId,fileId:file.id});if(closed)return;
+    const bytes=Uint8Array.from(atob(result.base64),c=>c.charCodeAt(0));
+    url=URL.createObjectURL(new Blob([bytes],{type:result.file.mimeType}));
+    const save=find('previewSave');save.href=url;save.download=result.file.originalName;save.hidden=false;
+    if(result.file.mimeType==='application/pdf'){
+      message.textContent='Открываем PDF…';const lib=await loadPdfLibrary();if(closed)return;
+      task=lib.getDocument({data:bytes,isEvalSupported:false,cMapUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/cmaps/',cMapPacked:true,standardFontDataUrl:'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/standard_fonts/'});
+      task.onPassword=()=>{if(!closed)message.textContent='PDF защищён паролем. Скачайте его и откройте в приложении для PDF.';};
+      pdf=await task.promise;if(closed)return;find('previewTools').hidden=false;await renderPage();
+    }else if(/^image\/(jpeg|png)$/.test(result.file.mimeType)){
+      const img=document.createElement('img');img.alt=file.originalName;img.style.cssText='display:block;max-width:100%;height:auto;margin:auto';
+      img.onload=()=>{message.hidden=true;};img.onerror=()=>{message.textContent='Не удалось показать изображение. Можно скачать файл.';};img.src=url;find('previewBody').appendChild(img);
+    }else message.textContent='Для этого формата доступно скачивание.';
+  }catch(e){if(!closed)message.textContent=e.message||'Не удалось открыть файл';}
+}
+
 function fCardHTML(f,i){
   const isImg=typeof f.data==='string'&&/^data:image\/(png|jpeg|gif|webp);base64,[a-z0-9+/=\s]+$/i.test(f.data);
   return`<div class="fcrd2">
@@ -2615,20 +3001,6 @@ function fCardHTML(f,i){
     <div class="fn">${esc(f.name)}</div><div class="fs">${(f.size/1024).toFixed(0)} KB</div>
     <button class="fdl" onclick="rmFile(${i})">×</button>
   </div>`;
-}
-function onFDrop(e){e.preventDefault();ge('fdrop')?.classList.remove('dov');procFiles(e.dataTransfer.files);}
-function onFSel(inp){procFiles(inp.files);}
-function procFiles(fl){
-  const cl=DB.find(c=>c.id===CID);if(!cl)return;
-  if(!cl.files)cl.files=[];
-  Array.from(fl).forEach(file=>{
-    const r=new FileReader();
-    r.onload=e=>{
-      cl.files.push({name:file.name,type:file.type,size:file.size,data:e.target.result,addedAt:Date.now()});
-      log(cl,`Файл: "${file.name}"`, '📎','#9b72cf');
-      save();renderFiles(cl);
-    };r.readAsDataURL(file);
-  });
 }
 function rmFile(i){
   const cl=DB.find(c=>c.id===CID);if(!cl||!cl.files)return;
@@ -2650,7 +3022,7 @@ function renderDocsTab(cl){
     </div>
     <div class="doc-acts">
       <button class="bp" onclick="window.print()">🖨 Печать</button>
-      <button class="bs" id="embtn" onclick="togEM()">✏️ Редактировать 🚧</button>
+      <button class="bs" id="embtn" onclick="togEM()">Правка для печати</button>
       <button class="bs" onclick="cpDoc()">📋 Копировать</button>
       <div class="tot-b">Итого: <strong id="totd">${fmt(tot)} ₽</strong></div>
     </div>
@@ -2685,7 +3057,7 @@ function togEM(){
     // оригинальные классы договора
     sh.querySelectorAll('.cl,.sh,.pbox,.highlight,.conditions li,.sig-col td,.party-col,.doc-center-title .t2s,.doc-hdr-right').forEach(el=>el.setAttribute('contenteditable','true'));
     const bar=document.createElement('div');bar.className='edit-mode-bar';bar.id='ebar';
-    bar.innerHTML=`<b>🚧 Режим редактирования — в разработке.</b> Правки видны только в этом окне и при печати; в карточке объекта они НЕ сохраняются.`;
+    bar.innerHTML=`<b>Правка печатной копии.</b> Правки видны только в этом окне и при печати; в карточке объекта они НЕ сохраняются.`;
     sh.prepend(bar);
   }else{
     sh.classList.remove('emed');
@@ -2760,8 +3132,8 @@ function fmtDate(s){ const p=pd(s); return p?`«${p.d}» ${p.m} ${p.y} г.`:`«$
 function fmtDateShort(s){ return fds(s); }
 function docDateParts(cl){ const p=pd(cl.docDate); return p?{day:`«${p.d}»`,month:p.m,year:p.y}:{day:`«${bl(16)}»`,month:bl(80),year:bl(28)}; }
 
-function orgTitle(cl){ return cl.orgForm==='ИП'?`ИП ${cl.orgName||bl(140)}`:`${cl.orgForm||''} «${cl.orgName||bl(140)}»`; }
-function orgSigner(cl){ return cl.orgForm==='ИП'?(cl.orgName||bl(140)):(cl.dirName||bl(140)); }
+function orgTitle(cl){ return cl.orgForm==='ИП'?`ИП ${esc(cl.orgName)||bl(140)}`:`${esc(cl.orgForm)||''} «${esc(cl.orgName)||bl(140)}»`; }
+function orgSigner(cl){ return cl.orgForm==='ИП'?(esc(cl.orgName)||bl(140)):(esc(cl.dirName)||bl(140)); }
 
 function itemsTable(cl, withPeriod=false){
   const total=calcTotal();
@@ -2778,10 +3150,10 @@ function itemsTable(cl, withPeriod=false){
     if(!r.name&&!r.price)return;
     idx++;
     const sum=(+r.price||0)*(+r.qty||0);
-    const per=withPeriod?`<td>${fmtDateShort(cl.workStart||cl.dateInstall)} – ${fmtDateShort(cl.workEnd||cl.dateDead)}</td>`:'';
-    html+=`<tr><td>${idx}</td><td>${r.name||'—'}</td>${per}
+    const per=withPeriod?`<td>${fmtDateShort(esc(cl.workStart)||cl.dateInstall)} – ${fmtDateShort(esc(cl.workEnd)||cl.dateDead)}</td>`:'';
+    html+=`<tr><td>${idx}</td><td>${esc(r.name)||'—'}</td>${per}
       <td class="num">${r.price?fmt(r.price):'—'}</td>
-      <td class="num">${r.qty||'—'}</td><td>${r.unit||'—'}</td>
+      <td class="num">${esc(r.qty)||'—'}</td><td>${esc(r.unit)||'—'}</td>
       <td class="num">${fmt(sum)}</td></tr>`;
   });
   const cs=withPeriod?6:5;
@@ -2808,7 +3180,7 @@ function workItems(cl){
 function docHeader(cl){
   const p=pd(cl.docDate);
   const day=p?p.d:bl(20), month=p?p.m:bl(80), year=p?p.y:bl(30);
-  const num=cl.docNum||bl(40);
+  const num=esc(cl.docNum)||bl(40);
   return `
   <div class="doc-hdr">
     <div class="doc-hdr-left">
@@ -2845,12 +3217,12 @@ function partiesFiz(cl){
       <div class="party-label">именуемый в дальнейшем «Подрядчик»</div>
     </div>
     <div class="party-col">
-      <div class="p-name">${cl.fio||bl(180)}</div>
+      <div class="p-name">${esc(cl.fio)||bl(180)}</div>
       <div class="party-row"><span class="lbl">действующий</span><span>на основании паспорта</span></div>
-      <div class="party-row"><span class="lbl">серии</span><span>${cl.passportSer||bl(40)} № ${cl.passportNum||bl(60)}</span></div>
-      <div class="party-row"><span class="lbl">выдан:</span><span>${cl.passportBy||bl(160)}</span></div>
+      <div class="party-row"><span class="lbl">серии</span><span>${esc(cl.passportSer)||bl(40)} № ${esc(cl.passportNum)||bl(60)}</span></div>
+      <div class="party-row"><span class="lbl">выдан:</span><span>${esc(cl.passportBy)||bl(160)}</span></div>
       <div class="party-row"><span class="lbl">дата:</span><span>${passDateFmt(cl)}</span></div>
-      <div class="party-row"><span class="lbl">к/п:</span><span>${cl.passportCode||bl(60)}</span></div>
+      <div class="party-row"><span class="lbl">к/п:</span><span>${esc(cl.passportCode)||bl(60)}</span></div>
       <div class="party-label">именуемый в дальнейшем «Заказчик»</div>
     </div>
   </div>`;
@@ -2870,11 +3242,11 @@ function partiesYur(cl){
     </div>
     <div class="party-col">
       <div class="p-name">${orgFull}</div>
-      ${isIP?'':`<div class="party-row"><span class="lbl">в лице</span><span>${cl.dirPost||bl(100)} ${cl.dirName||bl(140)}</span></div>
-      <div class="party-row"><span class="lbl">действующего</span><span>на основании ${cl.dirDoc||bl(70)}</span></div>`}
-      <div class="party-row"><span class="lbl">ИНН:</span><span>${cl.orgInn||bl(80)}</span></div>
-      ${isIP?'':`<div class="party-row"><span class="lbl">КПП:</span><span>${cl.orgKpp||bl(80)}</span></div>`}
-      <div class="party-row"><span class="lbl">${isIP?'ОГРНИП:':'ОГРН:'}</span><span>${cl.orgOgrn||bl(100)}</span></div>
+      ${isIP?'':`<div class="party-row"><span class="lbl">в лице</span><span>${esc(cl.dirPost)||bl(100)} ${esc(cl.dirName)||bl(140)}</span></div>
+      <div class="party-row"><span class="lbl">действующего</span><span>на основании ${esc(cl.dirDoc)||bl(70)}</span></div>`}
+      <div class="party-row"><span class="lbl">ИНН:</span><span>${esc(cl.orgInn)||bl(80)}</span></div>
+      ${isIP?'':`<div class="party-row"><span class="lbl">КПП:</span><span>${esc(cl.orgKpp)||bl(80)}</span></div>`}
+      <div class="party-row"><span class="lbl">${isIP?'ОГРНИП:':'ОГРН:'}</span><span>${esc(cl.orgOgrn)||bl(100)}</span></div>
       <div class="party-label">именуемый в дальнейшем «Заказчик»</div>
     </div>
   </div>`;
@@ -2882,7 +3254,7 @@ function partiesYur(cl){
 
 function sigFiz(cl){
   const dp=docDateParts(cl);
-  const clientName=cl.fio||bl(160);
+  const clientName=esc(cl.fio)||bl(160);
   const citizen=citizenLabel(cl.fio);
   return `<div class="sig-wrap"><div class="sh2">Реквизиты и подписи Сторон</div>
   <div class="sig-grid">
@@ -2909,14 +3281,14 @@ function sigFiz(cl){
       <div class="role">Заказчик:</div>
       <table>
         <tr><td colspan="2"><b>${citizen}</b><br>${clientName}</td></tr>
-        <tr><td class="lb" style="padding-top:5px">Паспорт серии:</td><td style="padding-top:5px">${cl.passportSer||bl(40)} №${cl.passportNum||bl(60)}</td></tr>
-        <tr><td class="lb">Выдан:</td><td>${cl.passportBy||bl(160)}</td></tr>
+        <tr><td class="lb" style="padding-top:5px">Паспорт серии:</td><td style="padding-top:5px">${esc(cl.passportSer)||bl(40)} №${esc(cl.passportNum)||bl(60)}</td></tr>
+        <tr><td class="lb">Выдан:</td><td>${esc(cl.passportBy)||bl(160)}</td></tr>
         <tr><td class="lb">Дата выдачи:</td><td>${passDateFmt(cl)}</td></tr>
-        <tr><td class="lb">Код подр.:</td><td>${cl.passportCode||bl(60)}</td></tr>
-        <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${cl.addr||bl(180)}</td></tr>
-        <tr><td class="lb">тел:</td><td>${cl.phone||bl(110)}</td></tr>
-        <tr><td class="lb">tg:</td><td>${cl.tg||bl(90)}</td></tr>
-        <tr><td class="lb">e-mail:</td><td>${cl.email||bl(110)}</td></tr>
+        <tr><td class="lb">Код подр.:</td><td>${esc(cl.passportCode)||bl(60)}</td></tr>
+        <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${esc(cl.addr)||bl(180)}</td></tr>
+        <tr><td class="lb">тел:</td><td>${esc(cl.phone)||bl(110)}</td></tr>
+        <tr><td class="lb">tg:</td><td>${esc(cl.tg)||bl(90)}</td></tr>
+        <tr><td class="lb">e-mail:</td><td>${esc(cl.email)||bl(110)}</td></tr>
       </table>
       <span class="sline"></span>
       <div class="slabel">${clientName} &nbsp;&nbsp;&nbsp; (подпись)</div>
@@ -2954,17 +3326,17 @@ function sigYur(cl){
       <div class="role">Заказчик:</div>
       <table>
         <tr><td colspan="2"><b>${orgFull}</b></td></tr>
-        <tr><td class="lb" style="padding-top:5px">ИНН:</td><td style="padding-top:5px">${cl.orgInn||bl(80)}</td></tr>
-        ${isIP?'':`<tr><td class="lb">КПП:</td><td>${cl.orgKpp||bl(80)}</td></tr>`}
-        <tr><td class="lb">${isIP?'ОГРНИП:':'ОГРН:'}</td><td>${cl.orgOgrn||bl(100)}</td></tr>
-        <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${cl.orgAddr||bl(180)}</td></tr>
-        <tr><td class="lb">Банк:</td><td>${cl.orgBank||bl(140)}</td></tr>
-        <tr><td class="lb">БИК:</td><td>${cl.orgBik||bl(70)}</td></tr>
-        <tr><td class="lb">р/с (л/с):</td><td>${cl.orgRs||bl(120)}</td></tr>
-        <tr><td class="lb">к/с:</td><td>${cl.orgKs||bl(120)}</td></tr>
-        <tr><td class="lb">тел:</td><td>${cl.orgPhone||bl(100)}</td></tr>
-        <tr><td class="lb">tg:</td><td>${cl.orgTg||bl(80)}</td></tr>
-        <tr><td class="lb">e-mail:</td><td>${cl.orgEmail||bl(100)}</td></tr>
+        <tr><td class="lb" style="padding-top:5px">ИНН:</td><td style="padding-top:5px">${esc(cl.orgInn)||bl(80)}</td></tr>
+        ${isIP?'':`<tr><td class="lb">КПП:</td><td>${esc(cl.orgKpp)||bl(80)}</td></tr>`}
+        <tr><td class="lb">${isIP?'ОГРНИП:':'ОГРН:'}</td><td>${esc(cl.orgOgrn)||bl(100)}</td></tr>
+        <tr><td class="lb" style="padding-top:5px">Юридический адрес:</td><td style="padding-top:5px">${esc(cl.orgAddr)||bl(180)}</td></tr>
+        <tr><td class="lb">Банк:</td><td>${esc(cl.orgBank)||bl(140)}</td></tr>
+        <tr><td class="lb">БИК:</td><td>${esc(cl.orgBik)||bl(70)}</td></tr>
+        <tr><td class="lb">р/с (л/с):</td><td>${esc(cl.orgRs)||bl(120)}</td></tr>
+        <tr><td class="lb">к/с:</td><td>${esc(cl.orgKs)||bl(120)}</td></tr>
+        <tr><td class="lb">тел:</td><td>${esc(cl.orgPhone)||bl(100)}</td></tr>
+        <tr><td class="lb">tg:</td><td>${esc(cl.orgTg)||bl(80)}</td></tr>
+        <tr><td class="lb">e-mail:</td><td>${esc(cl.orgEmail)||bl(100)}</td></tr>
       </table>
       <span class="sline"></span>
       <div class="slabel">${orgSigner(cl)} &nbsp;&nbsp;&nbsp; (подпись)</div>
@@ -2980,7 +3352,7 @@ function partiesBlock(cl){ return cl.type==='fiz'?partiesFiz(cl):partiesYur(cl);
 // Компактные подписи для Акта (без реквизитов)
 function sigAktFiz(cl){
   const dp=docDateParts(cl);
-  const clientName=cl.fio||bl(180);
+  const clientName=esc(cl.fio)||bl(180);
   const citizen=citizenLabel(cl.fio);
   return `<div class="sig-wrap">
   <div class="sh2">Подписи Сторон</div>
@@ -3008,7 +3380,7 @@ function sigAktYur(cl){
   const isIP=cl.orgForm==='ИП';
   const orgFull=orgTitle(cl);
   const signer=orgSigner(cl);
-  const post=cl.dirPost||'Генеральный директор';
+  const post=esc(cl.dirPost)||'Генеральный директор';
   return `<div class="sig-wrap">
   <div class="sh2">Подписи Сторон</div>
   <div class="sig-grid">
@@ -3038,12 +3410,12 @@ function sigAktBlock(cl){ return cl.type==='fiz'?sigAktFiz(cl):sigAktYur(cl); }
 // RENDER DOGOVOR — полный оригинальный текст
 // ═══════════════════════════════════════════════
 function renderDog(cl,total){
-  const num=cl.docNum||bl(40);
+  const num=esc(cl.docNum)||bl(40);
   const advPct=parseInt(cl.advPct)||50, restPct=100-advPct;
   const adv=total*advPct/100, rest=total*restPct/100;
   const totalStr=total?fmt(total):bl(100);
-  const startDays=cl.startDays||'20', execDays=cl.execDays||'30';
-  const objAddr=cl.objAddr||bl(200);
+  const startDays=esc(cl.startDays)||'20', execDays=esc(cl.execDays)||'30';
+  const objAddr=esc(cl.objAddr)||bl(200);
 
   ge('sheet').innerHTML=`
   ${docHeader(cl)}
@@ -3204,9 +3576,9 @@ function renderDog(cl,total){
 // RENDER SMETA (Приложение №1)
 // ═══════════════════════════════════════════════
 function renderSmeta(cl,total){
-  const num=cl.docNum||bl(40);
+  const num=esc(cl.docNum)||bl(40);
   const dp=docDateParts(cl);
-  const objAddr=cl.objAddr||bl(200);
+  const objAddr=esc(cl.objAddr)||bl(200);
   const advPct=parseInt(cl.advPct)||50,restPct=100-advPct;
   const adv=total*advPct/100,rest=total*restPct/100;
 
@@ -3218,9 +3590,9 @@ function renderSmeta(cl,total){
     idx++;
     rowsHtml+=`<tr>
       <td style="text-align:center">${idx}</td>
-      <td>${r.name||'—'}</td>
-      <td style="text-align:center">${r.unit}</td>
-      <td style="text-align:right">${r.qty}</td>
+      <td>${esc(r.name)||'—'}</td>
+      <td style="text-align:center">${esc(r.unit)}</td>
+      <td style="text-align:right">${esc(r.qty)}</td>
       <td style="text-align:right">${r.price?fmt(r.price):'—'}</td>
       <td style="text-align:right;font-weight:600">${fmt(sum)}</td>
     </tr>`;
@@ -3298,9 +3670,9 @@ function renderSmeta(cl,total){
       </div>
       <div class="sig-col">
         <div class="role">Заказчик:</div>
-        <div style="font-size:11px;margin-bottom:6px"><b>${cl.type==='fiz'?(cl.fio||bl(150)):orgTitle(cl)}</b></div>
+        <div style="font-size:11px;margin-bottom:6px"><b>${cl.type==='fiz'?(esc(cl.fio)||bl(150)):orgTitle(cl)}</b></div>
         <span class="sline"></span>
-        <div class="slabel">${cl.type==='fiz'?(cl.fio||bl(150)):orgSigner(cl)} &nbsp;&nbsp;&nbsp; (подпись)</div>
+        <div class="slabel">${cl.type==='fiz'?(esc(cl.fio)||bl(150)):orgSigner(cl)} &nbsp;&nbsp;&nbsp; (подпись)</div>
         <div class="dateline">${dp.day} &nbsp;${dp.month}&nbsp; ${dp.year} г.</div>
         ${cl.type==='yur'?'<div class="stamp">М.П.</div>':''}
       </div>
@@ -3312,11 +3684,11 @@ function renderSmeta(cl,total){
 // RENDER SCHET
 // ═══════════════════════════════════════════════
 function renderSch(cl,total){
-  const num=cl.docNum||bl(40);
+  const num=esc(cl.docNum)||bl(40);
   const advPct=parseInt(cl.advPct)||50, restPct=100-advPct;
   const adv=total*advPct/100, rest=total*restPct/100;
-  const billDays=cl.billDays||'3';
-  const clientLabel=cl.type==='fiz'?(cl.fio||bl(160)):`${orgTitle(cl)}, ИНН ${cl.orgInn||bl(60)}, ${cl.orgAddr||bl(140)}`;
+  const billDays=esc(cl.billDays)||'3';
+  const clientLabel=cl.type==='fiz'?(esc(cl.fio)||bl(160)):`${orgTitle(cl)}, ИНН ${esc(cl.orgInn)||bl(60)}, ${esc(cl.orgAddr)||bl(140)}`;
 
   ge('sheet').innerHTML=`
   <div class="bank-block">
@@ -3371,11 +3743,11 @@ function renderSch(cl,total){
 // RENDER AKT
 // ═══════════════════════════════════════════════
 function renderAkt(cl,total){
-  const num=cl.docNum||bl(40);
-  const objAddr=cl.objAddr||bl(200);
+  const num=esc(cl.docNum)||bl(40);
+  const objAddr=esc(cl.objAddr)||bl(200);
   const period=(cl.dateInstall&&cl.workEnd)?`${fmtDateShort(cl.dateInstall)} – ${fmtDateShort(cl.workEnd)}`:
     (cl.workStart&&cl.workEnd?`${fmtDateShort(cl.workStart)} – ${fmtDateShort(cl.workEnd)}`:bl(130));
-  const docRef=`Договора подряда № ${cl.docNum||bl(28)} от ${fmtDate(cl.docDate)}`;
+  const docRef=`Договора подряда № ${esc(cl.docNum)||bl(28)} от ${fmtDate(cl.docDate)}`;
 
   ge('sheet').innerHTML=`
   <div class="doc-hdr">
@@ -3511,19 +3883,19 @@ function kbEditCol(colId){
   mc.innerHTML = `
     <h3>Настройка колонки</h3>
     <div class="field"><label>Название</label>
-      <input id="kbEditName" value="${st.label}" style="font-size:14px">
+      <input id="kbEditName" value="${esc(st.label)}" style="font-size:14px">
     </div>
     <div class="field"><label>Цвет</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
         ${COL_COLORS.map(c=>`<div onclick="kbSelectColor('${c}')" id="kbcc-${c.replace('#','')}"
           style="width:28px;height:28px;border-radius:50%;background:${c};cursor:pointer;border:2px solid ${c===st.color?'#fff':'transparent'};transition:border .15s"></div>`).join('')}
-        <input type="color" id="kbColorCustom" value="${st.color}" title="Произвольный цвет"
+        <input type="color" id="kbColorCustom" value="${safeColor(st.color)}" title="Произвольный цвет"
           style="width:28px;height:28px;padding:1px;border-radius:50%;cursor:pointer;border:none;background:none"
           oninput="kbSelectColor(this.value)">
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
-        <div id="kbColorPreview" style="width:16px;height:16px;border-radius:50%;background:${st.color}"></div>
-        <span id="kbColorVal" style="font-size:12px;color:var(--mu)">${st.color}</span>
+        <div id="kbColorPreview" style="width:16px;height:16px;border-radius:50%;background:${safeColor(st.color)}"></div>
+        <span id="kbColorVal" style="font-size:12px;color:var(--mu)">${safeColor(st.color)}</span>
       </div>
     </div>
     <div style="margin-top:16px;display:flex;gap:8px">
@@ -3565,7 +3937,7 @@ function kbDeleteCol(colId){
   if(!st) return;
   const hasCards = DB.filter(c=>c.status===colId).length;
   if(hasCards){
-    if(!confirm(`В колонке "${st.label}" есть ${hasCards} объект(ов). Они будут переведены в "Новый лид". Удалить колонку?`)) return;
+    if(!confirm(`В колонке "${esc(st.label)}" есть ${hasCards} объект(ов). Они будут переведены в "Новый лид". Удалить колонку?`)) return;
     DB.forEach(c=>{ if(c.status===colId){c.status='lead';c.updatedAt=Date.now();} });
     save();
   }
@@ -3713,15 +4085,6 @@ function getSortedDB(){
 // ═══════════════════════════════════════════════
 // TASK BADGE COUNT
 // ═══════════════════════════════════════════════
-function openTasksTab(){
-  OBJTAB='tasks';
-  const cl=DB.find(c=>c.id===CID);if(!cl)return;
-  // highlight tab button
-  document.querySelectorAll('.otab').forEach(b=>{
-    b.classList.toggle('on',b.textContent.includes('Задачи'));
-  });
-  renderTasks(cl);
-}
 
 // ═══════════════════════════════════════════════
 // MONTHLY REPORT + FUNNEL ANALYTICS
@@ -3942,7 +4305,7 @@ function showAnalytics(){
           const conv=i>0?Math.round(s.count/(funnelData[i-1].count||1)*100):100;
           return`<div style="flex:1;text-align:center;padding:12px 8px;border-right:${i<funnelData.length-1?'1px solid var(--br)':'none'}">
             <div style="font-size:22px;font-weight:700;color:var(--ac);font-family:'Bebas Neue',sans-serif">${s.count}</div>
-            <div style="font-size:11px;color:var(--tx2);margin:2px 0">${s.label}</div>
+            <div style="font-size:11px;color:var(--tx2);margin:2px 0">${esc(s.label)}</div>
             <div style="font-size:10px;color:var(--mu)">${pct}% от всех</div>
             ${i>0?`<div style="font-size:10px;color:${conv>50?'var(--ok)':'var(--wn)'};margin-top:3px">→ ${conv}% конв.</div>`:''}
           </div>`;
@@ -3956,11 +4319,11 @@ function showAnalytics(){
         ${STATUSES.map(s=>{const cnt=liveDB().filter(c=>c.status===s.id).length;if(!cnt)return'';
           const pct=Math.round(cnt/total*100);
           return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--br)">
-            <span style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
-            <span style="flex:1;font-size:12px;color:var(--tx2)">${s.label}</span>
+            <span style="width:8px;height:8px;border-radius:50%;background:${safeColor(s.color)};flex-shrink:0"></span>
+            <span style="flex:1;font-size:12px;color:var(--tx2)">${esc(s.label)}</span>
             <span style="font-size:12px;font-weight:700;color:var(--ac)">${cnt}</span>
             <div style="width:60px;height:4px;background:var(--s4);border-radius:2px;overflow:hidden">
-              <div style="height:100%;background:${s.color};width:${pct}%"></div>
+              <div style="height:100%;background:${safeColor(s.color)};width:${pct}%"></div>
             </div>
           </div>`;
         }).join('')}
@@ -4100,18 +4463,18 @@ function renderAllTasksView(mc){
     const bord=late?' style="border-left:3px solid var(--dn);padding-left:10px"':(!t.done&&t.deadline===today?' style="border-left:3px solid var(--wn);padding-left:10px"':'');
     return`<div class="at-row"${bord}>
       <input type="checkbox" class="tchk" ${t.done?'checked':''}
-        onchange="quickToggleTask('${t._cid}',${t._idx})">
+        onchange="quickToggleTask(${escA(JSON.stringify(t._cid))},${t._idx})">
       <div class="at-body">
-        <div class="ttxt${t.done?' done':''}" ondblclick="gEditTaskText('${t._cid}',${t._idx},this)" title="Двойной клик — изменить текст">${esc(t.text)}</div>
+        <div class="ttxt${t.done?' done':''}" ondblclick="gEditTaskText(${escA(JSON.stringify(t._cid))},${t._idx},this)" title="Двойной клик — изменить текст">${esc(t.text)}</div>
         <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;align-items:center">
-          <span class="at-obj" onclick="openObj('${t._cid}')">${esc(t._cname)}</span>
-          <input type="date" class="tdate-inp${late?' late':''}" value="${t.deadline||''}" onchange="gSetTaskDate('${t._cid}',${t._idx},this.value)">
-          <input type="time" class="ttime-inp" value="${t.time||''}" onchange="gSetTaskTime('${t._cid}',${t._idx},this.value)">
+          <span class="at-obj" onclick="openObj(${escA(JSON.stringify(t._cid))})">${esc(t._cname)}</span>
+          <input type="date" class="tdate-inp${late?' late':''}" value="${escA(t.deadline||'')}" onchange="gSetTaskDate(${escA(JSON.stringify(t._cid))},${t._idx},this.value)">
+          <input type="time" class="ttime-inp" value="${escA(t.time||'')}" onchange="gSetTaskTime(${escA(JSON.stringify(t._cid))},${t._idx},this.value)">
           <select class="ops-owner-select" aria-label="Ответственный за задачу" data-cid="${escA(t._cid)}" onchange="opsTaskOwner(this.dataset.cid,${t._idx},this.value,true)">${opsOwnerOptions(t.owner)}</select>
-          <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="gCyclePrio('${t._cid}',${t._idx})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
+          <button class="tprio" style="${t.priority?`color:${PRIO[t.priority].c};border-color:${PRIO[t.priority].c}`:''}" onclick="gCyclePrio(${escA(JSON.stringify(t._cid))},${t._idx})" title="Приоритет">${t.priority?'● '+PRIO[t.priority].l:'○ Приоритет'}</button>
         </div>
       </div>
-      <button class="kact" onclick="openObj('${t._cid}')" style="font-size:10px;padding:3px 7px;flex-shrink:0">→</button>
+      <button class="kact" onclick="openObj(${escA(JSON.stringify(t._cid))})" style="font-size:10px;padding:3px 7px;flex-shrink:0">→</button>
     </div>`;
   }
 
@@ -4171,7 +4534,7 @@ function showAddTaskModal(){
     <div class="field"><label>Объект</label>
       <select id="atObj">
         <option value="">— Выберите объект —</option>
-        ${liveDB().map(c=>`<option value="${c.id}">${cname(c)}</option>`).join('')}
+        ${liveDB().map(c=>`<option value="${escA(c.id)}">${cname(c)}</option>`).join('')}
       </select>
     </div>
     <div class="fr">
@@ -4299,12 +4662,12 @@ function renderPlanner(){
       const top=it.lane*(BH+GAP)+GAP;
       const nm=cname(cl);
       const lbl=w<50?esc(nm.slice(0,3)):esc(nm);
-      const tip=escA(`${nm} · ${fds(it.start)}–${fds(it.end)} · ${st.label} · ${r.label}`);
+      const tip=escA(`${nm} · ${fds(it.start)}–${fds(it.end)} · ${esc(st.label)} · ${r.label}`);
       return`<div class="pl-block${it.conf?' conf':''}" draggable="true" title="${tip}"
-        style="left:${lft}px;top:${top}px;width:${Math.max(COL-4,w)}px;height:${BH}px;background:${st.color}"
-        onclick="plBlockClick(event,'${cl.id}')"
-        ondragstart="plBlockDragStart(event,'${cl.id}',${COL},${r.idx})" ondragend="plBlockDragEnd(event)"
-        ontouchstart="plTouchStart(event,'${cl.id}',${r.idx},${COL})">${lbl}</div>`;
+        style="left:${lft}px;top:${top}px;width:${Math.max(COL-4,w)}px;height:${BH}px;background:${safeColor(st.color)}"
+        onclick="plBlockClick(event,${escA(JSON.stringify(cl.id))})"
+        ondragstart="plBlockDragStart(event,${escA(JSON.stringify(cl.id))},${COL},${r.idx})" ondragend="plBlockDragEnd(event)"
+        ontouchstart="plTouchStart(event,${escA(JSON.stringify(cl.id))},${r.idx},${COL})">${lbl}</div>`;
     }).join('');
     return`<div class="pl-row">
       <div class="pl-rowlabel${r.none?' none':''}"${r.none?'':` ondblclick="plRenameBrigade(${r.idx})" title="Двойной клик — переименовать"`}>${esc(r.label)}</div>
@@ -4487,7 +4850,7 @@ function plqObjOpts(q){
     });
   }
   return`<option value="">➕ Создать новый объект</option>`+
-    items.map(c=>`<option value="${c.id}">${esc(cname(c))}${c.dateInstall?' · '+fds(c.dateInstall):''}</option>`).join('');
+    items.map(c=>`<option value="${escA(c.id)}">${esc(cname(c))}${c.dateInstall?' · '+fds(c.dateInstall):''}</option>`).join('');
 }
 function plqFilter(){
   const sel=ge('plqObj');if(!sel)return;
@@ -4625,9 +4988,9 @@ function renderCalendarView(){
                   <span style="font-size:${isToday2?'14':'13'}px;font-weight:${isToday2?'700':'400'};color:${isToday2?'var(--ac)':isWe?'var(--dn)':'var(--tx2)'}${isToday2?';background:var(--ac);color:var(--ac-on);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center':''}">${d}</span>
                   ${evs.length>3?`<span style="font-size:9px;color:var(--mu)">+${evs.length-3}</span>`:''}
                 </div>
-                ${evs.slice(0,3).map(ev=>`<div onclick="event.stopPropagation();openObj('${ev.cid}')" 
+                ${evs.slice(0,3).map(ev=>`<div onclick="event.stopPropagation();openObj(${escA(JSON.stringify(ev.cid))})" 
                   style="font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;background:${ev.color}22;color:${ev.color};border-left:2px solid ${ev.color}"
-                  title="${ev.label}">${ev.icon} ${ev.label}</div>`).join('')}
+                  title="${escA(ev.label)}">${esc(ev.icon)} ${esc(ev.label)}</div>`).join('')}
               </td>`;
             }).join('')}
           </tr>`).join('')}
@@ -4668,9 +5031,9 @@ function calDayClick(dateStr){
   mc2.innerHTML=`<h3>📅 ${dateLabel}</h3>
     ${dayEvents.length===0?'<div style="color:var(--mu);font-size:12px;margin-bottom:16px">Событий нет</div>':
       dayEvents.map(ev=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--br)">
-        <span style="font-size:16px">${ev.icon}</span>
-        <span style="flex:1;font-size:13px;color:var(--tx2)">${ev.label}</span>
-        <button class="kact" onclick="ge('modalOverlay').classList.add('hidden');openObj('${ev.cid}')">→</button>
+        <span style="font-size:16px">${esc(ev.icon)}</span>
+        <span style="flex:1;font-size:13px;color:var(--tx2)">${esc(ev.label)}</span>
+        <button class="kact" onclick="ge('modalOverlay').classList.add('hidden');openObj(${escA(JSON.stringify(ev.cid))})">→</button>
       </div>`).join('')}
     <div style="margin-top:16px;display:flex;gap:8px">
       <button class="modal-btn primary" onclick="ge('modalOverlay').classList.add('hidden');calAddTask('${dateStr}')">+ Задача на этот день</button>
@@ -4690,7 +5053,7 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // Versioned export container; business records retain their existing schema.
 function makeBackup(){
-  return {format:'parallax-backup',version:1,build:'25.09-2',exportedAt:new Date().toISOString(),
+  return {format:'parallax-backup',version:1,build:'28.09-5',exportedAt:new Date().toISOString(),
     records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
 }
 function parseBackup(value){
@@ -4698,7 +5061,7 @@ function parseBackup(value){
   if(!value||value.format!=='parallax-backup'||value.version!==1)throw new Error('Неизвестный формат или версия резервной копии');
   const settings=value.settings;
   if(!settings||!Array.isArray(settings.statuses)||!settings.statuses.length||
-    settings.statuses.some(s=>!s||typeof s.id!=='string'||!s.id||typeof s.label!=='string'||
+    settings.statuses.some(s=>!s||!safeIdentifier(s.id)||typeof s.label!=='string'||
       typeof s.color!=='string'||typeof s.bg!=='string')||
     new Set(settings.statuses.map(s=>s.id)).size!==settings.statuses.length||
     !Array.isArray(settings.brigades)||settings.brigades.some(b=>typeof b!=='string'))
@@ -4795,52 +5158,294 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 25.09-2','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+console.log('%cParallax CRM — сборка 28.09-5','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+let TEAM_USER=null,TEAM_RECORDS=[],TEAM_CURRENT=null,TEAM_USERS=[],TEAM_BUSY=false;
+const TEAM_ROLES={OWNER:'Владелец',ADMIN:'Администратор',SALES:'Продажи',PRODUCTION:'Производство'};
+async function startGoogleLogin(){
+  if(LOGIN_PENDING)return;
+  const err=ge('loginErr');
+  if(APP_READY){err.textContent='Сначала сохраните изменения и перезагрузите страницу для смены аккаунта.';return;}
+  LOGIN_PENDING=true;
+  try{
+    const verifier=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
+    const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({action:'google_start',verifier})});
+    const url=new URL(result.url);
+    if(url.origin!=='https://accounts.google.com'||typeof result.state!=='string')throw new Error('Неверный ответ сервера входа');
+    if(location.hash.startsWith('#task='))sessionStorage.setItem('px_push_target',location.hash);
+    sessionStorage.setItem('px_google_pending',JSON.stringify({state:result.state,verifier,expiresAt:Date.now()+600000}));
+    location.assign(result.url);
+  }catch(e){err.textContent=e.message;LOGIN_PENDING=false;}
+}
+async function finishGoogleLogin(){
+  const callback=window.__googleReturn;delete window.__googleReturn;
+  if(callback){const target=sessionStorage.getItem('px_push_target');sessionStorage.removeItem('px_push_target');if(target&&/^#task=[^/]+\/[^/]+$/.test(target))history.replaceState(null,'',location.pathname+target);}
+  if(!callback){checkAuth();return;}
+  const err=ge('loginErr');LOGIN_PENDING=true;
+  try{
+    const pending=JSON.parse(sessionStorage.getItem('px_google_pending')||'null');sessionStorage.removeItem('px_google_pending');
+    if(!pending||pending.state!==callback.state||pending.expiresAt<Date.now())throw new Error('Проверка входа не пройдена. Нажмите «Войти через Google» заново.');
+    if(callback.error||!callback.code)throw new Error('Вход через Google отменён. Можно повторить.');
+    err.textContent='Проверяем аккаунт…';
+    const result=await sheetsRequest(GS,{method:'POST',body:JSON.stringify({action:'google_finish',state:pending.state,verifier:pending.verifier,code:callback.code})});
+    if(result.apiVersion!==2||typeof result.token!=='string'||!Number.isFinite(result.expiresAt))throw new Error('Некорректный ответ входа');
+    AUTH_TOKEN=result.token;
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:result.token,expiresAt:result.expiresAt}));
+    const initial=await serverCall('load');
+    if(initial.user?.role&&initial.user.role!=='OWNER'){enterTeam(initial);return;}
+    leaveTeamShell();ge('loginScreen').style.display='none';init(initial);
+  }catch(e){err.textContent=e.message;AUTH_TOKEN='';sessionStorage.removeItem(SESSION_KEY);}
+  finally{LOGIN_PENDING=false;}
+}
+function leaveTeamShell(){document.body.classList.remove('team-mode');ge('teamApp')?.remove();ge('teamUsersPanel')?.remove();TEAM_USER=null;TEAM_RECORDS=[];TEAM_CURRENT=null;TEAM_USERS=[];}
+function enterTeam(initial){
+  // Staff data stays in memory; never merge a filtered server response into the owner's cache.
+  const ownerCache=JSON.parse(localStorage.getItem('px_v2')||'[]');
+  if(Array.isArray(ownerCache)&&ownerCache.some(c=>c.id!=='__config__'))throw new Error('В этом профиле браузера есть база владельца. Для входа сотрудника используйте отдельный профиль браузера. База сохранена без изменений.');
+  TEAM_USER=initial.user;TEAM_RECORDS=initial.records||[];DB=[];
+  document.body.classList.add('team-mode');ge('loginScreen').style.display='none';
+  if(!ge('teamApp')){const root=document.createElement('main');root.id='teamApp';document.body.appendChild(root);}
+  renderTeam();refreshPushDevice();openNotificationTask();
+}
+function teamMessage(text){const el=ge('teamMessage');if(el)el.textContent=text;}
+async function teamRequest(action,values={}){
+  try{return await serverCall(action,values);}catch(e){
+    if(e.code==='AUTH_REQUIRED'){
+      if(CLOSE_FILE_PREVIEW)CLOSE_FILE_PREVIEW();ge('teamUsersPanel')?.remove();TEAM_RECORDS=[];TEAM_CURRENT=null;TEAM_USERS=[];
+      if(ge('teamApp'))ge('teamApp').replaceChildren();
+      ge('loginScreen').style.display='';ge('loginErr').textContent='Доступ изменён или сессия завершена. Войдите снова.';
+    }
+    throw e;
+  }
+}
+function renderTeam(){
+  const manage=['OWNER','ADMIN'].includes(TEAM_USER.role);
+  ge('teamApp').innerHTML=`<header class="team-header"><div><strong>PARALLAX</strong><div class="stage-hint">${esc(TEAM_USER.name||TEAM_USER.email)} · ${esc(TEAM_ROLES[TEAM_USER.role])} · 28.09-5</div></div><div class="files-toolbar"><button class="bs" onclick="openPushSettings()">🔔 Уведомления</button><button class="bs" onclick="refreshTeam()">Обновить</button>${manage?'<button class="bs" onclick="openTeamUsers()">Сотрудники</button>':''}<button class="bs" onclick="leaveTeam()">Выйти</button></div></header><p id="teamMessage" role="status"></p><div class="team-layout"><section id="teamList"></section><section id="teamCard"><h2>Выберите объект</h2><p class="stage-hint">Здесь будут следующее действие и сроки.</p></section></div>`;
+  const list=ge('teamList');
+  if(!TEAM_RECORDS.length){list.textContent='Пока нет назначенных объектов.';return;}
+  TEAM_RECORDS.forEach(c=>{
+    const button=document.createElement('button');button.className='team-object';
+    const name=document.createElement('strong');name.textContent=c.projectName||c.fio||'Объект';
+    const detail=document.createElement('span');detail.textContent=c.workflow?.nextAction||'Следующее действие ещё не указано';
+    button.append(name,detail);button.onclick=()=>openTeamObject(c.id);list.appendChild(button);
+  });
+}
+function teamHasChanges(){return !!TEAM_CURRENT&&(TEAM_CURRENT.fields?.some(k=>ge('team-'+k)?.value!==(TEAM_CURRENT.record[k]||''))||!!ge('teamAction')?.value||!!ge('teamNote')?.value);}
+window.addEventListener('beforeunload',event=>{if(teamHasChanges()){event.preventDefault();event.returnValue='';}});
+async function refreshTeam(){
+  if(TEAM_BUSY)return;
+  if(teamHasChanges()&&!confirm('Обновить список? Несохранённые изменения формы будут потеряны.'))return;
+  TEAM_BUSY=true;
+  try{const initial=await teamRequest('load');TEAM_CURRENT=null;enterTeam(initial);}catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+}
+async function leaveTeam(){
+  if(TEAM_BUSY)return;
+  if(teamHasChanges()&&!confirm('Выйти? Несохранённые изменения формы будут потеряны.'))return;
+  const local=pushLocal(),token=AUTH_TOKEN;
+  // Start device cancellation with the old session, but clear the UI and session immediately.
+  const stop=local?.enabled?sheetsRequest(GS,{method:'POST',body:JSON.stringify({action:'push_disable',token,deviceId:local.id})},5000).then(()=>true,()=>false):Promise.resolve(true);
+  if(local){local.enabled=false;localStorage.setItem('px_push_device',JSON.stringify(local));}
+  sessionStorage.removeItem(SESSION_KEY);AUTH_TOKEN='';
+  if(CLOSE_FILE_PREVIEW)CLOSE_FILE_PREVIEW();ge('pushSettings')?.remove();leaveTeamShell();
+  ge('loginScreen').style.display='';ge('loginScreen').style.opacity='1';ge('loginErr').textContent='Вы вышли из аккаунта.';
+  if(PUSH_MESSAGING)PUSH_MESSAGING.deleteToken().catch(()=>{});
+  else if(navigator.serviceWorker?.getRegistration)navigator.serviceWorker.getRegistration().then(r=>r?.pushManager?.getSubscription()).then(s=>s?.unsubscribe()).catch(()=>{});
+  const stopped=await stop;
+  if(!stopped&&!AUTH_TOKEN)ge('loginErr').textContent='Вы вышли из аккаунта. Сервер не подтвердил отключение уведомлений; при необходимости запретите их для Parallax в настройках устройства.';
+}
+async function openTeamObject(id){
+  if(TEAM_BUSY)return;
+  if(teamHasChanges()&&!confirm('Открыть другой объект? Сначала сохраните изменения текущей формы, если они нужны.'))return;
+  TEAM_BUSY=true;
+  try{TEAM_CURRENT=await teamRequest('object_get',{objectId:id});renderTeamCard();teamMessage('');}catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+}
+function staffTasksHTML(c){return (c.tasks||[]).length?'<section><h3>Мои задачи</h3>'+c.tasks.map(t=>'<div class="team-object"><strong>'+esc(t.text)+'</strong><p>'+esc((t.deadline||'')+' '+(t.time||''))+'</p><button class="bs" data-task="'+escA(t.id)+'" onclick="completeTeamTask(this.dataset.task)" '+(t.done||TEAM_USER.canEdit===false?'disabled':'')+'>'+(t.done?'Выполнено':'Отметить выполненной')+'</button></div>').join('')+'</section>':'';}
+async function completeTeamTask(taskId){
+ if(TEAM_BUSY||!TEAM_CURRENT)return;if(teamHasChanges()){teamMessage('Сначала сохраните изменения формы.');return;}TEAM_BUSY=true;
+ try{TEAM_CURRENT=await teamRequest('task_complete',{objectId:TEAM_CURRENT.record.id,objectRevision:TEAM_CURRENT.objectRevision,taskId,done:true});renderTeamCard();teamMessage('Задача выполнена; новые напоминания отправляться не будут.');}catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+}
+function renderTeamCard(){
+  const c=TEAM_CURRENT.record,editable=TEAM_USER.canEdit!==false,production=TEAM_USER.role==='PRODUCTION';
+  const fields=production?[['dateProd','Производство'],['dateInstall','Монтаж'],['dateDead','Сдача']]:[['projectName','Название объекта'],['fio','Клиент'],['phone','Телефон'],['objAddr','Адрес'],['dateMeasure','Замер'],['dateProd','Производство'],['dateInstall','Монтаж'],['dateDead','Сдача']];
+  TEAM_CURRENT.fields=fields.map(([key])=>key);
+  ge('teamCard').innerHTML=`<h2>${esc(c.projectName||c.fio||'Объект')}</h2><p class="stage-hint">${esc(c.objAddr||'')} ${production?'· '+esc(c.phone||''):''}</p><div class="handoff-box"><strong>${esc(c.workflow?.state==='waiting'?'Ждёт приёма':c.workflow?.state==='accepted'?'Принято в работу':'Следующее действие')}</strong><p>${esc(c.workflow?.nextAction||'Не указано')}</p><p class="stage-hint">${esc(c.workflow?.note||'')}</p>${editable&&c.workflow?.state==='waiting'?'<button class="bs" onclick="teamHandoff(true)">Принять в работу</button>':''}</div>${staffTasksHTML(c)}<form id="teamObjectForm">${fields.map(([key,label])=>`<label class="stage-field" for="team-${key}">${label}</label><input id="team-${key}" type="${key.startsWith('date')?'date':'text'}" value="${escA(c[key]||'')}" maxlength="1000" ${editable?'':'disabled'}>`).join('')}${editable?'<button class="bp" type="submit">Сохранить изменения</button>':''}</form>${editable?'<details class="handoff-form"><summary>Передать дальше</summary><label for="teamDepartment">Отдел</label><select id="teamDepartment"><option value="sales">Продажи</option><option value="admin">Администратор</option><option value="production">Производство</option></select><label for="teamAction">Следующее действие</label><input id="teamAction" maxlength="500"><label for="teamNote">Пояснение</label><textarea id="teamNote" maxlength="2000"></textarea><button class="bs" onclick="teamHandoff(false)">Передать</button></details>':''}${TEAM_USER.role==='ADMIN'&&editable?'<details class="handoff-form"><summary>Ответственный по продажам</summary><button class="bs" onclick="teamLoadSellers()">Выбрать сотрудника</button><div id="teamSellers"></div></details>':''}${TEAM_USER.canFiles?'<details class="handoff-form"><summary>Файлы объекта</summary><button class="bs" onclick="teamListFiles()">Показать файлы</button><div id="teamFiles"></div></details>':''}`;
+  ge('teamObjectForm').onsubmit=e=>{e.preventDefault();saveTeamObject();};
+}
+async function saveTeamObject(){
+  if(TEAM_BUSY||!TEAM_CURRENT)return;TEAM_BUSY=true;
+  try{
+    const changes={};TEAM_CURRENT.fields.forEach(k=>{const value=ge('team-'+k).value;if(value!==(TEAM_CURRENT.record[k]||''))changes[k]=value;});
+    if(!Object.keys(changes).length){teamMessage('Изменений нет.');return;}
+    const result=await teamRequest('object_patch',{objectId:TEAM_CURRENT.record.id,objectRevision:TEAM_CURRENT.objectRevision,changes});
+    TEAM_CURRENT=result;TEAM_RECORDS=TEAM_RECORDS.map(c=>c.id===result.record.id?result.record:c);renderTeam();renderTeamCard();teamMessage('Изменения сохранены в облаке.');
+  }catch(e){teamMessage(e.message+' Введённый текст оставлен в форме.');}finally{TEAM_BUSY=false;}
+}
+async function teamHandoff(accept){
+  if(TEAM_BUSY||!TEAM_CURRENT)return;
+  const unsaved=TEAM_CURRENT.fields.some(k=>ge('team-'+k).value!==(TEAM_CURRENT.record[k]||''));
+  if(unsaved){teamMessage('Сначала сохраните изменения карточки.');return;}
+  TEAM_BUSY=true;
+  try{
+    const result=await teamRequest('object_handoff',{objectId:TEAM_CURRENT.record.id,objectRevision:TEAM_CURRENT.objectRevision,accept,department:ge('teamDepartment')?.value,nextAction:ge('teamAction')?.value||'',note:ge('teamNote')?.value||''});
+    TEAM_CURRENT=null;const initial=await teamRequest('load');enterTeam(initial);teamMessage(accept?'Объект принят в работу.':'Объект передан.');
+  }catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+}
+async function teamListFiles(){
+  if(TEAM_BUSY||!TEAM_CURRENT)return;TEAM_BUSY=true;
+  try{
+    const id=TEAM_CURRENT.record.id,result=await teamRequest('files_list',{objectId:id}),container=ge('teamFiles');container.replaceChildren();
+    if(!result.files.length)container.textContent='Файлов пока нет.';
+    result.files.forEach(file=>{if(file.mimeType==='application/pdf'||/^image\/(jpeg|png)$/.test(file.mimeType)){const preview=document.createElement('button');preview.className='bs';preview.textContent='Просмотр: '+file.originalName;preview.onclick=()=>previewCloudFile(id,file);container.appendChild(preview);}const button=document.createElement('button');button.className='bs';button.textContent='Скачать: '+file.originalName;button.onclick=async()=>{
+      if(TEAM_BUSY)return;TEAM_BUSY=true;try{const data=await teamRequest('files_download',{objectId:id,fileId:file.id});const bytes=Uint8Array.from(atob(data.base64),c=>c.charCodeAt(0));const url=URL.createObjectURL(new Blob([bytes],{type:data.file.mimeType}));const a=document.createElement('a');a.href=url;a.download=data.file.originalName;a.click();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+    };container.appendChild(button);});
+  }catch(e){teamMessage(e.message);}finally{TEAM_BUSY=false;}
+}
+async function openTeamUsers(){
+  if(TEAM_BUSY)return;TEAM_BUSY=true;
+  try{
+    const result=await teamRequest('users_list');TEAM_USERS=result.users;
+    let panel=ge('teamUsersPanel');if(!panel){panel=document.createElement('section');panel.id='teamUsersPanel';panel.className='team-users';document.body.appendChild(panel);}
+    panel.innerHTML='<h2>Сотрудники</h2><p class="stage-hint">Доступ откроется только указанному Google-аккаунту. Изменение прав завершит его текущую сессию.</p><button class="bs" id="closeTeamUsers">Закрыть</button><div id="teamUsersList"></div><div id="teamUserForm"></div><p id="teamUserMessage" role="status"></p>';
+    ge('closeTeamUsers').onclick=()=>{if(!TEAM_BUSY)panel.remove();};
+    const add=document.createElement('button');add.className='bp';add.textContent='Добавить сотрудника';add.onclick=()=>editTeamUser(null);if(TEAM_USER?.canEdit!==false)ge('teamUsersList').appendChild(add);
+    TEAM_USERS.forEach(u=>{const b=document.createElement('button');b.className='team-object';b.textContent=u.name+' · '+TEAM_ROLES[u.role]+' · '+(u.active?'Активен':'Отключён');b.disabled=TEAM_USER?.canEdit===false||(TEAM_USER?.role==='ADMIN'&&u.role==='ADMIN');b.onclick=()=>editTeamUser(u);ge('teamUsersList').appendChild(b);});
+  }catch(e){notify('err','Сотрудники',e.message);}finally{TEAM_BUSY=false;}
+}
+function editTeamUser(user){
+  const u=user||{name:'',email:'',role:'SALES',active:true,canEdit:true,canFiles:false};
+  const admin=TEAM_USER?.role==='ADMIN';
+  ge('teamUserForm').innerHTML=`<form id="staffForm"><label>Имя<input id="staffName" required maxlength="100" value="${escA(u.name)}"></label><label>Google-почта<input id="staffEmail" type="email" required value="${escA(u.email)}" ${user?'readonly':''}></label><label>Отдел<select id="staffRole">${['SALES','PRODUCTION',...(admin?[]:['ADMIN'])].map(role=>`<option value="${role}" ${u.role===role?'selected':''}>${TEAM_ROLES[role]}</option>`).join('')}</select></label><label><input id="staffActive" type="checkbox" ${u.active?'checked':''}> Доступ включён</label><label><input id="staffEdit" type="checkbox" ${u.canEdit?'checked':''}> Разрешить изменения</label><label><input id="staffFiles" type="checkbox" ${u.canFiles?'checked':''}> Показывать и разрешить файлы объекта, включая сметы</label><button class="bp" type="submit">Сохранить права</button></form>`;
+  ge('staffForm').onsubmit=async e=>{
+    e.preventDefault();if(TEAM_BUSY)return;TEAM_BUSY=true;
+    try{await teamRequest('users_save',{user:{...(user?{id:user.id,version:user.version}:{}),name:ge('staffName').value.trim(),email:ge('staffEmail').value.trim(),role:ge('staffRole').value,active:ge('staffActive').checked,canEdit:ge('staffEdit').checked,canFiles:ge('staffFiles').checked}});TEAM_BUSY=false;await openTeamUsers();ge('teamUserMessage').textContent='Права сохранены.';}catch(error){if(ge('teamUserMessage'))ge('teamUserMessage').textContent=error.message;}finally{TEAM_BUSY=false;}
+  };
+}
+async function teamLoadSellers(){
+  if(TEAM_BUSY)return;TEAM_BUSY=true;
+  try{const result=await teamRequest('users_list'),container=ge('teamSellers');container.replaceChildren();
+    const select=document.createElement('select');select.id='teamSeller';
+    [{id:'',name:'Без ответственного'},...result.users.filter(u=>u.role==='SALES'&&u.active)].forEach(u=>{const option=document.createElement('option');option.value=u.id;option.textContent=u.name;select.appendChild(option);});
+    const button=document.createElement('button');button.className='bs';button.textContent='Назначить';button.onclick=async()=>{
+      if(TEAM_BUSY)return;if(teamHasChanges()){teamMessage('Сначала сохраните изменения карточки.');return;}TEAM_BUSY=true;
+      try{const objectId=TEAM_USER?.role==='ADMIN'?TEAM_CURRENT?.record.id:CID;if(!objectId)throw new Error('Откройте карточку объекта.');
+        const latest=await teamRequest('object_get',{objectId});await teamRequest('object_assign',{objectId,objectRevision:latest.objectRevision,salesUserId:select.value});
+        if(TEAM_USER?.role==='ADMIN'){TEAM_CURRENT=await teamRequest('object_get',{objectId});renderTeamCard();teamMessage('Ответственный назначен.');}else{notify('ok','Ответственный назначен','Обновите облачные данные кнопкой синхронизации.');}
+      }catch(e){notify('err','Назначение',e.message);}finally{TEAM_BUSY=false;}
+    };container.append(select,button);
+  }catch(e){notify('err','Сотрудники',e.message);}finally{TEAM_BUSY=false;}
+}
+async function ownerTeamPanel(){
+  TEAM_USER={role:'OWNER'};await openTeamUsers();
+  if(CID&&ge('teamUsersPanel')){
+    const title=document.createElement('p');title.textContent='Назначить продавца текущему открытому объекту';
+    const container=document.createElement('div');container.id='teamSellers';ge('teamUsersPanel').append(title,container);await teamLoadSellers();
+  }
+}
+
+let PUSH_READY=null,PUSH_REG=null,PUSH_MESSAGING=null;
+function pushLocal(){try{return JSON.parse(localStorage.getItem('px_push_device')||'null')}catch(e){return null}}
+function pushScript(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;const timer=setTimeout(()=>{s.remove();reject(new Error('Загрузка уведомлений заняла слишком долго. Повторите.'));},25000);s.onload=()=>{clearTimeout(timer);resolve()};s.onerror=()=>{clearTimeout(timer);s.remove();reject(new Error('Не удалось загрузить уведомления. Проверьте интернет.'));};document.head.appendChild(s);});}
+async function preparePush(){
+  if(!PUSH_READY)PUSH_READY=(async()=>{
+    if(location.protocol!=='https:'||!('serviceWorker' in navigator)||!('Notification' in window)||!('PushManager' in window))throw new Error('Откройте опубликованную CRM. На iPhone добавьте её на главный экран через Safari и запускайте с иконки. Нужна iOS 16.4 или новее.');
+    await pushScript('./firebase-config.js');
+    const config=window.PARALLAX_PUSH;
+    if(!config?.firebase?.apiKey||!config.vapidKey)throw new Error('Сначала заполните настройки Firebase из инструкции.');
+    if(!window.firebase){await pushScript('./vendor/firebase-app-compat.js');await pushScript('./vendor/firebase-messaging-compat.js');}
+    if(!firebase.apps.length)firebase.initializeApp(config.firebase);
+    if(!firebase.messaging.isSupported())throw new Error('Этот браузер не поддерживает уведомления. На iPhone откройте CRM с главного экрана.');
+    PUSH_REG=await navigator.serviceWorker.register('./firebase-messaging-sw.js',{scope:'./',updateViaCache:'none'});
+    await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Не удалось запустить уведомления. Проверьте файлы на GitHub и настройки Firebase.')),30000);navigator.serviceWorker.ready.then(r=>{clearTimeout(timer);resolve(r)},e=>{clearTimeout(timer);reject(e)});});
+    PUSH_MESSAGING=firebase.messaging();
+    PUSH_MESSAGING.onMessage(payload=>{
+      const d=payload.data||{};return PUSH_REG.showNotification('Parallax · Задачи',{body:d.kind==='test'?'Проверка: уведомления подключены.':d.kind==='assigned'?'Вам назначена задача. Откройте CRM.':'Напоминание о задаче. Откройте CRM.',tag:d.tag||'parallax-task',icon:'./icon-192.png',data:{url:d.url||'./'}});
+    });
+  })().catch(e=>{PUSH_READY=null;throw e;});
+  return PUSH_READY;
+}
+function pushApi(action,values){return TEAM_USER&&TEAM_USER.role!=='OWNER'?teamRequest(action,values):serverCall(action,values);}
+async function openPushSettings(){
+  ge('pushSettings')?.remove();
+  const local=pushLocal(),settings=local?.settings||{assigned:true,due:true,start:9,end:20};
+  const dialog=document.createElement('dialog');dialog.id='pushSettings';dialog.className='push-dialog';
+  dialog.innerHTML=`<h2>Уведомления на этом устройстве</h2><p>Напоминания приходят после облачного сохранения задачи. Рабочие часы — по Москве.</p><label><input id="pushAssigned" type="checkbox" ${settings.assigned?'checked':''}> Назначение задачи</label><label><input id="pushDue" type="checkbox" ${settings.due?'checked':''}> Приближение срока</label><label>С <input id="pushStart" type="number" min="0" max="23" value="${settings.start}"> до <input id="pushEnd" type="number" min="1" max="24" value="${settings.end}"> часов</label><div class="files-toolbar"><button class="bp" id="pushEnable" disabled>Включить / сохранить</button><button class="bs" id="pushTest" ${local?.enabled?'':'disabled'}>Проверить уведомление</button><button class="bs" id="pushDisable" ${local?.enabled?'':'disabled'}>Отключить</button><button class="bs" id="pushClose">Закрыть</button></div><p id="pushMessage" role="status">Подготовка…</p>`;
+  document.body.appendChild(dialog);if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
+  ge('pushClose').onclick=()=>dialog.remove();
+  ge('pushEnable').onclick=enablePush;ge('pushDisable').onclick=disablePush;
+  ge('pushTest').onclick=async()=>{try{await pushApi('push_test',{deviceId:pushLocal()?.id});ge('pushMessage').textContent='Сервис принял проверку. Убедитесь, что уведомление появилось на телефоне.';}catch(e){if(ge('pushMessage'))ge('pushMessage').textContent=e.message;}};
+  try{await preparePush();if(ge('pushEnable')){ge('pushEnable').disabled=false;ge('pushMessage').textContent=local?.enabled?'Устройство подключено. Можно изменить часы или проверить доставку.':'Нажмите «Включить» и разрешите уведомления.';}}
+  catch(e){if(ge('pushMessage'))ge('pushMessage').textContent=e.message;}
+}
+async function enablePush(){
+  const button=ge('pushEnable');if(!button)return;button.disabled=true;
+  try{
+    // Permission request must happen directly in the user's click, before network work.
+    const permission=await Notification.requestPermission();
+    if(permission!=='granted')throw new Error('Уведомления не разрешены. Разрешите их для Parallax в настройках устройства.');
+    const settings={assigned:ge('pushAssigned').checked,due:ge('pushDue').checked,start:Number(ge('pushStart').value),end:Number(ge('pushEnd').value)};
+    const token=await PUSH_MESSAGING.getToken({vapidKey:PARALLAX_PUSH.vapidKey,serviceWorkerRegistration:PUSH_REG});
+    const old=pushLocal(),id=old?.id||crypto.randomUUID();
+    await pushApi('push_register',{deviceId:id,fcmToken:token,settings});
+    localStorage.setItem('px_push_device',JSON.stringify({id,settings,enabled:true}));
+    ge('pushMessage').textContent='Подключено. Нажмите «Проверить уведомление».';ge('pushTest').disabled=false;ge('pushDisable').disabled=false;
+  }catch(e){if(ge('pushMessage'))ge('pushMessage').textContent=e.message;}
+  finally{if(button.isConnected)button.disabled=false;}
+}
+async function disablePush(){
+  try{
+    const local=pushLocal();if(!local)return;
+    await pushApi('push_disable',{deviceId:local.id});
+    local.enabled=false;localStorage.setItem('px_push_device',JSON.stringify(local));
+    if(PUSH_MESSAGING)await PUSH_MESSAGING.deleteToken();
+    if(ge('pushMessage')){ge('pushMessage').textContent='Отключено.';ge('pushTest').disabled=true;ge('pushDisable').disabled=true;}
+  }catch(e){if(ge('pushMessage'))ge('pushMessage').textContent=e.message;throw e;}
+}
+async function refreshPushDevice(){
+  const local=pushLocal();if(!local?.enabled||!('Notification' in window)||Notification.permission!=='granted')return;
+  try{await preparePush();const token=await PUSH_MESSAGING.getToken({vapidKey:PARALLAX_PUSH.vapidKey,serviceWorkerRegistration:PUSH_REG});await pushApi('push_register',{deviceId:local.id,fcmToken:token,settings:local.settings});}catch(e){console.warn('Push registration needs attention');}
+}
+async function configureTaskReminder(index){
+  const object=DB.find(c=>c.id===CID),task=object?.tasks?.[index];if(!task)return;
+  const expected=JSON.stringify(task),objectId=object.id;
+  try{
+    const result=await serverCall('users_list'),users=[{id:'owner',name:'Владелец'},...result.users.filter(u=>u.active)];
+    ge('taskReminderDialog')?.remove();const dialog=document.createElement('dialog');dialog.id='taskReminderDialog';dialog.className='push-dialog';
+    dialog.innerHTML=`<h2>Напоминание о задаче</h2><p>${esc(task.text)}</p><label>Кому на телефон<select id="reminderUser">${users.map(u=>`<option value="${escA(u.id)}" ${task.reminder?.userId===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select></label><label>До срока<select id="reminderMinutes">${[10,30,60,1440].map(n=>`<option value="${n}" ${(task.reminder?.minutes??30)===n?'selected':''}>${n===1440?'За сутки':'За '+n+' минут'}</option>`).join('')}</select></label><label><input type="checkbox" id="reminderAssigned" ${task.reminder?.assigned!==false?'checked':''}> Сообщить о назначении</label><p>Для напоминания о сроке заполните дату и время задачи. Получатель должен иметь доступ к объекту и включить уведомления на своём устройстве.</p><div class="files-toolbar"><button class="bp" id="reminderSave">Сохранить</button><button class="bs" id="reminderRemove">Без напоминания</button><button class="bs" id="reminderClose">Закрыть</button></div><p id="reminderMessage" role="status"></p>`;
+    document.body.appendChild(dialog);if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
+    ge('reminderClose').onclick=()=>dialog.remove();
+    const apply=enabled=>{
+      const liveObject=DB.find(c=>c.id===objectId),current=liveObject?.tasks?.[index];
+      if(!current||JSON.stringify(current)!==expected){ge('reminderMessage').textContent='Задача изменилась. Откройте настройку заново.';return;}
+      const old=JSON.parse(JSON.stringify(current)),updatedAt=liveObject.updatedAt;
+      if(enabled){current.id=current.id||crypto.randomUUID();current.reminder={...current.reminder,userId:ge('reminderUser').value,minutes:Number(ge('reminderMinutes').value),assigned:ge('reminderAssigned').checked,enabledAt:current.reminder?.userId===ge('reminderUser').value&&Number.isFinite(current.reminder.enabledAt)?current.reminder.enabledAt:Date.now()};}else delete current.reminder;
+      liveObject.updatedAt=Date.now();
+      if(save()){dialog.remove();renderTasks(liveObject);notify('ok','Напоминание сохранено','Начнёт работать после успешной синхронизации с облаком.');}
+      else{Object.keys(current).forEach(k=>delete current[k]);Object.assign(current,old);liveObject.updatedAt=updatedAt;ge('reminderMessage').textContent='Не удалось сохранить на устройстве. Изменения отменены.';}
+    };
+    ge('reminderSave').onclick=()=>apply(true);ge('reminderRemove').onclick=()=>apply(false);
+  }catch(e){notify('err','Напоминания',e.message);}
+}
+async function openNotificationTask(){
+  const match=/^#task=([^/]+)\/([^/]+)$/.exec(location.hash);if(!match)return;
+  let objectId,taskId;try{objectId=decodeURIComponent(match[1]);taskId=decodeURIComponent(match[2]);}catch(e){return;}
+  if(!safeIdentifier(objectId)||!safeIdentifier(taskId))return;
+  if(TEAM_USER&&TEAM_USER.role!=='OWNER'){
+    const object=TEAM_RECORDS.find(c=>c.id===objectId);if(!object){teamMessage('Объект недоступен или уже передан другому отделу.');return;}
+    await openTeamObject(objectId);
+  }else{
+    const object=DB.find(c=>c.id===objectId&&!c.deletedAt&&!c.purgedAt);if(!object)return;
+    opsOpen(objectId,'tasks');
+    const index=(object.tasks||[]).findIndex(t=>t.id===taskId);if(index>=0)ge('orbody')?.querySelectorAll('.task-item')[index]?.scrollIntoView({block:'center'});
+  }
+  history.replaceState(null,'',location.pathname+location.search);
+}
+
 // Запуск через проверку авторизации
-checkAuth();
+finishGoogleLogin();
 
 // ── OFFLINE SUPPORT ──────────────────────────
 // Service Worker для офлайн-режима
 // Service Worker для офлайн-режима
-if('serviceWorker' in navigator && location.protocol !== 'file:' && location.protocol !== 'blob:'){
-  const swCode=`
-    const CACHE='parallax-crm-v3';
-    self.addEventListener('install',e=>{
-      self.skipWaiting();
-    });
-    self.addEventListener('activate',e=>{
-      e.waitUntil(
-        caches.keys().then(keys=>Promise.all(
-          keys.filter(k=>k!=='parallax-crm-v3').map(k=>caches.delete(k))
-        )).then(()=>clients.claim())
-      );
-    });
-    self.addEventListener('fetch',e=>{
-      if(e.request.method!=='GET')return;
-      if(e.request.url.includes('script.google.com'))return;
-      e.respondWith(
-        fetch(e.request).then(resp=>{
-          if(resp.ok){
-            const clone=resp.clone();
-            caches.open('parallax-crm-v3').then(c=>c.put(e.request,clone));
-          }
-          return resp;
-        }).catch(()=>caches.match(e.request).then(r=>r||new Response('Офлайн',{status:503})))
-      );
-    });
-  `;
-  try{
-    const blob=new Blob([swCode],{type:'application/javascript'});
-    const swUrl=URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).then(reg=>{
-      console.log('SW ok');
-      // Кешируем текущую страницу
-      if(reg.installing){
-        caches.open('parallax-crm-v3').then(c=>c.add(location.href));
-      }
-    }).catch(e=>console.warn('SW:',e));
-  }catch(e){console.warn('SW blob error:',e);}
-}
+// The real service worker is registered by preparePush after explicit setup.
 
 // Offline / online indicators
 // online/offline moved to init()
