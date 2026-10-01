@@ -833,7 +833,7 @@ body.team-mode> :not(#teamApp):not(#teamUsersPanel):not(#loginScreen):not(#nfpan
     <button class="login-btn" onclick="doLogin()">Войти</button>
     <button class="bs" style="width:100%;margin-top:12px" onclick="startGoogleLogin()">Войти через Google</button>
     <div class="login-err" id="loginErr"></div>
-    <div class="login-hint">Параллакс · Иваново · сборка 28.09-5</div>
+    <div class="login-hint">Параллакс · Иваново · сборка 30.09-1</div>
   </div>
 </div>
 <div id="qlBanner" style="display:none;background:#c8a96e;color:#0f0f0f;padding:10px 16px;font-size:13px;font-weight:600;text-align:center;position:sticky;top:0;z-index:999">
@@ -841,7 +841,7 @@ body.team-mode> :not(#teamApp):not(#teamUsersPanel):not(#loginScreen):not(#nfpan
   <button onclick="ge('qlBanner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;margin-left:8px;color:#0f0f0f">✕</button>
 </div>
 <div class="hdr">
-  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 28.09-5</span></div>
+  <div class="logo" onclick="showDash()">PARALLAX<span class="build-label">сборка 30.09-1</span></div>
   <button class="bs" onclick="openPushSettings()" title="Напоминания на телефоне">🔔</button>
   <button class="bs" onclick="ownerTeamPanel()" title="Сотрудники и права">Сотрудники</button>
   <nav class="hdr-nav">
@@ -1383,8 +1383,20 @@ async function sheetsRequest(url,options={},timeout=60000){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeout);
   try{
-    const response=await fetch(url,{...options,signal:controller.signal});
-    if(!response.ok)throw new Error('HTTP '+response.status);
+    let action='';try{action=JSON.parse(options.body||'{}').action||'';}catch(e){}
+    // Apps Script ContentService redirects to a one-time response URL.
+    // A new URL avoids reusing a cached redirect. Never retry writes or login exchanges.
+    const readOnly=['load','users_list','object_get','files_list','files_download'].includes(action);
+    const request=()=>{
+      const fresh=new URL(url);fresh.searchParams.set('_px_request',Date.now().toString(36)+'-'+Array.from(crypto.getRandomValues(new Uint32Array(2)),v=>v.toString(36)).join('-'));
+      return fetch(fresh.href,{...options,cache:'no-store',credentials:'omit',redirect:'follow',signal:controller.signal});
+    };
+    let response=await request();
+    if(response.status===404&&readOnly&&!controller.signal.aborted)response=await request();
+    if(!response.ok){
+      const error=new Error('HTTP '+response.status+(response.status===404?' — ответ Apps Script недоступен. Сохранение не подтверждено. Нажмите «Синхронизировать» повторно; очищать данные браузера не нужно.':''));
+      error.httpStatus=response.status;error.action=action;throw error;
+    }
     const result=await response.json();
     if(result.ok!==true){
       const messages={PUSH_NOT_CONFIGURED:'Укажите Firebase Project ID в свойствах Apps Script.',PUSH_SEND_FAILED:'Сервис не подтвердил отправку. Проверьте Firebase и разрешения Apps Script.',PUSH_DEVICE_CONFLICT:'Это устройство уже подключено. Сначала отключите уведомления в прежнем профиле.',GOOGLE_NOT_CONFIGURED:'Google-вход ещё не настроен. Используйте текущий вход владельца.',GOOGLE_AUTH_FAILED:'Google не подтвердил вход. Начните вход заново.',GOOGLE_EMAIL_UNSUPPORTED:'Используйте Gmail или Google Workspace для входа.',ACCESS_DENIED:'Нет доступа к этому действию или объекту.',USERS_INVALID:'Нужна проверка списка сотрудников владельцем.',UNKNOWN_ACTION:'Обновите Apps Script: сервер ещё не поддерживает эту операцию.',FILE_FOLDER_ACCESS:'Папка файлов недоступна или открыта по ссылке. Нужна проверка владельцем.',FILE_TYPE:'Формат или содержимое файла не поддерживается.',FILE_SIZE:'Файл должен быть непустым и не больше 20 МБ.',FILE_OBJECT:'Объект ещё не сохранён в облаке или удалён. Выполните синхронизацию.',FILE_NOT_FOUND:'Файл удалён или недоступен.',FILE_INVALID:'Не удалось проверить файл.',FILE_REQUEST_CONFLICT:'Этот повтор загрузки не соответствует исходному файлу.',FILE_STORAGE_ERROR:'Не удалось подтвердить сохранность файла. Повторите загрузку.',RECOVERY_REQUIRED:'Запись была прервана. Облачная база заблокирована до проверки резервной копии; сохраните локальный экспорт.',AUTH_REQUIRED:'Сессия завершена. Войдите снова.',AUTH_FAILED:'Неверный пароль',TRY_LATER:'Слишком много попыток. Повторите через 5 минут.',NOT_CONFIGURED:'Сначала настройте серверный пароль в Apps Script',CONFLICT:'База изменена на другом устройстве. Повторите синхронизацию.',MISSING_RECORDS:'Запись остановлена: в отправке отсутствуют существующие объекты.',BUSY:'Сервер занят. Повторите синхронизацию.',INVALID_DATA:'Сервер отклонил данные. Сохраните экспорт и сообщите об ошибке.'};
@@ -5053,7 +5065,7 @@ function calAddTask(dateStr){
 // ═══════════════════════════════════════════════
 // Versioned export container; business records retain their existing schema.
 function makeBackup(){
-  return {format:'parallax-backup',version:1,build:'28.09-5',exportedAt:new Date().toISOString(),
+  return {format:'parallax-backup',version:1,build:'30.09-1',exportedAt:new Date().toISOString(),
     records:DB,settings:{statuses:STATUSES,brigades:BRIGADES}};
 }
 function parseBackup(value){
@@ -5158,7 +5170,7 @@ function toggleTheme(){
   });
 })();
 
-console.log('%cParallax CRM — сборка 28.09-5','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
+console.log('%cParallax CRM — сборка 30.09-1','color:#c8a96e;font-weight:700');console.log('Включает: Центр управления, готовность объектов, ответственных и сроки подготовки');
 let TEAM_USER=null,TEAM_RECORDS=[],TEAM_CURRENT=null,TEAM_USERS=[],TEAM_BUSY=false;
 const TEAM_ROLES={OWNER:'Владелец',ADMIN:'Администратор',SALES:'Продажи',PRODUCTION:'Производство'};
 async function startGoogleLogin(){
@@ -5219,7 +5231,7 @@ async function teamRequest(action,values={}){
 }
 function renderTeam(){
   const manage=['OWNER','ADMIN'].includes(TEAM_USER.role);
-  ge('teamApp').innerHTML=`<header class="team-header"><div><strong>PARALLAX</strong><div class="stage-hint">${esc(TEAM_USER.name||TEAM_USER.email)} · ${esc(TEAM_ROLES[TEAM_USER.role])} · 28.09-5</div></div><div class="files-toolbar"><button class="bs" onclick="openPushSettings()">🔔 Уведомления</button><button class="bs" onclick="refreshTeam()">Обновить</button>${manage?'<button class="bs" onclick="openTeamUsers()">Сотрудники</button>':''}<button class="bs" onclick="leaveTeam()">Выйти</button></div></header><p id="teamMessage" role="status"></p><div class="team-layout"><section id="teamList"></section><section id="teamCard"><h2>Выберите объект</h2><p class="stage-hint">Здесь будут следующее действие и сроки.</p></section></div>`;
+  ge('teamApp').innerHTML=`<header class="team-header"><div><strong>PARALLAX</strong><div class="stage-hint">${esc(TEAM_USER.name||TEAM_USER.email)} · ${esc(TEAM_ROLES[TEAM_USER.role])} · 30.09-1</div></div><div class="files-toolbar"><button class="bs" onclick="openPushSettings()">🔔 Уведомления</button><button class="bs" onclick="refreshTeam()">Обновить</button>${manage?'<button class="bs" onclick="openTeamUsers()">Сотрудники</button>':''}<button class="bs" onclick="leaveTeam()">Выйти</button></div></header><p id="teamMessage" role="status"></p><div class="team-layout"><section id="teamList"></section><section id="teamCard"><h2>Выберите объект</h2><p class="stage-hint">Здесь будут следующее действие и сроки.</p></section></div>`;
   const list=ge('teamList');
   if(!TEAM_RECORDS.length){list.textContent='Пока нет назначенных объектов.';return;}
   TEAM_RECORDS.forEach(c=>{
